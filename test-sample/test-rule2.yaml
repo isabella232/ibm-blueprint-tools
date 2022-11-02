@@ -1,0 +1,316 @@
+name: "Roks Landing Zone "
+schema_version: "1.0.0"
+description: "Roks landingzone configuration"
+tags:
+  - "blueprint:roks-landing-zone"
+loction: us-south
+inputs:
+  ####### Resource Group ###########
+  - name: resource_group_name
+  #- name: existing_resource_group_name
+  ####### activity_tracker #########
+  - name: is_ats_instance
+  - name: actvity_tracker_name
+  - name: actvity_tracker_plan
+  - name: actvity_tracker_region
+  - name: activity_tracker_make_default_receiver
+  ####### key magement #########
+  - name: is_kp_instance_exist
+  - name: kms_instance_name
+    default: slz-kms11
+  - name: kms_location
+  - name: kms_plan
+  - name: key_name
+  ####### transit gateway #########
+  - name: transit_gateway_name
+  - name: transit_gateway_location
+  - name: transit_gateway_vpc_connections
+  - name: transit_gateway_classic_connections_count
+  ####### cos instance #########
+  - name: cos_instance_name
+  - name: cos_instance_plan
+  - name: cos_instance_region
+  - name: cos_bind_resource_key
+  - name: cos_resource_key_name
+  - name: cos_resource_key_role
+  ####### cos bucket #########
+  - name: bucket_name_prefix
+  - name: bucket_name
+  - name: bucket_location
+  - name: bucket_storage_class
+  ####### activity tracker object storage #########
+  - name: atracker_target_name
+  - name: atracker_target_type
+  - name: atracker_receive_global_events
+  - name: atracker_route_name
+outputs:
+  - name: resource_group_name
+    value: $module.resource-groups.outputs.resource_group_name
+  - name: resource_group_id
+    value: $module.resource-groups.outputs.resource_group_id
+  ####### activity_tracker #########
+  - name: activity_tracker_id
+    value: $module.activity-tracker.outputs.id
+  - name: activity_tracker_guid
+    value: $module.activity-tracker.outputs.guid
+  ####### key management #########
+  - name: kms_instance_crn
+    value: $module.key-management.outputs.kms_instance_crn
+  - name: kms_instance_guid
+    value: $module.key-management.outputs.kms_instance_guid
+  - name: kms_key_crn
+    value: $module.key-management.outputs.kms_key_crn
+  ####### transit gateway #########
+  # - name: tg_id
+  #   value: $module.transit-gateway.outputs.tg_id
+  # - name: tg_crn
+  #   value: $module.transit-gateway.outputs.tg_crn
+  ####### cos instance #########
+  - name: cos_instance_id
+    value: $module.cos-instance.outputs.cos_instance_id
+  - name: cos_instance_guid
+    value: $module.cos-instance.outputs.cos_instance_guid
+  - name: cos_key_id
+    value: $module.cos-instance.outputs.cos_key_id
+  - name: cos_key_credentials
+    value: $module.cos-instance.outputs.cos_key_credentials
+  ####### cos bucket #########
+  - name: cos_bucket_id
+    value: $module.cos-bucket.outputs.cos_bucket_id
+  ####### activity tracker object storage - atracker #########
+  - name: atracker_target_crn
+    value: $module.activity-tracker-object-storage.outputs.atracker_target_crn
+  - name: atracker_route_id
+    value: $module.activity-tracker-object-storage.outputs.atracker_route_id
+settings:
+  - name: TF_VERSION
+    value: 1.0
+  - name: TF_LOG
+    value: "DEBUG"
+modules:
+  - module_type: terraform
+    name: resource-groups
+    layer: cloud-service-resource-group
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/terraform-ibm-modules/terraform-ibm-resource-group/tree/main"
+    inputs:
+      - name: resource_group_name
+        value: $blueprint.resource_group_name
+      # - name: existing_resource_group_name
+      #   value: $blueprint.existing_resource_group_name
+    outputs:
+      - name: resource_group_name
+      - name: resource_group_id
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.46.0
+          - name: provider_source
+            value: IBM-Cloud/ibm
+  - module_type: terraform
+    name: activity-tracker
+    layer: cloud-service-resource-group
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/terraform-ibm-modules/terraform-ibm-observability/tree/main/modules/activity-tracker-instance"
+    inputs:
+      - name: is_ats_instance
+        value: $blueprint.is_ats_instance
+      - name: name
+        value: $blueprint.actvity_tracker_name
+      - name: plan
+        value: $blueprint.actvity_tracker_plan
+      - name: region
+        value: $blueprint.actvity_tracker_region
+      - name: resource_group_id
+        value: $module.resource-groups.outputs.resource_group_id
+      - name: make_default_receiver
+        value: $blueprint.activity_tracker_make_default_receiver
+    outputs:
+      - name: id
+      - name: guid
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.46.0
+          - name: provider_source
+            value: IBM-Cloud/ibm
+  - module_type: terraform
+    name: key-management
+    layer: cloud-service-resource-group
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/terraform-ibm-modules/terraform-ibm-kms/tree/main/modules/key-protect"
+    inputs:
+      - name: is_kp_instance_exist
+        value: $blueprint.is_kp_instance_exist
+      - name: service_name
+        value: $blueprint.kms_instance_name
+      - name: resource_group_id
+        value: $module.resource-groups.outputs.resource_group_id
+      - name: plan
+        value: $blueprint.kms_plan
+      - name: location
+        value: $blueprint.kms_location
+      - name: key_name
+        value: $blueprint.key_name
+    outputs:
+      - name: kms_key_crn
+      - name: kms_instance_guid
+      - name: kms_instance_crn
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.46.0
+          - name: provider_source
+            value: IBM-Cloud/ibm
+  # - module_type: terraform
+  #   name: transit-gateway
+  #   layer: cloud-service-resource-group
+  #   source:
+  #     source_type: github
+  #     git:
+  #       git_repo_url: "https://github.com/terraform-ibm-modules/terraform-ibm-transit-gateway/tree/main/modules/tg-gateway-connection"
+  #   inputs:
+  #     - name: transit_gateway_name
+  #       value: $blueprint.transit_gateway_name
+  #     - name: location
+  #       value: $blueprint.transit_gateway_location
+  #     - name: resource_group_id
+  #       value: $module.resource-groups.outputs.resource_group_id
+  #     - name: vpc_connections
+  #       value: $blueprint.transit_gateway_vpc_connections
+  #     - name: classic_connections_count
+  #       value: $blueprint.transit_gateway_classic_connections_count
+  #   outputs:
+  #     - name: tg_id
+  #     - name: tg_crn
+  #   injectors:
+  #     - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+  #       tft_name: "ibm"
+  #       injection_type: override
+  #       tft_parameters:
+  #         - name: provider_version
+  #           value: 1.46.0
+  #         - name: provider_source
+  #           value: IBM-Cloud/ibm
+  - module_type: terraform
+    name: cos-instance
+    layer: cloud-service-resource-group
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/terraform-ibm-modules/terraform-ibm-cos/tree/main/modules/instance"
+    inputs:
+      - name: service_name
+        value: $blueprint.cos_instance_name
+      - name: plan
+        value: $blueprint.cos_instance_plan
+      - name: resource_group_id
+        value: $module.resource-groups.outputs.resource_group_id
+      - name: region
+        value: $blueprint.cos_instance_region
+      - name: bind_resource_key
+        value: $blueprint.cos_bind_resource_key
+      - name: resource_key_name
+        value: $blueprint.cos_resource_key_name
+      - name: role
+        value: $blueprint.cos_resource_key_role
+    outputs:
+      - name: cos_instance_id
+      - name: cos_instance_guid
+      - name: cos_key_id
+      - name: cos_key_credentials
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.46.0
+          - name: provider_source
+            value: IBM-Cloud/ibm
+  - module_type: terraform
+    name: cos-bucket
+    layer: cloud-service-resource-group
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/terraform-ibm-modules/terraform-ibm-cos/tree/main/modules/bucket"
+    inputs:
+      - name: bucket_name_prefix
+        value: $blueprint.bucket_name_prefix
+      - name: bucket_name
+        value: $blueprint.bucket_name
+      - name: location
+        value: $blueprint.bucket_location
+      - name: storage_class
+        value: $blueprint.bucket_storage_class
+      - name: kms_key_crn
+        value: $module.key-management.outputs.kms_key_crn
+      - name: cos_instance_id
+        value: $module.cos-instance.outputs.cos_instance_id
+    outputs:
+      - name: cos_bucket_id
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.46.0
+          - name: provider_source
+            value: IBM-Cloud/ibm
+  - module_type: terraform
+    name: activity-tracker-object-storage
+    layer: cloud-service-resource-group
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/terraform-ibm-modules/terraform-ibm-atracker"
+    inputs:
+      - name: resource_group
+        value: $blueprint.resource_group_name
+      - name: target_crn
+        value: $module.cos-instance.outputs.cos_instance_id
+      - name: api_key
+        value: $module.cos-instance.outputs.cos_key_credentials.apikey
+      - name: prefix
+        value: $blueprint.bucket_name_prefix
+      - name: location
+        value: $blueprint.bucket_location
+      - name: bucket_name
+        value: $blueprint.bucket_name
+      - name: atracker_target_name
+        value: $blueprint.atracker_target_name
+      - name: atracker_target_type
+        value: $blueprint.atracker_target_type
+      - name: receive_global_events
+        value: $blueprint.atracker_receive_global_events
+      - name: atracker_route_name
+        value: $blueprint.atracker_route_name
+    outputs:
+      - name: atracker_target_crn
+      - name: atracker_route_id
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.46.0
+          - name: provider_source
+            value: IBM-Cloud/ibm

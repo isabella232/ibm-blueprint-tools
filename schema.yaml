@@ -1,0 +1,128 @@
+name: str(required=False)
+schema_version: str(required=False)
+description: str(required=False)
+type: str()
+resource_group: str(required=False)
+tags: list(str(),required=False)
+location: str(required=False)
+source: include('source',required=False)
+modules: list(include('modules'))
+inputs: list(include('ubinputs'),required=False)
+outputs: list(include('uboutput'),required=False)
+settings: list(include('ubsetting'),required=False)
+---
+modules:
+  module_type: str(required=False)
+  name: str(required=False)
+  layer: str(required=False)
+  source: include('source',required=False)
+  injectors: list(include('injectors'),required=False)
+  inputs: list(include('ubcomponentinputs'),required=False)
+  outputs: list(include('ubcomponentoutput'),required=False)
+  settings: list(include('ubcomponentsetting'),required=False)
+  tags: str(required=False)
+---
+source:
+  source_type: str(required=False)
+  git: include('git',required=False)
+  catalog: include('catalog',required=False)
+---
+injectors:
+  tft_git_url: str(required=False)
+  tft_name: str(required=False)
+  injection_type: str(required=False)
+  tft_parameters: list(include('UBTFTParameter'))
+---
+git:
+  git_repo_url: str(required=False)
+  git_branch: str(required=False)
+  git_repo_folder: str(required=False)
+  git_release: str(required=False)
+  git_token: str(required=False)
+  computed_git_repo_url: str(required=False)
+---
+ubinputs:
+  name: str(required=False)
+  value: any(required=False)
+  default: any(required=False)
+  use_default: bool(required=False)
+  metadata: include('ubmetadata',required=False)
+  link: str(required=False)
+  type: str(required=False)
+  hidden: bool(required=False)
+  required: bool(required=False)
+  description: str(required=False)
+  sensitive: bool(required=False)
+  source: str(required=False)
+  options: list(str(),required=False)
+  cloud_data_type: str(required=False)
+---
+catalog:
+  catalog_name: str(required=False)
+  offering_name: str(required=False)
+  offering_version: str(required=False)
+  offering_kind: str(required=False)
+  catalog_id: str(required=False)
+  offering_id: str(required=False)
+  offering_version_id: str(required=False)
+  offering_repo_url: str(required=False)
+---
+ubmetadata:
+  type: str(required=False)
+  aliases: list(str(),required=False)
+  description: str(required=False)
+  cloud_data_type: str(required=False)
+  default_value: str(required=False)
+  secure: bool(required=False)
+  hidden: bool(required=False)
+  immutable: bool(required=False)
+  options: list(str(),required=False)
+---
+ubsetting:
+  name: str(required=False)
+  value: any(required=False)
+  use_default: bool(required=False)
+  metadata: include('ubmetadata',required=False)
+  link: str(required=False)
+---
+uboutput:
+  name: str(required=False)
+  value: any(required=False)
+  use_default: bool(required=False)
+  metadata: include('ubmetadata',required=False)
+  link: str(required=False)
+---
+UBTFTParameter:
+  name: str(required=False)
+  value: any(required=False)
+---
+ubcomponentinputs:
+  name: str(required=False)
+  value: any(required=False)
+  default: any(required=False)
+  use_default: bool(required=False)
+  metadata: include('ubmetadata',required=False)
+  link: str(required=False)
+  type: str(required=False)
+  hidden: bool(required=False)
+  required: bool(required=False)
+  description: str(required=False)
+  sensitive: bool(required=False)
+  source: str(required=False)
+  options: list(str(),required=False)
+  cloud_data_type: str(required=False)
+---
+ubcomponentsetting:
+  name: str(required=False)
+  value: any(required=False)
+  use_default: bool(required=False)
+  metadata: include('ubmetadata',required=False)
+  link: str(required=False)
+---
+ubcomponentoutput:
+  name: str(required=False)
+  value: any(required=False)
+  use_default: bool(required=False)
+  metadata: include('ubmetadata',required=False)
+  link: str(required=False)
+

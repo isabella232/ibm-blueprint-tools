@@ -1,0 +1,428 @@
+name: "Roks Blueprint"
+schema_version: "1.0.0"
+type: "blueprint"
+description: "Roks configuration to be used for testing"
+resource_group: Default
+tags:
+  - "blueprint:Tor-Dev"
+location: us-south
+inputs:
+  - name: vpc_zone
+  - name: vpc_name
+  - name: vpc_addressprefix
+  - name: vpc_subnetname
+  - name: vpc_securitygroupname
+  - name: vpc_hostname
+  - name: vpc_profile
+  - name: vpc_image
+  - name: vpc_sshkey_name
+  - name: ssh_private_key
+  - name: bastion_public_ip
+  - name: suse_activation
+  - name: vpc_nfs_disk_conf
+  - name: dlc_name
+  - name: pvs_location
+  - name: pvs_resource_group
+  - name: pvs_service_name
+  - name: dlc_count
+  - name: dlc_speed
+  - name: dlc_globalrouting
+  - name: dlc_metered
+  - name: pvc_subnet_names
+  - name: dlc_vpc_enabled
+  - name: pvs_tag_name
+  - name: pvs_sshkey_name
+  - name: pvs_sshkey_pub
+  - name: pvs_images_names
+  - name: pvs_public_network_name
+  - name: pvs_management_network
+  - name: pvs_sap_network
+  - name: pvs_backup_network
+  - name: pvs_nw_image_name
+  - name: pvs_hana_image_name
+  - name: pvs_sap_hostname
+  - name: pvs_sap_profileID
+  - name: pvs_sap_memory
+  - name: pvs_sap_processors
+  - name: pvs_sap_proc_type
+  - name: pvs_sap_sys_type
+  - name: pvs_sap_private_net_names
+  - name: pvs_sap_health_status
+  - name: disks_configuration
+  - name: sap_solution
+  - name: vpc_bastion_proxy_config
+  - name: pvs_bastion_snat_config
+  - name: host_private_ip
+  - name: vpc_address_prefix_for_route
+  - name: vpc_public_ip_required
+  - name: hana_disks_configuration
+  - name: nw_disks_configuration
+settings:
+  # - name: TF_VERSION
+  #   value: 0.13
+  - name: TF_LOG
+    value: "DEBUG"
+modules:
+  - module_type: terraform
+    name: SAP_vpc
+    layer: Roks
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.ibm.com/SAP-Automation/powervs-sap-deploy/tree/master/modules/vpc"
+        git_branch: "master"
+    inputs:
+      - name: VPC_ZONE
+        value: $blueprint.vpc_zone
+      - name: VPC_NAME
+        value: $blueprint.vpc_name
+      - name: VPC_ADDRESSPREFIX
+        value: $blueprint.vpc_addressprefix
+      - name: VPC_SUBNETNAME
+        value: $blueprint.vpc_subnetname
+      - name: VPC_SECURITYGROUPNAME
+        value: $blueprint.vpc_securitygroupname
+      - name: VPC_ADDRESSPREFIX
+        value: vpc_addressprefix
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.38.2
+          - name: provider_source
+            value: IBM-Cloud/ibm
+  - module_type: terraform
+    name: SAP_vpcbastion
+    layer: Roks
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.ibm.com/SAP-Automation/powervs-sap-deploy/tree/master/modules/vpc_bastion"
+        git_branch: "master"
+    inputs:
+      - name: VPC_ZONE
+        value: $blueprint.vpc_zone
+      - name: VPC_NAME
+        value: $blueprint.vpc_name
+      - name: VPC_SUBNETNAME
+        value: $blueprint.vpc_subnetname
+      - name: VPC_SECURITYGROUPNAME
+        value: $blueprint.vpc_securitygroupname
+      - name: VPC_HOSTNAME
+        value: $blueprint.vpc_hostname
+      - name: VPC_PROFILE
+        value: $blueprint.vpc_profile
+      - name: VPC_IMAGE
+        value: $blueprint.vpc_image
+      - name: VPC_SSHKEY_NAME
+        value: $blueprint.vpc_sshkey_name
+      - name: VPC_PUBLIC_IP_REQUIRED
+        value: $blueprint.vpc_public_ip_required
+        default: true
+      - name: VPC_NFS_DISK_CONFIGURATION
+        value: vpc_nfs_disk_conf
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.38.2
+          - name: provider_source
+            value: IBM-Cloud/ibm
+
+  - module_type: terraform
+    name: SAP_pvs
+    layer: Roks
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.ibm.com/SAP-Automation/powervs-sap-deploy/tree/master/modules/pvs"
+        git_branch: "master"
+    inputs:
+      - name: PVS_LOCATION
+        value: $blueprint.pvs_location
+      - name: PVS_RESOURCE_GROUP
+        value: $blueprint.pvs_resource_group
+      - name: PVS_SERVICE_NAME
+        value: $blueprint.pvs_service_name
+      - name: PVS_TAGNAME
+        value: $blueprint.pvs_tag_name
+        type: list
+      - name: PVS_SSHKEY_NAME
+        value: $blueprint.pvs_sshkey_name
+      - name: PVS_SSHKEY_PUB
+        value: $blueprint.pvs_sshkey_pub
+      - name: PVS_IMAGES_NAMES
+        value: $blueprint.pvs_images_names
+      - name: PVS_PUBLIC_NETWORK_NAME
+        value: $blueprint.pvs_public_network_name
+      - name: PVS_MANAGEMENT_NETWORK
+        value: $blueprint.pvs_management_network
+      - name: PVS_SAP_NETWORK
+        value: $blueprint.pvs_sap_network
+      - name: PVS_BACKUP_NETWORK
+        value: $blueprint.pvs_backup_network
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.38.2
+          - name: provider_source
+            value: IBM-Cloud/ibm
+
+  - module_type: terraform
+    name: SAP_createconnections
+    layer: Roks
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.ibm.com/SAP-Automation/powervs-sap-deploy/tree/master/modules/createconnections"
+        git_branch: "master"
+    inputs:
+      - name: PVS_LOCATION
+        value: $blueprint.pvs_location
+      - name: PVS_RESOURCE_GROUP
+        value: $blueprint.pvs_resource_group
+      - name: PVS_SERVICE_NAME
+        value: $blueprint.pvs_service_name
+      - name: DLC_NAME
+        value: $blueprint.dlc_name
+        default: pvs-vpc-dlc
+      - name: DLC_COUNT
+        value: $blueprint.dlc_count
+      - name: DLC_SPEED
+        value: $blueprint.dlc_speed
+      - name: DLC_GLOBALROUTING
+        value: $blueprint.dlc_globalrouting
+        type: bool
+        default: true
+      - name: DLC_METERED
+        value: $blueprint.dlc_metered
+        type: bool
+        default: false
+      - name: PVS_SUBNET_NAMES
+        value: $blueprint.pvc_subnet_names
+        default: ["mgmt_net","sap_net","bkp_net"]
+      - name: DLC_VPC_ENABLED
+        value: $blueprint.dlc_vpc_enabled
+        type: bool
+        default: false
+      - name: VPC_NAME
+        value: $blueprint.vpc_name
+      - name: PVS_SUBNET_NAMES 
+        value: ["mgmt_net","sap_net","bkp_net"]
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.38.2
+          - name: provider_source
+            value: IBM-Cloud/ibm
+
+  - module_type: terraform
+    name: SAP_pvc_hana
+    layer: Roks
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.ibm.com/SAP-Automation/powervs-sap-deploy/tree/master/modules/pvs_sap"
+        git_branch: "master"
+    inputs:
+      - name: PVS_LOCATION
+        value: $blueprint.pvs_location
+      - name: PVS_RESOURCE_GROUP
+        value: $blueprint.pvs_resource_group
+      - name: PVS_SERVICE_NAME
+        value: $blueprint.pvs_service_name
+      - name: PVS_SSHKEY_NAME
+        value: $blueprint.pvs_sshkey_name
+      - name: PVS_SAP_IMAGE_NAME
+        value: $blueprint.pvs_hana_image_name
+      - name: PVS_SAP_HOSTNAME
+        value: $blueprint.pvs_sap_hostname
+      - name: PVS_SAP_PROFILE_ID
+        value: $blueprint.pvs_sap_profileID
+      - name: PVS_SAP_PRIVATE_NET_NAMES
+        value: $blueprint.pvs_sap_private_net_names
+        default: ["mgmt_net","sap_net","bkp_net"]
+      - name: PVS_SAP_HEALTH_STATUS
+        value: $blueprint.pvs_sap_health_status
+        default: OK
+      - name: DISKS_CONFIGURATION
+        value: $blueprint.hana_disks_configuration
+        type: map
+    outputs:
+      - name: sap_wwns
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.38.2
+          - name: provider_source
+            value: IBM-Cloud/ibm
+
+  - module_type: terraform
+    name: SAP_pvc_netweaver
+    layer: Roks
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.ibm.com/SAP-Automation/powervs-sap-deploy/tree/master/modules/pvs_sap"
+        git_branch: "master"
+    inputs:
+      - name: PVS_LOCATION
+        value: $blueprint.pvs_location
+      - name: PVS_RESOURCE_GROUP
+        value: $blueprint.pvs_resource_group
+      - name: PVS_SERVICE_NAME
+        value: $blueprint.pvs_service_name
+      - name: PVS_SSHKEY_NAME
+        value: $blueprint.pvs_sshkey_name
+      - name: PVS_SAP_IMAGE_NAME
+        value: $blueprint.pvs_nw_image_name
+      - name: PVS_SAP_HOSTNAME
+        value: $blueprint.pvs_sap_hostname
+      - name: PVS_SAP_MEMORY
+        value: $blueprint.pvs_sap_memory
+      - name: PVS_SAP_PROCESSORS
+        value: $blueprint.pvs_sap_processors
+      - name: PVS_SAP_PROC_TYPE
+        value: $blueprint.pvs_sap_proc_type
+      - name: PVS_SAP_SYS_TYPE
+        value: $blueprint.pvs_sap_sys_type
+      - name: PVS_SAP_PRIVATE_NET_NAMES
+        value: $blueprint.pvs_sap_private_net_names
+        default: ["mgmt_net","sap_net","bkp_net"]
+      - name: PVS_SAP_HEALTH_STATUS
+        value: $blueprint.pvs_sap_health_status
+        default : OK
+      - name: DISKS_CONFIGURATION
+        value: $blueprint.nw_disks_configuration
+        type: map
+    outputs:
+      - name: sap_wwns
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.38.2
+          - name: provider_source
+            value: IBM-Cloud/ibm
+
+  - module_type: terraform
+    name: SAP_vpc_bastion_init_sles
+    layer: Roks
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.ibm.com/SAP-Automation/powervs-sap-deploy/tree/master/modules/vpc_bastion_init_sles"
+        git_branch: "master"
+    inputs:
+      - name: SSH_PRIVATE_KEY
+        value: $blueprint.ssh_private_key
+      - name: BASTION_PUBLIC_IP
+        value: $blueprint.bastion_public_ip
+      - name: SUSE_ACTIVATION
+        value: $blueprint.suse_activation
+        type: map
+      - name: VPC_NFS_DISK_CONFIGURATION
+        value: $blueprint.vpc_nfs_disk_conf
+        type: map
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.38.2
+          - name: provider_source
+            value: IBM-Cloud/ibm
+
+  - module_type: terraform
+    name: SAP_pvs_sap_init_sles_hana
+    layer: Roks
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.ibm.com/SAP-Automation/powervs-sap-deploy/tree/master/modules/pvs_sap_init_sles"
+        git_branch: "master"
+    inputs:
+      - name: BASTION_PUBLIC_IP
+        value: $blueprint.bastion_public_ip
+      - name: HOST_PRIVATE_IP
+        value: $blueprint.host_private_ip
+      - name: SSH_PRIVATE_KEY
+        value: $blueprint.ssh_private_key
+      - name: SUSE_ACTIVATION
+        value: $blueprint.suse_activation
+        type: map
+      - name: VPC_ADDRESS_PREFIX_FOR_ROUTE
+        value: $blueprint.vpc_address_prefix_for_route
+      - name: PVS_BASTION_SNAT_CONFIG
+        value: $blueprint.pvs_bastion_snat_config
+      - name: VPC_BASTION_PROXY_CONFIG
+        value: $blueprint.vpc_bastion_proxy_config
+      - name: DISKS_CONFIGURATION
+        value: $module.SAP_pvc_hana.outputs.sap_wwns
+      - name: SAP_SOLUTION
+        value: $blueprint.sap_solution
+        default: HANA
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.38.2
+          - name: provider_source
+            value: IBM-Cloud/ibm
+
+  - module_type: terraform
+    name: SAP_pvs_sap_init_sles_netweaver
+    layer: Roks
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.ibm.com/SAP-Automation/powervs-sap-deploy/tree/master/modules/pvs_sap_init_sles"
+        git_branch: "master"
+    inputs:
+      - name: BASTION_PUBLIC_IP
+        value: $blueprint.bastion_public_ip
+      - name: HOST_PRIVATE_IP
+        value: $blueprint.host_private_ip
+      - name: SSH_PRIVATE_KEY
+        value: $blueprint.ssh_private_key
+      - name: SUSE_ACTIVATION
+        value: $blueprint.suse_activation
+        type: map
+      - name: VPC_ADDRESS_PREFIX_FOR_ROUTE
+        value: $blueprint.vpc_address_prefix_for_route
+      - name: PVS_BASTION_SNAT_CONFIG
+        value: $blueprint.pvs_bastion_snat_config
+      - name: VPC_BASTION_PROXY_CONFIG
+        value: $blueprint.vpc_bastion_proxy_config
+      - name: DISKS_CONFIGURATION
+        value: $module.SAP_pvc_netweaver.outputs.sap_wwns
+      - name: SAP_SOLUTION
+        value: $blueprint.sap_solution
+        default: NETWEAVER
+    injectors:
+      - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
+        tft_name: "ibm"
+        injection_type: override
+        tft_parameters:
+          - name: provider_version
+            value: 1.38.2
+          - name: provider_source
+            value: IBM-Cloud/ibm
