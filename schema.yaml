@@ -9,7 +9,7 @@ source: include('source',required=False)
 modules: list(include('modules'))
 inputs: list(include('ubinputs'),required=False)
 outputs: list(include('uboutput'),required=False)
-settings: list(include('ubsetting'),required=False)
+settings: settings(include('ubsetting'))
 ---
 modules:
   module_type: str(required=False)
@@ -19,7 +19,7 @@ modules:
   injectors: list(include('injectors'),required=False)
   inputs: list(include('ubcomponentinputs'),required=False)
   outputs: list(include('ubcomponentoutput'),required=False)
-  settings: list(include('ubcomponentsetting'),required=False)
+  settings: settings(include('ubcomponentsetting'))
   tags: str(required=False)
 ---
 source:

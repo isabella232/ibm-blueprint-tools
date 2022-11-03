@@ -84,6 +84,9 @@ modules:
         value: $blueprint.vpc_securitygroupname
       - name: VPC_ADDRESSPREFIX
         value: vpc_addressprefix
+    settings:
+    - name: TF_VERSION
+      value: 0.13
     injectors:
       - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
         tft_name: "ibm"
@@ -123,6 +126,9 @@ modules:
         default: true
       - name: VPC_NFS_DISK_CONFIGURATION
         value: vpc_nfs_disk_conf
+    settings:
+      - name: TF_VERSION
+        value: 0.13
     injectors:
       - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
         tft_name: "ibm"
@@ -165,6 +171,9 @@ modules:
         value: $blueprint.pvs_sap_network
       - name: PVS_BACKUP_NETWORK
         value: $blueprint.pvs_backup_network
+    settings:
+      - name: TF_VERSION
+        value: 0.13
     injectors:
       - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
         tft_name: "ibm"
@@ -216,6 +225,9 @@ modules:
         value: $blueprint.vpc_name
       - name: PVS_SUBNET_NAMES 
         value: ["mgmt_net","sap_net","bkp_net"]
+    settings:
+      - name: TF_VERSION
+        value: 0.13
     injectors:
       - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
         tft_name: "ibm"
@@ -260,6 +272,9 @@ modules:
         type: map
     outputs:
       - name: sap_wwns
+    settings:
+      - name: TF_VERSION
+        value: 0.13
     injectors:
       - tft_git_url: "https://github.com/Cloud-Schematics/tf-templates"
         tft_name: "ibm"
@@ -308,6 +323,9 @@ modules:
       - name: DISKS_CONFIGURATION
         value: $blueprint.nw_disks_configuration
         type: map
+    settings:
+      - name: TF_VERSION
+        value: 0.13
     outputs:
       - name: sap_wwns
     injectors:
@@ -348,6 +366,9 @@ modules:
             value: 1.38.2
           - name: provider_source
             value: IBM-Cloud/ibm
+    settings:
+      - name: TF_VERSION
+        value: 0.13
 
   - module_type: terraform
     name: SAP_pvs_sap_init_sles_hana
@@ -387,6 +408,9 @@ modules:
             value: 1.38.2
           - name: provider_source
             value: IBM-Cloud/ibm
+    settings:
+      - name: TF_VERSION
+        value: 0.13
 
   - module_type: terraform
     name: SAP_pvs_sap_init_sles_netweaver
@@ -426,3 +450,6 @@ modules:
             value: 1.38.2
           - name: provider_source
             value: IBM-Cloud/ibm
+    settings:
+      - name: TF_VERSION
+        value: 0.13
