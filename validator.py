@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict
 
 import yamale
-import custom_validator.settings as settings
+import validators.settings as settings
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from yamale.validators import DefaultValidators
@@ -122,11 +122,11 @@ def validate(path_schema: Path, path_data: Path):
 
 
 curr_path = Path(__file__).parent
-path_schema = (curr_path / "schema.yaml").resolve()
-path_data = (curr_path / "detection-rule.yaml").resolve()
-# path_data = (curr_path / "test-sample/test-rule1.yaml").resolve()
-# path_data = (curr_path / "test-sample/test-rule2.yaml").resolve()
-# path_data = (curr_path / "test-sample/test-rule3.yaml").resolve()
+path_schema = (curr_path / "schema/schema.yaml").resolve()
+path_data = (curr_path / "test/detection-rule.yaml").resolve()
+# path_data = (curr_path / "test/test-rule1.yaml").resolve()
+# path_data = (curr_path / "test/test-rule2.yaml").resolve()
+# path_data = (curr_path / "test/test-rule3.yaml").resolve()
 
 
 
