@@ -58,8 +58,8 @@ inputs:
   - name: hana_disks_configuration
   - name: nw_disks_configuration
 settings:
-  # - name: TF_VERSION
-  #   value: 0.13
+  - name: TF_VERSION
+    value: 0.13
   - name: TF_LOG
     value: "DEBUG"
 modules:
