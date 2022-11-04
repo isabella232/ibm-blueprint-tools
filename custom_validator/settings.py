@@ -17,3 +17,7 @@ class Settings(Validator):
                     return True
             if found ==  False:
                 return False
+    
+    def fail(self, value):
+        # Called in case `_is_valid` returns False
+        return 'TF_VERSION must be set in the settings.'
