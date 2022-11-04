@@ -1,4 +1,4 @@
-# Blueprint-yaml-validator
+# IBM-Blueprint-Validator
 
 Prerequisite:
 
@@ -8,4 +8,4 @@ install yamle using below command
 
 ## How to test your blueprint yaml file
 
-ovveride detection-rule.yaml file with your blueprint yaml file and run `python validator.py`
+ovveride detection-rule.yaml file with your blueprint yaml file and run `python3 validator.py`
