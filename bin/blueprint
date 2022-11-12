@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+
+"""blueprint:
+    blueprint tool that extracts insights in a yaml file which are further used in validating and analyzing he blueprint yaml."""
+
+import argparse
+from tools.validator.validator import Validator
+
+def main():
+    # Create the parser
+    my_parser = argparse.ArgumentParser(
+        description='Tool for analysing terraform logs')
+
+    my_parser.add_argument('--schema-validate', action='store_const', const=True, default=False, help='validates the yaml files')
+
+
+    # Add the arguments
+    my_parser.add_argument('-f', '--yaml_file', metavar='input_file_with_path',
+                           type=str, help='input yaml file name (with path)', default=None)
+
+    # Execute the parse_args() method
+    args = my_parser.parse_args()
+
+    if args.schema_validate:
+        if args.yaml_file:
+            filename = args.yaml_file
+            Validator(filename)
+        else:
+            print("file paramter is required")
+
+    else:
+        my_parser.print_help()
+
+if __name__ == '__main__':
+    main()
+
