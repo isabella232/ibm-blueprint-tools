@@ -1,16 +1,18 @@
 # IBM Blueprint tools
 
 1. [About bluperint tool](#about)
+2. [Installation](#installation)
+3. [Usage](#usage)
 
 ## About
 The IBM Blueprint tool is for analyzing and validating the Ibmcloud blueprint configurations file.
 
-2. [Installation](#installation)
 
+## Installation
 The blueprint validator can be install as a CLI tool using the following steps.
 
+### Prerequisite
 * Must install [Python version 3.8](https://www.python.org/downloads/release/python-380/) and above.
-* pip3 install yamale 
 * Setup the [CLI tool]
 
 ### Setup CLI tool
@@ -22,11 +24,11 @@ Execute following steps to setup the command line tool.
 
 ## Usage
 
-* IBMCloud blueprint validator tool
+### IBMCloud blueprint validator tool
 
 The blueprint validator can be used from your terminal, by running the following command
 
-> blueprint --schema-validate -f <provide the absolute yaml file path>
+> blueprint --schema-validate -f [provide the absolute yaml file path]
 
 ```text 
 usage: blueprint [-h] [-f input_file_with_path] [schema-validate]
@@ -42,3 +44,15 @@ optional arguments:
                         input yaml file name (with path)
 The log analyzer can be used from your terminal, by running the following command
 ```
+
+## Future roadmap
+
+Here are the list of enhancements to the tool in the future releases:
+- Enhance the validator tool with more customised validators.
+- add more sub-tools like concating the sub-yaml files.
+
+## Contact
+
+Contact the authors of the tool:
+
+- Nishu Bharti (nishu.bharti1@ibm.com)
