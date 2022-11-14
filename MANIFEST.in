@@ -11,5 +11,4 @@ include LICENSE
 include setup.py
 
 include *
-include schema/*
-include schema/schema.yaml
+include tools/validator/schema/*
