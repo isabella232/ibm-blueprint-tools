@@ -1,4 +1,4 @@
-# IBM Cloud Schematics - blueprint toolset
+# Blueprint toolset for IBM Cloud Schematics
 
 1. [About bluperint toolset](#about)
 2. [Installation](#installation)
