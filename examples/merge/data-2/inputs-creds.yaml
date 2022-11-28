@@ -1,0 +1,13 @@
+inputs:
+  - name: ssh_public_key
+    description: Public SSHKey for VSI
+    type: string
+    required: true
+  - name: ssh_private_key
+    description: Private SSHKey
+    type: string
+    required: true
+  - name: ibmcloud_api_key
+    type: string
+    sensitive: true
+    required: true

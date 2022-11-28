@@ -1,0 +1,17 @@
+name: "SAP on secure Power Virtual Servers"
+schema_version: "1.0.0"
+description: "Solution to deploy SAP on secure Power Virtual Servers"
+type: "blueprint"
+inputs:
+  - name: test_ibmcloud_api_key
+    type: string
+    sensitive: true
+    required: true
+  - ${{inputs-creds.yaml}}
+  - ${{./inputs-resource-meta.yaml}}
+outputs:
+  - ${{outputs-bp.yaml}}
+modules:
+  - ${{./mod-secure-infrastructure.yaml}}
+  - ${{./mod-power-infrastructure.yaml}}
+  - ${{./mod-sap-secure-powervs.yaml}}

@@ -1,0 +1,15 @@
+modules:
+  - name: sap-secure-powervs
+    layer: software
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/terraform-ibm-modules/terraform-ibm-powervs-sap/tree/main/examples/ibm-catalog/prepared-system-solution"
+    inputs:
+      - name: prerequisite_workspace_id
+        value: $module.power-infrastructure.powervs_workspace_name_id
+        type: string
+    settings:
+      - name: TF_VERSION
+        value: 1.0

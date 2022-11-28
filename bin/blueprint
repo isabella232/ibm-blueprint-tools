@@ -14,36 +14,94 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""blueprint:
-    blueprint tool that extracts insights in a yaml file which are further used in validating and analyzing he blueprint yaml."""
+"""
+blueprint:
+    Blueprint helper tools for IBM Cloud Schematics.
+"""
 
+import os
+import sys
 import argparse
-from tools.validator.validator import Validator
+from blueprint.validate.validator import Validator
+from blueprint.merge.load import BPLoader
+import importlib
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 def main():
     # Create the parser
-    my_parser = argparse.ArgumentParser(
-        description='Tool for analysing terraform logs')
+    arg_parser = argparse.ArgumentParser(
+        description='Blueprint helper tools for IBM Cloud Schematics')
+    
+    subparser = arg_parser.add_subparsers(dest='command')
+    validate = subparser.add_parser('validate')
+    merge = subparser.add_parser('merge')
+    generate = subparser.add_parser('generate')
 
-    my_parser.add_argument('--schema-validate', action='store_const', const=True, default=False, help='validates the yaml files')
+    validate.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint yaml file', default=None)
+    validate.add_argument('-w', '--working-dir', type=str, required=False, help='working directory for validate command', default='.')
 
+    merge.add_argument('-m', '--manifest-file', type=str, required=True, help='blueprint manifest file', default=None)
+    merge.add_argument('-w', '--working-dir', type=str, required=False, help='working directory for merge command', default='.')
+    merge.add_argument('-o', '--out-file', type=str, required=False, help='output blueprint yaml file', default=None)
 
-    # Add the arguments
-    my_parser.add_argument('-f', '--yaml_file', metavar='input_file_with_path',
-                           type=str, help='input yaml file name (with path)', default=None)
+    # generate.add_argument('-p', '--python-file', type=str, required=True, help='Python file used to describe the blueprint yaml', default=None)
+    # generate.add_argument('-w', '--working-dir', type=str, required=False, help='Working directory for generate command', default='.')
+    # generate.add_argument('-o', '--out-file', type=str, required=False, help='Output blueprint yaml file', default=None)
 
     # Execute the parse_args() method
-    args = my_parser.parse_args()
+    args = arg_parser.parse_args()
 
-    if args.schema_validate:
-        if args.yaml_file:
-            filename = args.yaml_file
-            Validator(filename)
+    if args.command == 'validate':
+        if args.bp_file:
+            filename = args.bp_file
+            working_dir = args.working_dir
+            file = os.path.join(working_dir, filename)
+            print("Validate - " + file)
+            Validator(file)
         else:
-            print("file paramter is required")
+            eprint("Blueprint configuration file parameter is required")
+    
+    elif args.command == 'merge':
+        if args.manifest_file:
+            filename = args.manifest_file
+            working_dir = args.working_dir
+            output_blueprint_file = args.out_file
+            input_manifest_file = os.path.join(working_dir, filename)
 
+            print("Merge - " + input_manifest_file)
+            loader = BPLoader(input_manifest_file)
+            errors = loader.get_errors()
+            if len(errors) > 0:
+                eprint(errors)
+                return -1
+
+            out_yaml_str = loader.to_yaml_str()
+
+            if output_blueprint_file == None or output_blueprint_file == '':
+                print(out_yaml_str)
+            else:
+                with open(output_blueprint_file, 'w') as yaml_file:
+                    yaml_file.write(out_yaml_str)
+    
+    # elif args.command == 'generate':
+    #     if args.python_file:
+    #         filename = args.python_file
+    #         working_dir = args.working_dir
+    #         output_blueprint_file = args.out_file
+    #         python_file = os.path.join(working_dir, filename)
+    #         print("Generate - " + python_file)
+
+    #         # import subprocess
+    #         # subprocess.call(python_file, shell=True)
+    #         # exec(open(python_file).read())
+    #         manifest = importlib.import_module(filename)
+    #         bp, errors = manifest.blueprint_manifest()
+    #         bp.to_yaml_str()
+    
     else:
-        my_parser.print_help()
+        arg_parser.print_help("Help for blueprint tools CLI")
 
 if __name__ == '__main__':
     main()

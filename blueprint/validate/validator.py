@@ -15,13 +15,20 @@
 
 import yamale
 import os
+import sys
+import pkgutil
+
 from pathlib import Path
 from typing import Dict
-from tools.validator.custom_validator.settings import Settings
+from blueprint.validate.custom.settings import Settings
+
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+
 from yamale.validators import DefaultValidators
 
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 def _get_lc_dict_helper(data: CommentedMap, dict_key_line: Dict[str, int], parentkey: str = "") -> Dict[str, int]:
     """
@@ -54,7 +61,7 @@ def _get_lc_dict_helper(data: CommentedMap, dict_key_line: Dict[str, int], paren
         try:
             lnum = data.lc.data[key][0] + 1
             if keyref in dict_key_line:
-                print(
+                eprint(
                     f"WARNING : key '{keyref}' is NOT UNIQUE, at lines {dict_key_line[keyref]:>4} and {lnum:>4}."
                     f" (overwriting)."
                 )
@@ -108,16 +115,16 @@ def validate(path_schema: Path, path_data: Path):
     validators = DefaultValidators.copy()  # This is a dictionary
     validators[Settings.tag]=Settings
     # Create a schema object
-    schema = yamale.make_schema(path=path_schema, parser="ruamel",validators=validators)
+    schema = yamale.make_schema(path=path_schema, parser="PyYAML",validators=validators)
 
     # Create a Data object
     config = yamale.make_data(path=path_data, parser="ruamel")
     # Validate data against the schema. Throws a ValueError if data is invalid.
     try:
         yamale.validate(schema, config)
-        print("Blueprint Yaml Validation success!👍")
+        print("Blueprint yaml validation success!👍")
     except yamale.YamaleError as e:
-        errmsg = "Blueprint Yaml Validation failed!\n"
+        errmsg = "Blueprint yaml validation failed!\n"
         lc = _get_lc_dict(path_data)
         for result in e.results:
             title1 = "Schema"
@@ -132,16 +139,15 @@ def validate(path_schema: Path, path_data: Path):
                 errmsg += f"* line {l_num:>4}:  {keypath:<40} : {err}\n"
             errmsg += f"{sep}"
 
-        print(errmsg)
+        eprint(errmsg)
         exit(1)
 
 class Validator():
-    def __init__(self,filename):
-        filepath = os.path.dirname(__file__)
-        path_schema = filepath+'/schema/schema.yaml'
-        path_data = filename
-
-        validate(path_schema=path_schema, path_data=path_data)
+    def __init__(self, filename):
+        
+        schema = os.path.join(os.path.dirname(__file__), '../schema/schema.yaml')
+        
+        validate(path_schema = schema, path_data = filename)
 
 
 

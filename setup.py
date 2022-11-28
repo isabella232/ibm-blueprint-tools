@@ -30,13 +30,14 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 setup(
     name='blueprint',
     version='1.0.0',
-    description='IBM Blueprint tool that extracts insights in a yaml file which are further used in validating and analyzing the files',
+    description='Blueprint tools for IBM Cloud Schematics',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     author='Nishu Bharti',
     author_email='nishu.bhart1@ibm.com',
-    packages=find_packages(exclude=['ez_setup', 'data', 'docs']),
+    packages=find_packages(include=['blueprint', 'blueprint.*']),
     scripts=['bin/blueprint'],
-    install_requires=['yamale == 4.0.4'],
+    install_requires=['yamale >= 4.0.4', 'PyYAML >= 6.0', 'ruamel.yaml >=  0.17.21'],
     include_package_data = True
     )
+

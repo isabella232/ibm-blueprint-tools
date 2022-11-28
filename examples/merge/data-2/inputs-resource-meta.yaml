@@ -1,0 +1,21 @@
+inputs:
+  - name: prefix
+    default: secure-vpc
+    description: A unique identifier for resources
+    type: string
+    optional: true
+  - name: powervs_zone
+    description: powervs zone
+    type: string
+    default: eu-de-1
+    required: true
+  - name: powervs_resource_group_name
+    description: powervs resource group name
+    type: string
+    default: Default
+    required: true
+  - name: region
+    default: us-east
+    type: string
+    description: Region where vpc will be created
+    optional: true
