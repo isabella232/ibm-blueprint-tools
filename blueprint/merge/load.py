@@ -84,12 +84,13 @@ class BPLoader:
         
         if isinstance(arr2, dict):
             for key, value in arr2.items():
+                entry={}
                 if key == "name":
                     if(value in names):
                         self.bperrors.append(ValidationEvent(BPWarning, 'Duplicate parameter name: ' + value))
                     names.append(value)
-                    entry = "{} : {}".format(key, value)
-                    result.append(entry)
+                entry[key]= value
+                result.append(entry)
         else:
             for entry in arr2:
                 if(entry['name'] in names):
