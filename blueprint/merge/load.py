@@ -81,12 +81,22 @@ class BPLoader:
                 self.bperrors.append(ValidationEvent(BPWarning, 'Duplicate parameter name: ' + entry['name']))
             names.append(entry['name'])
             result.append(entry)
-
-        for entry in arr2:
-            if(entry['name'] in names):
-                self.bperrors.append(ValidationEvent(BPWarning, 'Duplicate parameter name: ' + entry['name']))
-            names.append(entry['name'])
+        
+        if isinstance(arr2, dict):
+            entry={}
+            for key, value in arr2.items():
+                if key == "name":
+                    if(value in names):
+                        self.bperrors.append(ValidationEvent(BPWarning, 'Duplicate parameter name: ' + value))
+                    names.append(value)
+                entry[key]= value
             result.append(entry)
+        else:
+            for entry in arr2:
+                if(entry['name'] in names):
+                    self.bperrors.append(ValidationEvent(BPWarning, 'Duplicate parameter name: ' + entry['name']))
+                names.append(entry['name'])
+                result.append(entry)
     
         return result
 
