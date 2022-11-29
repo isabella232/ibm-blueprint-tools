@@ -68,7 +68,7 @@ class Input (Parameter):
         txt = "in("
         txt += "name:" + (self.name if hasattr(self, 'name') else 'None') + ", "
         txt += "type:" + str(self.type if hasattr(self, 'type') else 'None') + ", "
-        txt += "value:" + str(self.value if hasattr(self, 'value') else 'None') + ", "
+        txt += "value:" + str(self.value if hasattr(self, 'value') else 'None')
         txt += ")"
         return txt
 
@@ -98,7 +98,7 @@ class Input (Parameter):
         try:
             type = data['type']
         except KeyError:
-            type = None
+            type = "string"
         try:
             description = data['description']
         except KeyError:
@@ -128,7 +128,7 @@ class Output (Parameter):
         txt = "out("
         txt += "name:" + (self.name if hasattr(self, 'name') else 'None') + ", "
         txt += "type:" + str(self.type if hasattr(self, 'type') else 'None') + ", "
-        txt += "value:" + str(self.value if hasattr(self, 'value') else 'None') + ", "
+        txt += "value:" + str(self.value if hasattr(self, 'value') else 'None')
         txt += ")"
         return txt
 
@@ -157,7 +157,7 @@ class Output (Parameter):
         try:
             type = data['type']
         except KeyError:
-            type = None
+            type = "string"
         
         try:
             description = data['description']
@@ -190,7 +190,7 @@ class Setting (Parameter):
         txt = "env("
         txt += "name:" + (self.name if hasattr(self, 'name') else 'None') + ", "
         txt += "type:" + str(self.type if hasattr(self, 'type') else 'None') + ", "
-        txt += "value:" + str(self.value if hasattr(self, 'value') else 'None') + ", "
+        txt += "value:" + str(self.value if hasattr(self, 'value') else 'None')
         txt += ")"
         return txt
 
@@ -219,7 +219,7 @@ class Setting (Parameter):
         try:
             type = data['type']
         except KeyError:
-            type = None
+            type = "string"
         
         try:
             description = data['description']
