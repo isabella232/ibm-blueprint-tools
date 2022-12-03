@@ -3,7 +3,12 @@ import sys
 
 from blueprint.merge import BPLoader
 
+from blueprint.lib.logger import logr
+# import logging
+# logr = logging.getLogger(__name__)
+
 def eprint(*args, **kwargs):
+    logr.error(*args)
     print(*args, file=sys.stderr, **kwargs)
 
 def main(argv):

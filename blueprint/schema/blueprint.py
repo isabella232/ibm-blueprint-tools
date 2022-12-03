@@ -17,12 +17,18 @@ import sys
 
 import blueprint.schema.module as module
 import blueprint.schema.param as param
+from blueprint.lib.dag import BlueprintGraph
 
 from blueprint.lib.validator import BlueprintValidator
 from blueprint.lib.validator import BPError
 from blueprint.lib.validator import BPWarning
 
+from blueprint.lib.logger import logr
+# import logging
+# logr = logging.getLogger(__name__)
+
 def eprint(*args, **kwargs):
+    logr.error(*args)
     print(*args, file=sys.stderr, **kwargs)
 #========================================================================
 
@@ -414,4 +420,117 @@ class Blueprint(dict):
             raise ValueError('Invalid module name')
 
 #========================================================================
+
+    def find_replace_in_module(self, param_ref, value):
+        errors = []
+        if self.modules != None:
+            for mod in self.modules:
+                param_ref_alias = param_ref.replace("$blueprint.inputs.", "$blueprint.")
+                param_name = mod.find_input_ref(param_ref)
+                if param_name == None:
+                    param_name = mod.find_input_ref(param_ref_alias)
+                if param_name != None:
+                    mod.set_input_value(param_name, value)
+                else:
+                    param_name = mod.find_setting_ref(param_ref)
+                    if param_name == None:
+                        param_name = mod.find_setting_ref(param_ref_alias)
+                    if param_name != None:
+                        mod.set_setting_value(param_name, value)
+
+                param_ref_alias = param_ref.replace("$blueprint.settings.", "$blueprint.")
+                param_name = mod.find_setting_ref(param_ref)
+                if param_name == None:
+                    param_name = mod.find_setting_ref(param_ref_alias)
+                if param_name != None:
+                    mod.set_setting_value(param_name, value)
+                else:
+                    param_name = mod.find_input_ref(param_ref)
+                    if param_name == None:
+                        param_name = mod.find_input_ref(param_ref_alias)
+                    if param_name != None:
+                        mod.set_input_value(param_name, value)
+
+        return errors
+
+    def propagate_blueprint_input_data(self):
+        errors = []
+        for p in self.inputs:
+            if p.value != None:
+                p_ref = self.input_ref(p.name)
+                self.find_replace_in_module(p_ref, p.value)
+
+        for p in self.settings:
+            if p.value != None:
+                p_ref = self.setting_ref(p.name)
+                self.find_replace_in_module(p_ref, p.value)
+
+        return errors
+
+    def propagate_module_data(self, module_data):
+        # module_data -> dict
+        errors = []
+        if self.modules != None:
+            for mod in self.modules:
+                for p in mod.inputs:
+                    if p.value != None and p.value in module_data.keys():
+                        mod.set_input_value(p.name, module_data[p.value])
+
+                for p in mod.settings:
+                    if p.value != None and p.value in module_data.keys():
+                        mod.set_setting_value(p.name, module_data[p.value])
+
+        if self.outputs != None:
+            for p in self.outputs:
+                if p.value != None:
+                    if p.value != None and p.value in module_data.keys():
+                        self.set_output_value(p.name, module_data[p.value])
+
+        return errors
+
+#======================================================================
+
+    def build_dag(self):
+        g = BlueprintGraph()
+        for m in self.modules:
+            iref = m.input_value_refs()
+            for i in iref:
+                if i.startswith("$module.") :
+                    n = i[8:i.find(".", 8)]
+                    if n != m.name:
+                        g.addEdge(m.name, n)
+                elif i.startswith("$blueprint.") :
+                    g.addEdge(m.name, "blueprint")
+
+            oref = m.output_refs()
+            for o in oref:
+                if o.startswith("$module.") :
+                    n = o[8:o.find(".", 8)]
+                    if n != m.name:
+                        g.addEdge(n, m.name)
+                elif o.startswith("$blueprint.") :
+                    g.addEdge("blueprint", m.name)
+            
+            g.addEdge("root", m.name)
+        
+        return g
+
+    def is_dag_empty(self, bp_graph):
+        return bp_graph.isEmpty()
+
+    def dag_next_node(self, bp_graph):
+        if bp_graph.isEmpty():
+            return None
+        
+        while not bp_graph.isEmpty():
+            node_name = bp_graph.getAnIndependentNode()
+            if node_name == "root" or node_name == "blueprint":
+                bp_graph.popNode(node_name)
+            else:
+                return node_name
+        
+        return None
+
+
+#======================================================================
 

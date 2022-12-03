@@ -18,8 +18,14 @@ import sys
 from blueprint.lib import event
 from blueprint.lib import validator
 
+from blueprint.lib.logger import logr
+# import logging
+# logr = logging.getLogger(__name__)
+
 def eprint(*args, **kwargs):
+    logr.error(*args)
     print(*args, file=sys.stderr, **kwargs)
+
 #========================================================================
 class Parameter(dict):
     def __init__(self, name, type="string", description=None, value=None):

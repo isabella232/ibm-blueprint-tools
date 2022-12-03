@@ -12,6 +12,7 @@ include setup.py
 
 include *
 include blueprint/lib/*
+include blueprint/run/*
 include blueprint/schema/*
 include blueprint/circuit/*
 include blueprint/merge/*

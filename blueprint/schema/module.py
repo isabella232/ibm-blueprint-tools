@@ -21,7 +21,12 @@ import blueprint.schema.source as src
 from blueprint.lib.validator import ModuleValidator
 from blueprint.lib.validator import BPError
 
+from blueprint.lib.logger import logr
+# import logging
+# logr = logging.getLogger(__name__)
+
 def eprint(*args, **kwargs):
+    logr.error(*args)
     print(*args, file=sys.stderr, **kwargs)
 
 #========================================================================
@@ -105,13 +110,13 @@ class Module(dict):
         try:
             outputs = []
             for p in data['outputs']:
-                outputs.append(param.Input.from_json(p))
+                outputs.append(param.Output.from_json(p))
         except (KeyError, UnboundLocalError, TypeError):
             outputs = None
         try:
             settings = []
             for p in data['settings']:
-                settings.append(param.Input.from_json(p))
+                settings.append(param.Setting.from_json(p))
         except (KeyError, UnboundLocalError, TypeError):
             settings = None
         
@@ -164,22 +169,53 @@ class Module(dict):
                     raise ValueError('Module input parameter not found')
 
     def input_ref(self, key):
-        for p in self.inputs:
-            if p.name == key:
-                return "$module." + self.name + ".inputs." + key
+        if hasattr(self, "inputs"):
+            for p in self.inputs:
+                if p.name == key:
+                    return "$module." + self.name + ".inputs." + key
         raise ValueError('Module input parameter not found')
 
+    def find_input_ref(self, value_ref):
+        if hasattr(self, "inputs"):
+            for p in self.inputs:
+                if p.value == value_ref:
+                    return p.name
+        return None
+
     def output_ref(self, key):
-        for p in self.outputs:
-            if p.name == key:
-                return "$module." + self.name + ".outputs." + key
+        if hasattr(self, "outputs"):
+            for p in self.outputs:
+                if p.name == key:
+                    return "$module." + self.name + ".outputs." + key
         raise ValueError('Module output parameter not found')
 
+    def output_refs(self):
+        value_refs = []
+        if hasattr(self, "outputs"):
+            for p in self.outputs:
+                value_refs.append("$module." + self.name + ".outputs." + p.name)
+        return value_refs
+
+    def find_output_ref(self, value_ref):
+        if hasattr(self, "outputs"):
+            for p in self.outputs:
+                if p.value == value_ref:
+                    return p.name
+        return None
+
     def setting_ref(self, key):
-        for p in self.settings:
-            if p.name == key:
-                return "$module." + self.name + ".settings." + key
+        if hasattr(self, "settings"):
+            for p in self.settings:
+                if p.name == key:
+                    return "$module." + self.name + ".settings." + key
         raise ValueError('Module settings parameter not found')
+
+    def find_setting_ref(self, value_ref):
+        if hasattr(self, "settings"):
+            for p in self.settings:
+                if p.value == value_ref:
+                    return p.name
+        return None
 
     def set_source(self, source):
         errors = source.validate(BPError)

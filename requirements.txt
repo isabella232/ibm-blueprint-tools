@@ -1,0 +1,6 @@
+yamale >= 4.0.4
+PyYAML >= 6.0
+ruamel.yaml >=  0.17.21
+GitPython >= 3.1.29
+python-terraform >= 0.10.1
+git-url-parse >= 1.2.2

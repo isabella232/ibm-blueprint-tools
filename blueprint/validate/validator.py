@@ -27,7 +27,12 @@ from ruamel.yaml.comments import CommentedMap
 
 from yamale.validators import DefaultValidators
 
+from blueprint.lib.logger import logr
+import logging
+logr = logging.getLogger(__name__)
+
 def eprint(*args, **kwargs):
+    logr.error(*args)
     print(*args, file=sys.stderr, **kwargs)
 
 def _get_lc_dict_helper(data: CommentedMap, dict_key_line: Dict[str, int], parentkey: str = "") -> Dict[str, int]:
@@ -122,9 +127,10 @@ def validate(path_schema: Path, path_data: Path):
     # Validate data against the schema. Throws a ValueError if data is invalid.
     try:
         yamale.validate(schema, config)
-        print("Blueprint yaml validation success!👍")
+        print("Blueprint yaml schema validation success!👍")
+        logr.info("Blueprint yaml schema validation success!")
     except yamale.YamaleError as e:
-        errmsg = "Blueprint yaml validation failed!\n"
+        errmsg = "Blueprint yaml schema validation failed!\n"
         lc = _get_lc_dict(path_data)
         for result in e.results:
             title1 = "Schema"
@@ -138,13 +144,13 @@ def validate(path_schema: Path, path_data: Path):
                 l_num = lc.get(keypath, "?")
                 errmsg += f"* line {l_num:>4}:  {keypath:<40} : {err}\n"
             errmsg += f"{sep}"
-
+        logr.error(errmsg)
         eprint(errmsg)
-        exit(1)
 
 class Validator():
     def __init__(self, filename):
         
+        logr.debug("Loading blueprint yaml schema file")
         schema = os.path.join(os.path.dirname(__file__), '../schema/schema.yaml')
         
         validate(path_schema = schema, path_data = filename)

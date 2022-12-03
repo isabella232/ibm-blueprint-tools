@@ -17,114 +17,141 @@ from blueprint.lib.event import ValidationEvent
 from blueprint.lib.event import BPError
 from blueprint.lib.event import BPWarning
 
+from blueprint.lib.logger import logr
+import logging
+logr = logging.getLogger(__name__)
+
 class BlueprintValidator:
     def validate_blueprint(self, bp, level=BPError):
         bperrors = []
+        logr.debug("Validating blueprint name: " + bp.name)
         # validate all modules (parameters, bp-references, input-types)
         mod_validator = ModuleValidator()
         for m in bp.modules:
             mverror = mod_validator.validate_module(m, level)
             if len(mverror) > 0:
-                bperrors.append(ValidationEvent(BPError, "Error in blueprint modules", bp, m, mverror))
+                e = ValidationEvent(BPError, "Error in blueprint modules", bp, m, mverror)
+                bperrors.append(e)
+                logr.debug("Found issues in module - " + m.name)
+                logr.debug(e)
 
         # hanging inputs & outputs
-        value_refs = []
-        output_bp_value_refs = []
-        input_mod_value_refs = []
-        input_mod_var_names = []
-        output_mod_var_names = []
-        input_bp_var_names = []
-        output_bp_var_names = []
-        uninit_bp_output_vals = []
+        value_refs = set()
+        output_bp_value_refs    = set()
+        input_mod_value_refs    = set()
+        input_mod_var_names     = set()
+        output_mod_var_names    = set()
+        input_bp_var_names      = set()
+        output_bp_var_names     = set()
+        uninit_bp_output_vals   = set()
+        output_mod_value_refs   = set()
         if hasattr(bp, "modules") and bp.modules != None:
             for m in bp.modules:
                 if hasattr(m, "inputs") and m.inputs != None:
                     for p in m.inputs:
-                        input_mod_var_names.append(bp.module_input_ref(m.name, p.name))
-                        if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module." + m.name) or p.value.startswith("$blueprint."))):
-                            value_refs.append(p.value)
-                            input_mod_value_refs.append(p.value)
+                        input_mod_var_names.add(bp.module_input_ref(m.name, p.name))
+                        if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
+                            value_refs.add(p.value)
+                            input_mod_value_refs.add(p.value)
                 if hasattr(m, "outputs") and m.outputs != None:
                     for p in m.outputs:
-                        output_mod_var_names.append(bp.module_output_ref(m.name, p.name))
-                        if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module." + m.name) or p.value.startswith("$blueprint."))):
-                            value_refs.append(p.value)
+                        output_mod_var_names.add(bp.module_output_ref(m.name, p.name))
+                        if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
+                            value_refs.add(p.value)
+                            output_mod_value_refs.add(p.value)
                 if hasattr(m, "settings") and m.settings != None:
                     for p in m.settings:
-                        input_mod_var_names.append(bp.module_setting_ref(m.name, p.name))
-                        if hasattr(p, "value") and (p.value != None and isinstance(p.value, str) and (p.value.startswith("$module." + m.name) or p.value.startswith("$blueprint."))):
-                            value_refs.append(p.value)
-                            input_mod_value_refs.append(p.value)
+                        input_mod_var_names.add(bp.module_setting_ref(m.name, p.name))
+                        if hasattr(p, "value") and (p.value != None and isinstance(p.value, str) and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
+                            value_refs.add(p.value)
+                            input_mod_value_refs.add(p.value)
         if hasattr(bp, "inputs") and bp.inputs != None:
             for p in bp.inputs:
-                input_bp_var_names.append(bp.input_ref(p.name))
+                input_bp_var_names.add(bp.input_ref(p.name))
                 if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
-                    value_refs.append(p.value)
+                    value_refs.add(p.value)
         if hasattr(bp, "outputs") and bp.outputs != None:
             for p in bp.outputs:
-                output_bp_var_names.append(bp.output_ref(p.name))
+                output_bp_var_names.add(bp.output_ref(p.name))
                 if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None):
                     if (p.value.startswith("$module.") or p.value.startswith("$blueprint.")):
-                        value_refs.append(p.value)
-                        output_bp_value_refs.append(p.value)
+                        value_refs.add(p.value)
+                        output_bp_value_refs.add(p.value)
                     else:
-                        uninit_bp_output_vals.append(p.name)
+                        uninit_bp_output_vals.add(p.name)
 
         if hasattr(bp, "settings") and bp.settings != None:
             for p in bp.settings:
-                input_bp_var_names.append(bp.setting_ref(p.name))
+                input_bp_var_names.add(bp.setting_ref(p.name))
                 if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
-                    value_refs.append(p.value)
+                    value_refs.add(p.value)
         #===============================================
-        unused_bp_vars = []
+        unused_bp_vars = set()
         for bp_inputs in input_bp_var_names:
-            if not (bp in value_refs):
-                unused_bp_vars.append(bp_inputs)      
+            if not (bp_inputs in value_refs):
+                unused_bp_vars.add(bp_inputs)      
 
         if len(unused_bp_vars) > 0:
             if level >= BPWarning:
-                bperrors.append(ValidationEvent(BPWarning, "Unused input parameters declared in the blueprint", bp, unused_bp_vars))
+                e = ValidationEvent(BPWarning, "Unused input parameters declared in the blueprint", bp, list(unused_bp_vars))
+                bperrors.append(e)
+                logr.warning(str(e))
         #===============================================
-        unused_mod_vars = []
+        undeclared_bp_vars = set()
+        for mod_inputs in input_mod_value_refs:
+            if mod_inputs.startswith("$blueprint."):
+                if mod_inputs not in input_bp_var_names:
+                    undeclared_bp_vars.add(mod_inputs)      
+
+        if len(undeclared_bp_vars) > 0:
+            if level >= BPError:
+                e = ValidationEvent(BPError, "Undeclared blueprint parameters used by modules", bp, list(undeclared_bp_vars))
+                bperrors.append(e)
+                logr.error(str(e))
+        #===============================================
+        undeclared_mod_vars = set()
+        for mod_inputs in input_mod_value_refs:
+            if mod_inputs.startswith("$module.") and ".outputs." in mod_inputs:
+                if mod_inputs not in output_mod_var_names:
+                    undeclared_mod_vars.add(mod_inputs)      
+
+        if len(undeclared_mod_vars) > 0:
+            if level >= BPError:
+                e = ValidationEvent(BPError, "Undeclared output parameters used by modules", bp, list(undeclared_mod_vars))
+                bperrors.append(e)
+                logr.error(str(e))
+        #===============================================
+        unused_mod_vars = set()
         for mod in output_mod_var_names:
             if (not (mod in output_bp_value_refs)) and (not (mod in input_mod_value_refs)):
-                unused_mod_vars.append(mod)
+                unused_mod_vars.add(mod)
 
         if len(unused_mod_vars) > 0:
             if level >= BPWarning:
-                bperrors.append(ValidationEvent(BPWarning, "Unused output parameters declared in the modules", bp, unused_mod_vars))
+                e = ValidationEvent(BPWarning, "Unused output parameters declared in the modules", bp, list(unused_mod_vars))
+                bperrors.append(e)
+                logr.warning(str(e))
         #===============================================
         if len(uninit_bp_output_vals) > 0:
             if level >= BPError:
-                bperrors.append(ValidationEvent(BPError, "Blueprint output parameters is left hanging", bp, uninit_bp_output_vals))
+                e = ValidationEvent(BPError, "Blueprint output parameters is left hanging", bp, list(uninit_bp_output_vals))
+                bperrors.append(e)
+                logr.error(str(e))
         #===============================================
         # are there any circular references between modules
-        dag = self.build_dag(bp)
+        dag = bp.build_dag()
         if dag.isCyclic() == True:
             if level >= BPError:
-                bperrors.append(ValidationEvent(BPError, "Found circular dependencies between modules", bp, dag.getCyclicPath()))
+                e = ValidationEvent(BPError, "Found circular dependencies between modules", bp, dag.getCyclicPath())
+                bperrors.append(e)
+                logr.error(str(e))
         #===============================================
+
+        if len(bperrors) > 0:
+            logr.debug("Found issues in blueprint - " + bp.name)
+            logr.debug(bperrors)
+
         return bperrors
-
-    def build_dag(self, bp):
-        g = BlueprintGraph(len(bp.modules))
-        for m in bp.modules:
-            iref = m.input_value_refs()
-            for i in iref:
-                if i.startswith("$module.") :
-                    n = i[8:i.find(".", 8)]
-                    g.addEdge(n, m.name)
-                elif i.startswith("$blueprint.") :
-                    g.addEdge("blueprint", m.name)
-
-            oref = m.output_value_refs()
-            for o in oref:
-                if o.startswith("$module.") :
-                    n = o[8:o.find(".", 8)]
-                    g.addEdge(m.name, n)
-                elif o.startswith("$blueprint.") :
-                    g.addEdge(m.name, "blueprint")
-        return g
 
 ##====================================================================##
 
@@ -179,12 +206,16 @@ class ModuleValidator:
         # parameters with empty input values
         if len(invalid_params) > 0:
             if level >= BPError:
-                ret_errors.append(ValidationEvent(BPError, "Error in the input parameters for the modules", self, invalid_params, mverrors))
+                e = ValidationEvent(BPError, "Error in the input parameters for the modules", self, invalid_params, mverrors)
+                ret_errors.append(e)
+                logr.error(str(e))
 
         # duplicate parameters (inputs, outputs, settings) with same name
         if len(duplicate_names) > 0:
             if level >= BPWarning:
-                ret_errors.append(ValidationEvent(BPWarning, "Duplicate parameter names in the module", self, duplicate_names, mverrors))
+                e = ValidationEvent(BPWarning, "Duplicate parameter names in the module", self, duplicate_names, mverrors)
+                ret_errors.append(e)
+                logr.warning(str(e))
 
         # self referential values in parameters (inputs, outputs, settings)
         invalid_self_references = []
@@ -194,7 +225,9 @@ class ModuleValidator:
 
         if len(invalid_self_references) > 0:
             if level >= BPError:
-                ret_errors.append(ValidationEvent(BPError, "Self referencial values in the module", self, invalid_self_references, mverrors))
+                e = ValidationEvent(BPError, "Self referencial values in the module", self, invalid_self_references, mverrors)
+                ret_errors.append(e)
+                logr.error(str(e))
 
         return ret_errors
 
@@ -210,28 +243,36 @@ class ParameterValidator:
                     param.value = True if param.value.lower() == "true" else False
                 if not (param.value == True or param.value == False) :
                     if level >= BPError:
-                        pverrors.append(ValidationEvent(BPError, "Type mismatch for boolean parameter", param, param.value))
+                        e = ValidationEvent(BPError, "Type mismatch for boolean parameter", param, param.value)
+                        pverrors.append(e)
+                        logr.error(str(e))
         return pverrors
 
     def validate_input(self, param, level=BPError):
         pverrors = self.validate_param(param, level)
         if hasattr(param, "value") and param.value == None:
             if level >= BPWarning:
-                pverrors.append(ValidationEvent(BPWarning, "Input parameter is not initialized with any value", param, param.value))
+                e = ValidationEvent(BPWarning, "Input parameter is not initialized with any value", param, param.value)
+                pverrors.append(e)
+                logr.warning(str(e))
         return pverrors
 
     def validate_output(self, param, level=BPError):
         pverrors = self.validate_param(param, level)
         # if hasattr(param, "value") and param.value == None:
         #     if level >= BPWarning:
-        #         pverrors.append(ValidationEvent(BPWarning, "Output parameter is not initialized with any value", param, param.value))
+        #         ValidationEvent(BPWarning, "Output parameter is not initialized with any value", param, param.value)
+        #         pverrors.append(e)
+        #         logr.warning(str(e))
         return pverrors
 
     def validate_setting(self, param, level=BPError):
         pverrors = self.validate_param(param, level)
         if param.value == None:
             if level >= BPWarning:
-                pverrors.append(ValidationEvent(BPWarning, "Setting parameter is not initialized with any value", param, param.value))
+                e = ValidationEvent(BPWarning, "Setting parameter is not initialized with any value", param, param.value)
+                pverrors.append(e)
+                logr.warning(str(e))
         return pverrors
 
 ##====================================================================##

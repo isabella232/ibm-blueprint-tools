@@ -6,8 +6,13 @@ from blueprint.lib import event
 
 from bp_basic import blueprint_manifest
 
+from blueprint.lib.logger import logr
+# import logging
+# logr = logging.getLogger(__name__)
+
 #======================================================================
 def eprint(*args, **kwargs):
+    logr.error(*args)
     print(*args, file=sys.stderr, **kwargs)
 #======================================================================
 def main(argv):

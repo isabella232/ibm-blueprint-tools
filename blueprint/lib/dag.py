@@ -13,13 +13,27 @@
 # limitations under the License.
 
 from collections import defaultdict
+import copy
 
 class BlueprintGraph():
-    def __init__(self, module_count):
+    def __init__(self):
         self.dag = defaultdict(list)
-        self.module_count = module_count
+        self.nodes = []
+        # self.module_count = module_count
+
+    def copy(self):
+        newGraph = BlueprintGraph()
+        newGraph.dag = copy.deepcopy(self.dag)
+        newGraph.nodes = copy.deepcopy(self.nodes)
+        return newGraph
 
     def addEdge(self, source, dest):
+
+        if source not in self.nodes:
+            self.nodes.append(source)
+        if dest not in self.nodes:
+            self.nodes.append(dest)
+
         if not (dest in self.dag[source]):
             self.dag[source].append(dest)
 
@@ -72,6 +86,40 @@ class BlueprintGraph():
                     return path[::-1]
         return []
 
+    def printDAG(self):
+        print(str(self.dag))
+
+    def getAnIndependentNode(self):
+        dag_keys = self.dag.keys()
+        for n in self.nodes:
+            if n not in dag_keys:
+                return n
+            if len(self.dag[n]) == 0:
+                return n
+        raise ValueError("Circular dependencies in graph - No independent nodes")
+
+    def isEmpty(self):
+        return len(self.nodes) == 0
+
+    def popNode(self, inode):
+        found = False
+        nodes = self.dag.keys()
+        for n in nodes:
+            neighbours = self.dag[n]
+            if neighbours != None and len(neighbours) > 0:
+                if inode in neighbours:
+                    self.dag[n].remove(inode)
+                    found = True
+
+        
+        nodes = self.dag.keys()
+        if inode in nodes:
+            if len(self.dag[inode]) == 0:
+                del self.dag[inode]
+                found = True
+        
+        if found:
+            self.nodes.remove(inode)
 
 # g = BlueprintGraph(4)
 # g.addEdge("a", "b")
@@ -79,7 +127,11 @@ class BlueprintGraph():
 # g.addEdge("b", "c")
 # g.addEdge("c", "a")
 # g.addEdge("b", "d")
-# g.addEdge("d", "d")
+# g.addEdge("c", "d")
+# g.addEdge("b", "e")
+# g.addEdge("c", "f")
+# g.addEdge("a", "f")
+# g.addEdge("e", "f")
 # g.addEdge(0, 1)
 # g.addEdge(0, 2)
 # g.addEdge(1, 2)
@@ -92,3 +144,9 @@ class BlueprintGraph():
 #     print("Graph doesn't contain cycle")
 
 # print(g.getCyclicPath())
+# g.printDAG()
+# while not g.isEmply():
+#     n = g.getAnIndependentNode()
+#     print("Independent node: " + n)
+#     g.popNode(n)
+#     g.printDAG()

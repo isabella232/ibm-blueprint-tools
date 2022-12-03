@@ -21,10 +21,10 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-# # Implements parse_requirements as standalone functionality
-# with open("requirements.txt") as f:
-#     reqs = [l.strip('\n')
-#             for l in f if l.strip('\n') and not l.startswith('#')]
+# Implements parse_requirements as standalone functionality
+with open("requirements.txt") as f:
+    reqs = [l.strip('\n')
+            for l in f if l.strip('\n') and not l.startswith('#')]
 
 
 setup(
@@ -37,7 +37,7 @@ setup(
     author_email='nishu.bhart1@ibm.com',
     packages=find_packages(include=['blueprint', 'blueprint.*']),
     scripts=['bin/blueprint'],
-    install_requires=['yamale >= 4.0.4', 'PyYAML >= 6.0', 'ruamel.yaml >=  0.17.21'],
+    install_requires=reqs,
     include_package_data = True
     )
 

@@ -1,0 +1,108 @@
+name: "Blueprint Basic Example"
+type: "blueprint"
+schema_version: "1.0.0"
+description: "Simple blueprint to demonstrate module linking"
+inputs:
+  - name: var-1 # Hello
+  - name: var-2 # 12
+  - name: var-3 # test.txt
+  - name: var-4
+outputs:
+  - name: var-5
+    value: $module.mod-5.outputs.rendered_template
+  - name: var-6
+    value: $module.mod-3.outputs.var-11
+  - name: var-6
+    value: $module.mod-2.outputs.lf-var-4
+settings:
+  - name: TF_VERSION
+    value: 1.0
+  - name: set-1
+    value: "1.0"
+  - name: set-2
+    value: "water"
+modules:
+  - name: mod-1
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/cloudless"
+        git_branch: main
+    inputs:
+      - name: sample_var
+        value: $blueprint.inputs.var-1
+      - name: sleepy_time
+        value: $blueprint.inputs.var-2
+    settings:
+      - name: m-set-1
+        value: $blueprint.settings.set-1
+      - name: m-set-2
+        value: $blueprint.inputs.var-4
+    outputs:
+      - name: rendered_template
+      - name: cl-var-1
+      - name: cl-var-2
+  - name: mod-2
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/local-file"
+        git_branch: main
+    inputs:
+      - name: lf-var-1
+        value: $blueprint.inputs.var-3
+      - name: lf-var-2
+        value: $blueprint.inputs.var-2
+    outputs:
+      - name: lf-var-3
+      - name: lf-var-4
+    settings:
+      - name: m-set-1
+        value: $blueprint.inputs.var-4
+  - name: mod-3
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/medium"
+        git_branch: main
+    inputs:
+      - name: sample_var
+        value: $blueprint.inputs.var-1
+      - name: sleepy_time
+        value: $blueprint.inputs.var-2
+    outputs:
+      - name: var-11
+      - name: var-12
+  - name: mod-4
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/rg-tf"
+        git_branch: main
+    inputs:
+    outputs:
+      - name: resource_group_id
+      - name: resource_group_name
+    settings:
+      - name: m-set-4
+        value: $blueprint.settings.TF_VERSION
+      - name: m-set-5
+        value: $module.mod-1.outputs.cl-var-1
+  - name: mod-5
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/simple"
+        git_branch: main
+    inputs:
+      - name: s-var-2
+        value: $module.mod-3.outputs.var-11
+      - name: s-var-4
+        value: $module.mod-3.outputs.var-12
+    outputs:
+      - name: rendered_template
