@@ -18,9 +18,16 @@ import giturlparse
 from pathlib import Path
 import shutil
 
+from blueprint.lib import event
+
+from blueprint.lib.logger import logr
+# import logging
+# logr = logging.getLogger(__name__)
+
 class GitDownloadTemplate:
-    def __init__(self, git_url, mod_name):
+    def __init__(self, git_url, git_token, mod_name):
         self.git_url = git_url
+        self.git_token = git_token
         self.mod_name = mod_name
 
         cwd = os.getcwd()
@@ -35,9 +42,18 @@ class GitDownloadTemplate:
             new_git_url = git_url
         # print(mod_name)
         
+        if self.git_token != None:
+            access_token = self.git_token
+            new_git_url.replace('https://git', f'https://{access_token}:x-oauth-basic@git')
+
         # Clone all the files from the git repo
-        Repo.clone_from(new_git_url, mod_name)
-        self.working_dir = os.path.join(Path(cwd), mod_name)
+        try:
+            repo = Repo.clone_from(new_git_url, mod_name)
+            self.working_dir = os.path.join(Path(cwd), mod_name)
+        except Exception as e:
+            error = event.ValidationEvent(event.BPError, 'Error cloning the Git repository : ' + str(e), self)
+            logr.error(str(error))
+            raise ValueError(error)
 
         # Remove unnecessary files from the cloned git repo (in the local file-system)
         files = os.listdir(self.working_dir)

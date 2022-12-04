@@ -213,27 +213,6 @@ class BlueprintRunner:
 
         return errors
 
-    def output_modules(self):
-        errors = []
-        # print(self.bp.modules)
-        bp_graph = self.bp.build_dag()
-        while not self.bp.is_dag_empty(bp_graph):
-            mod_name = self.bp.dag_next_node(bp_graph)
-            if mod_name == None:
-                break
-
-            mr = self.module_runners[mod_name]
-            e = mr.output_module()
-
-            bp_graph.popNode(mod_name)
-            errors.append(e)
-        
-        if len(errors) > 0:
-            logr.debug("Errors found during output modules.  Count = " + str(len(errors)))
-
-        return errors
-
-
     def save_module_output_data(self, output_data):
         # output_data -> dict
         # self.module_data -> dict

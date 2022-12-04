@@ -11,6 +11,9 @@ The `blueprint dev-tools` is used for analyzing, validating and working with the
 
 Refer to IBM Cloud Schematics docs for more information about [blueprint](https://cloud.ibm.com/docs/schematics?topic=schematics-blueprint-intro).
 
+> Note: These dev-tools are not supported by IBM.  It can be used on as-is basis.
+> You can raise issues, in this repository; however, we encourage you to raise a pull-request.
+
 ---
 
 ## Installation
@@ -69,13 +72,17 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
 
       optional arguments:
         -h, --help                                          Show this help message and exit
-        -b BP_FILE, --bp-file BP_FILE                       Input blueprint yaml file
+        -b BP_FILE, --bp-file BP_FILE                       Input blueprint configuration yaml file
         -w WORKING_DIR, --working-dir WORKING_DIR           Working directory for validate command
+        -l LOG_FILE, --log-file LOG_FILE                    log file
+        -e {DEBUG,INFO,WARNING,ERROR}, 
+            --log-level {DEBUG,INFO,WARNING,ERROR}          log level
 
+  Refer to examples in the `examples/validate` folder. 
 
   #### Blueprint schema merge usage
 
-  Use the `blueprint merge` command to use a blueprint manifest (manifest.yaml file) to assemble the parts of the blueprint configuration file (blueprint.yaml)
+  Use the `blueprint merge` command to assemble the parts of the blueprint configuration file (blueprint.yaml) from a blueprint manifest (manifest.yaml file).
 
   > blueprint merge -h
 
@@ -85,7 +92,41 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
         -h, --help                                          Show this help message and exit
         -m MANIFEST_FILE, --manifest-file MANIFEST_FILE     Blueprint manifest file
         -w WORKING_DIR, --working-dir WORKING_DIR           Working directory for merge command
-        -o OUT_FILE, --out-file OUT_FILE                    Output blueprint yaml file
+        -o OUT_FILE, --out-file OUT_FILE                    Output blueprint configuration yaml file
+        -l LOG_FILE, --log-file LOG_FILE                    log file
+        -e {DEBUG,INFO,WARNING,ERROR}, 
+            --log-level {DEBUG,INFO,WARNING,ERROR}          log level
+  
+  Refer to examples in the `examples/merge` data folder.
+
+  #### Blueprint run usage
+
+  Use the `blueprint run` command to run the *blueprint configuration file* (blueprint.yaml), using the input data in the local machine.  
+  
+  The `blueprint run` will download the templates from the Git repositories in the local file system (one folder per module, in the working directory). Further, it uses the local Terraform CLI installation to run the `blueprint run -c init`, `blueprint run -c plan`, `blueprint run -c apply` & `blueprint run -c destroy` commands for all its modules.
+
+  The `--dry-run` option will _not_ download the template, instead it will generate a dummy Terraform template for each module (with inputs & outputs specified in the *blueprint configuration yaml* file).  You can use these dummy terraform templates to verify the data flows in the log files.
+
+  > blueprint run -h
+
+      usage: blueprint run [-h] -c {init,plan,apply,destroy,output} [-d] -b BP_FILE -i INPUT_FILE [-s SOURCE_DIR] [-w WORKING_DIR] [-o OUT_FILE]
+                     [-l LOG_FILE] [-e {DEBUG,INFO,WARNING,ERROR}]
+
+      optional arguments:
+        -h, --help                                          show this help message and exit
+        -c {init,plan,apply,destroy}, 
+            --sub-command {init,plan,apply,destroy}         blueprint command
+        -d, --dry-run                                       dry run the command, to preview outcome
+        -b BP_FILE, --bp-file BP_FILE                       input blueprint configuration yaml file
+        -i INPUT_FILE, --input-file INPUT_FILE              input blueprint data file
+        -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for blueprint and input data files
+        -w WORKING_DIR, --working-dir WORKING_DIR           working directory for intermediate files
+        -o OUT_FILE, --out-file OUT_FILE                    output blueprint file
+        -l LOG_FILE, --log-file LOG_FILE                    log file
+        -e {DEBUG,INFO,WARNING,ERROR}, 
+            --log-level {DEBUG,INFO,WARNING,ERROR}          log level
+
+Refer to examples in the `examples/run` folder.
 
 ### Blueprint Python library usage
 
@@ -117,12 +158,13 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
   | 1 | Schema validator    | `./examples/validate/app.py` | The `validate/app.py` illustrate the use of the `blueprint.schema.validate.validator.Validator` class to validate a blueprint configuration file.|
   | 2 | Schema merge        | `./examples/validate/app.py` | The `merge/app.py` illustrate the use of `blueprint.merge.load.BPLoader` class to load manifest file, to generate a blueprint configuration file. </br> The `./examples/validate/data-1/manifest.yaml` & `./examples/validate/data-2/manifest.yaml` are sample blueprint manifest file. |
   | 3 | Schema generate     | `./examples/generate/bp_basic.py` | The `generate/bp_basic.py` illustrate the use of `blueprint.schema` & `blueprint.circuit` library classes to generate a blueprint configuation file, using Python code |
-
+  | 4 | Blueprint run       | `./examples/run/app.py` | The `run/app.py` illustrate the ability to run & verify the blueprint behaviour locally. |
 ---
 ## Future roadmap
 
   The roadmap for this tootset include the following:
-  - blueprint-run: Support to run & test the blueprint configuration using the local Terraform CLI
+  - blueprint-gen: Support to generate blueprint configuration file from a simple bill-of-material
+  - blueprint-draw: Support to draw & visualize the blueprint configuration file
   - and more.. 
 
 ---

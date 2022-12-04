@@ -16,6 +16,7 @@ import yaml
 import sys
 
 from blueprint.lib.validator import BPError
+from blueprint.lib import event
 
 from blueprint.lib.logger import logr
 # import logging
@@ -49,7 +50,7 @@ class Source(dict):
 
     def to_yaml(self):
         # yaml.encoding = None
-        errors = self.validate(BPWarning)
+        errors = self.validate(event.BPWarning)
         eprint(errors)
         return yaml.dump(self, sort_keys=False)
 
@@ -75,10 +76,12 @@ class Source(dict):
 #========================================================================
 
 class GitSource:
-    def __init__(self, repo_url, branch=None):
+    def __init__(self, repo_url, branch=None, token=None):
         self.git_repo_url = repo_url
-        if(branch!=None):
+        if branch!=None:
             self.git_branch = branch
+        if token!=None:
+            self.git_token = token
 
     def __str__(self):
         return f'GitSource({self.git_repo_url}: {self.git_branch})'
@@ -91,10 +94,12 @@ class GitSource:
             del self.git_repo_url
         if self.git_branch == None:
             del self.git_branch
+        if self.git_token == None:
+            del self.git_token
 
     def to_yaml(self):
         # yaml.encoding = None
-        errors = self.validate(BPWarning)
+        errors = self.validate(event.BPWarning)
         eprint(errors)
         return yaml.dump(self, sort_keys=False)
 
@@ -140,7 +145,7 @@ class CatalogSource:
 
     def to_yaml(self):
         # yaml.encoding = None
-        errors = self.validate(BPWarning)
+        errors = self.validate(event.BPWarning)
         eprint(errors)
         return yaml.dump(self, sort_keys=False)
 

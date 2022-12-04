@@ -42,26 +42,6 @@ class PsuedoGenTemplate:
         self.generate_output_tf(mod.outputs)
         os.chdir(cwd)
 
-        # if p.resource != None:
-        #     new_git_url = git_url[0:git_url.find(p.resource)]
-        # else:
-        #     new_git_url = git_url
-        # Clone all the files from the git repo
-        # Repo.clone_from(new_git_url, mod.name)
-        # self.working_dir = os.path.join(Path(cwd), mod.name)
-
-        # Remove unnecessary files from the cloned git repo (in the local file-system)
-        # files = os.listdir(self.working_dir)
-        # for f in files:
-        #     if f != str(p.name):
-        #         d = Path(os.path.join(cwd, mod.name, f))
-        #         if d.exists() and d.is_dir():
-        #             shutil.rmtree(d)
-        #         if d.exists() and d.is_file():
-        #             # TODO: Don't remove the blueprint.tfstate & blueprint.tfvars files
-        #             os.remove(d)
-        # self.working_dir = os.path.join(Path(cwd), mod.name, p.name)
-        # os.chdir(cwd)
 
     def get_working_dir(self):
         return self.working_dir

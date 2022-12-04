@@ -1,21 +1,19 @@
-#-*-coding:utf-8-*-
-import datetime
+
+# (C) Copyright IBM Corp. 2022.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import logging
-import logging.config
 
 logr = logging.getLogger(__name__)
 # logging.basicConfig(filename = "logfile.log", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', encoding='utf-8', level=logging.INFO)
-
-# def setLevel(level="WARNING"):
-#     print("setting log level to " + level)
-#     if level == 'DEBUG':
-#         logr.setLevel(logging.DEBUG)
-#     elif level == 'INFO':
-#         logr.setLevel(logging.INFO)
-#     elif level == 'WARNING':
-#         logr.setLevel(logging.WARNING)
-#     elif level == 'ERROR':
-#         logr.setLevel(logging.ERROR)
-#     else:
-#         logr.setLevel(logging.WARNING)
-        

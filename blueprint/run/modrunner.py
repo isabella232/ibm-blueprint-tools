@@ -49,7 +49,8 @@ class ModuleRunner:
         # Download the git repo to the module folder
         cwd = os.getcwd()
         git_url = self.module.source.git.git_repo_url
-        downloader = git.GitDownloadTemplate(git_url, self.module.name)
+        git_token = self.module.source.git.git_token
+        downloader = git.GitDownloadTemplate(git_url, git_token, self.module.name)
         self.working_dir = downloader.get_working_dir()
 
     def setup_dry_module(self, module):
@@ -73,6 +74,7 @@ class ModuleRunner:
         print("==================================================================")
         print("Preparing for terraform init : " + str(self.module.name))
         tfvars_file, self.errors = self.prepare_tfvars()
+        self.set_env()
         tr = terraform.TerraformRunner(self.working_dir, var_file="blueprint.tfvars")
         print("Running terraform init : " + str(self.module.name))
         ret_code, stdout, stderr = tr.init()
@@ -88,7 +90,8 @@ class ModuleRunner:
         print("==================================================================")
         print("Preparing for terraform plan : " + str(self.module.name))
         tfvars_file, self.errors = self.prepare_tfvars()
-        if len(errors) == 0:
+        if len(self.errors) == 0:
+            self.set_env()
             tr = terraform.TerraformRunner(self.working_dir, var_file="blueprint.tfvars")
             print("Running terraform plan : " + str(self.module.name))
             ret_code, stdout, stderr = tr.plan()
@@ -122,6 +125,7 @@ class ModuleRunner:
                                 input_data[input.name] = input.value
                 self.parent.save_module_input_data(input_data)
 
+            self.set_env()
             tr = terraform.TerraformRunner(self.working_dir, var_file="blueprint.tfvars")
             print("Running terraform apply : " + str(self.module.name))
             ret_code, stdout, stderr = tr.apply()
@@ -156,6 +160,7 @@ class ModuleRunner:
         print("Preparing for terraform destroy : " + str(self.module.name))
         tfvars_file, self.errors = self.prepare_tfvars()
         if len(self.errors) == 0:
+            self.set_env()
             tr = terraform.TerraformRunner(self.working_dir, var_file="blueprint.tfvars")
             print("terraform destroy : " + str(self.module.name))
             ret_code, stdout, stderr = tr.destroy()
@@ -169,30 +174,8 @@ class ModuleRunner:
         print("==================================================================")
         return self.errors
 
-    def output_module(self):
-        
-        self.errors = []
-        print("==================================================================")
-        print("Preparing for terraform output : " + str(self.module.name))
-        tfvars_file, self.errors = self.prepare_tfvars()
-        if len(self.errors) == 0:
-            tr = terraform.TerraformRunner(self.working_dir, var_file="blueprint.tfvars")
-            print("terraform output : " + str(self.module.name))
-            ret_code, stdout, stderr = tr.output()
-            print("terraform output, return code: " + str(ret_code))
-            # print(stdout)
-            # eprint(stderr)
-        else:
-            self.errors.append(event.ValidationEvent(event.BPError, "Did not run output, since all the input parameters have not been dereferenced"))
-            print("Did not run terraform output : " + str(self.module.name))
-        
-        print("==================================================================")
-        return self.errors
-
-
     def prepare_tfvars(self):
 
-        self.errors = []
         inputs = self.module.inputs
         if inputs == None or inputs == "":
             return (None, self.errors)
@@ -217,3 +200,16 @@ class ModuleRunner:
             tfvars_file.write(tfvars_str)
 
         return (tfvars_str, self.errors)
+
+    def set_env(self):
+
+        settings = self.module.settings
+        if settings == None or settings == "":
+            return (None, self.errors)
+        
+        for env in settings:
+            if str(env.value).startswith("$"):
+                self.errors.append(event.ValidationEvent(event.BPWarning, "Parameter value is not dereferenced for " + env.name))
+            else:
+                os.environ[env.name] = str(env.value)
+        

@@ -46,32 +46,32 @@ def main():
     # generate = subparser.add_parser('generate')
     run = subparser.add_parser('run')
 
-    validate.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint yaml file', default=None)
+    validate.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint configuration yaml file', default=None)
     validate.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for input files', default=None)
     validate.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
-    validate.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log file', default=None)
+    validate.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
 
     merge.add_argument('-m', '--manifest-file', type=str, required=True, help='blueprint manifest file', default=None)
     merge.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for input files', default=None)
-    merge.add_argument('-o', '--out-file', type=str, required=True, help='output blueprint yaml file', default=None)
+    merge.add_argument('-o', '--out-file', type=str, required=True, help='output blueprint configuration yaml file', default=None)
     merge.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
-    merge.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log file', default=None)
+    merge.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
 
     # generate.add_argument('-p', '--python-file', type=str, required=True, help='Python file used to describe the blueprint yaml', default=None)
     # generate.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for python files', default='.')
-    # generate.add_argument('-o', '--out-file', type=str, required=False, help='Output blueprint yaml file', default=None)
+    # generate.add_argument('-o', '--out-file', type=str, required=False, help='Output blueprint configuration yaml file', default=None)
     # generate.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
-    # generate.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log file', default=None)
+    # generate.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
 
-    run.add_argument('-c', '--sub-command', choices= ['init', 'plan', 'apply', 'destroy', 'output'], required=True, help='blueprint command', default=None)
+    run.add_argument('-c', '--sub-command', choices= ['init', 'plan', 'apply', 'destroy'], required=True, help='blueprint command', default=None)
     run.add_argument('-d', '--dry-run', action='store_false', help='dry run the command, to preview outcome', default=None)
-    run.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint yaml file', default=None)
-    run.add_argument('-i', '--input-file', type=str, required=True, help='input data file', default=None)
+    run.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint configuration yaml file', default=None)
+    run.add_argument('-i', '--input-file', type=str, required=True, help='input blueprint data file', default=None)
     run.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for blueprint and input data files', default='.')
     run.add_argument('-w', '--working-dir', type=str, required=False, help='working directory for intermediate files', default='.')
     run.add_argument('-o', '--out-file', type=str, required=False, help='output blueprint file', default=None)
     run.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
-    run.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log file', default=None)
+    run.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
 
     # Execute the parse_args() method
     args = arg_parser.parse_args()
@@ -222,16 +222,6 @@ def main():
                 else:
                     logr.info("Successful Destroy")
                     print("Successful Destroy")
-            elif command == 'output':
-                print("Command > blueprint output")
-                logr.info("Command > blueprint output")
-                e = br.output_modules()
-                if len(e) > 0:
-                    logr.error("Output errors \n" + str(e))
-                    print("Ouput errors \n" + str(e))
-                else:
-                    logr.info("Successful Output")
-                    print("Successful Output")
             else:
                 logr.error("Invalid command name")
 
