@@ -1,0 +1,44 @@
+name: "Blueprint Basic Example"
+type: "blueprint"
+schema_version: "1.0.0"
+description: "Simple blueprint to demonstrate module linking"
+modules:
+  - name: mod-1
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/cloudless"
+        git_branch: main
+    inputs:
+      - name: smple_var5
+        value: test
+        description: test description
+  - name: mod-2
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/local-file"
+        git_branch: main
+  - name: mod-3
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/medium"
+        git_branch: main
+  - name: mod-4
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/rg-tf"
+        git_branch: main
+  - name: mod-5
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/simple"
+        git_branch: main

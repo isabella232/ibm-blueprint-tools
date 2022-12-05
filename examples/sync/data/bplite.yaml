@@ -1,0 +1,15 @@
+name: "Blueprint Basic Example"
+type: "blueprint"
+schema_version: "1.0.0"
+description: "Simple blueprint to demonstrate module linking"
+git_sources:
+  - git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/cloudless"
+    git_branch: main
+  - git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/local-file"
+    git_branch: main
+  - git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/medium"
+    git_branch: main
+  - git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/rg-tf"
+    git_branch: main
+  - git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/simple"
+    git_branch: main

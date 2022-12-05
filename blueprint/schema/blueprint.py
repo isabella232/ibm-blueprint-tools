@@ -76,36 +76,40 @@ class Blueprint(dict):
     def remove_null_entries(self):
         if self.name == None:
             del self.name
-        if self.type == None:
+        if hasattr(self, 'type') and self.type == None:
             del self.type
-        if self.schema_version == None:
+        if hasattr(self, 'schema_version') and self.schema_version == None:
             del self.schema_version
-        if self.description == None:
+        if hasattr(self, 'description') and self.description == None:
             del self.description
 
-        if self.inputs == None or (self.inputs != None and len(self.inputs) == 0):
-            del self.inputs
-        else:
-            for p in self.inputs:
-                p.remove_null_entries()
+        if hasattr(self, 'inputs'):
+            if self.inputs == None or (self.inputs != None and len(self.inputs) == 0):
+                del self.inputs
+            else:
+                for p in self.inputs:
+                    p.remove_null_entries()
 
-        if self.outputs == None or (self.outputs != None and len(self.outputs) == 0):
-            del self.outputs
-        else:
-            for p in self.outputs:
-                p.remove_null_entries()
+        if hasattr(self, 'outputs'):
+            if self.outputs == None or (self.outputs != None and len(self.outputs) == 0):
+                del self.outputs
+            else:
+                for p in self.outputs:
+                    p.remove_null_entries()
 
-        if self.settings == None or (self.settings != None and len(self.settings) == 0):
-            del self.settings
-        else:
-            for p in self.settings:
-                p.remove_null_entries()
+        if hasattr(self, 'settings'):
+            if self.settings == None or (self.settings != None and len(self.settings) == 0):
+                del self.settings
+            else:
+                for p in self.settings:
+                    p.remove_null_entries()
 
-        if self.modules == None or (self.modules != None and len(self.modules) == 0):
-            del self.modules
-        else:
-            for m in self.modules:
-                m.remove_null_entries()
+        if hasattr(self, 'modules'):
+            if self.modules == None or (self.modules != None and len(self.modules) == 0):
+                del self.modules
+            else:
+                for m in self.modules:
+                    m.remove_null_entries()
 
     def to_yaml(self, stream = None):
         self.remove_null_entries()

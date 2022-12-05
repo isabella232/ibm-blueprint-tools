@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os
-from git import Repo
 import giturlparse
 from pathlib import Path
 import shutil

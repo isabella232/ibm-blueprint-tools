@@ -17,3 +17,4 @@ include blueprint/schema/*
 include blueprint/circuit/*
 include blueprint/merge/*
 include blueprint/validate/*
+include blueprint/sync/*

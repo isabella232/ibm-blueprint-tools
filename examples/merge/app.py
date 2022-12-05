@@ -1,7 +1,7 @@
 import getopt
 import sys
 
-from blueprint.merge import BPLoader
+from blueprint.merge import bpload
 
 from blueprint.lib.logger import logr
 # import logging
@@ -17,11 +17,11 @@ def main(argv):
    try:
       opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
    except getopt.GetoptError:
-      print('bpmerge.py -i <input_manifest_file> -o output_blueprint_file')
+      print('bpmerge.py -i <input_manifest_file> -o <output_blueprint_file>')
       sys.exit(2)
    for opt, arg in opts:
       if opt == '-h':
-         print('bpmerge.py -i <input_manifest_file>  -o output_blueprint_file')
+         print('bpmerge.py -i <input_manifest_file>  -o <output_blueprint_file>')
          sys.exit()
       elif opt in ("-i", "--ifile"):
          input_manifest_file = arg
@@ -31,7 +31,7 @@ def main(argv):
    if input_manifest_file == None or input_manifest_file == '':
       input_manifest_file = 'data-1/manifest.yaml'
 
-   loader = BPLoader(input_manifest_file)
+   loader = bpload.BPLoader(input_manifest_file)
    errors = loader.get_errors()
    if len(errors) > 0:
       eprint(errors)

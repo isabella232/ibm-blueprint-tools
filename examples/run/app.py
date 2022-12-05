@@ -3,8 +3,6 @@ import sys
 import getopt
 import logging
 
-# logging.basicConfig(level=logging.DEBUG)
-
 from blueprint.run import bprunner
 
 from blueprint.lib.logger import logr

@@ -22,8 +22,12 @@ blueprint:
 import os
 import sys
 import argparse
+from os.path import exists
+from pathlib import Path
+
 from blueprint.validate import validator
-from blueprint.merge import load
+from blueprint.merge import bpload
+from blueprint.sync import bpsync
 from blueprint.run import bprunner
 
 from blueprint.lib.logger import logr
@@ -44,6 +48,7 @@ def main():
     validate = subparser.add_parser('validate')
     merge = subparser.add_parser('merge')
     # generate = subparser.add_parser('generate')
+    sync = subparser.add_parser('sync')
     run = subparser.add_parser('run')
 
     validate.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint configuration yaml file', default=None)
@@ -51,7 +56,7 @@ def main():
     validate.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
     validate.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
 
-    merge.add_argument('-m', '--manifest-file', type=str, required=True, help='blueprint manifest file', default=None)
+    merge.add_argument('-m', '--manifest-file', type=str, required=True, help='input blueprint manifest file', default=None)
     merge.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for input files', default=None)
     merge.add_argument('-o', '--out-file', type=str, required=True, help='output blueprint configuration yaml file', default=None)
     merge.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
@@ -63,12 +68,19 @@ def main():
     # generate.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
     # generate.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
 
+    sync.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint lite configuration yaml file', default=None)
+    sync.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for input files', default=None)
+    sync.add_argument('-o', '--out-file', type=str, required=True, help='output blueprint configuration yaml file', default=None)
+    sync.add_argument('-w', '--working-dir', type=str, required=True, help='working directory for the intermediate files', default='.')
+    sync.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
+    sync.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
+
     run.add_argument('-c', '--sub-command', choices= ['init', 'plan', 'apply', 'destroy'], required=True, help='blueprint command', default=None)
     run.add_argument('-d', '--dry-run', action='store_false', help='dry run the command, to preview outcome', default=None)
     run.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint configuration yaml file', default=None)
     run.add_argument('-i', '--input-file', type=str, required=True, help='input blueprint data file', default=None)
     run.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for blueprint and input data files', default='.')
-    run.add_argument('-w', '--working-dir', type=str, required=False, help='working directory for intermediate files', default='.')
+    run.add_argument('-w', '--working-dir', type=str, required=True, help='working directory for intermediate files', default='.')
     run.add_argument('-o', '--out-file', type=str, required=False, help='output blueprint file', default=None)
     run.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
     run.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
@@ -110,7 +122,23 @@ def main():
             bp_filename = args.bp_file
             source_dir = args.source_dir
             if source_dir:
+                if not os.path.exists(source_dir):
+                    print('Error in source_dir, or directory does not exists')
+                    logr.error('Error in source_dir, or directory does not exists')
+                    return -1
+                source_path = Path(source_dir)
+                if not source_path.is_dir():
+                    print('Error in source_dir, not a directory')
+                    logr.error('Error in source_dir, not a directory')
+                    return -1
+
+                source_dir = os.path.abspath(source_dir)
                 bp_filename = os.path.join(source_dir, bp_filename)
+                if not os.path.exists(bp_filename):
+                    print('Invalid source file location for blueprint : ' + bp_filename)
+                    logr.error('Invalid source file location for blueprint : ' + bp_filename)
+                    return -1
+
             logr.info("Validate - " + bp_filename)
             print("Validate - " + bp_filename)
             validator.Validator(bp_filename)
@@ -122,14 +150,33 @@ def main():
             bp_manifest = args.manifest_file
             output_blueprint_file = args.out_file
             source_dir = args.source_dir
-            if args.source_dir:
+
+            if source_dir:
+                if not os.path.exists(source_dir):
+                    print('Error in source_dir, or directory does not exists')
+                    logr.error('Error in source_dir, or directory does not exists')
+                    return -1
+                source_path = Path(source_dir)
+                if not source_path.is_dir():
+                    print('Error in source_dir, not a directory')
+                    logr.error('Error in source_dir, not a directory')
+                    return -1
+
+                source_dir = os.path.abspath(source_dir)
                 bp_manifest = os.path.join(source_dir, bp_manifest)
-                output_blueprint_file = os.path.join(source_dir, output_blueprint_file)
+                if not os.path.exists(bp_manifest):
+                    print('Invalid source file location for blueprint manifest : ' + bp_manifest)
+                    logr.error('Invalid source file location for blueprint manifest : ' + bp_manifest)
+                    return -1
+                
+                if output_blueprint_file != None:
+                    output_blueprint_file = os.path.join(source_dir, output_blueprint_file)
+                
 
             print("Merge - " + bp_manifest)
             logr.info("Merge - " + bp_manifest)
 
-            loader = load.BPLoader(bp_manifest)
+            loader = bpload.BPLoader(bp_manifest)
             errors = loader.get_errors()
             if len(errors) > 0:
                 eprint(errors)
@@ -159,7 +206,61 @@ def main():
     #         manifest = importlib.import_module(bp_filename)
     #         bp, errors = manifest.blueprint_manifest()
     #         bp.to_yaml_str()
-    
+
+    elif args.command == 'sync':
+        if args.bp_file:
+            bp_filename = args.bp_file
+            source_dir = args.source_dir
+            output_blueprint_file = args.out_file
+            working_dir = args.working_dir
+
+            if source_dir:
+                if not os.path.exists(source_dir):
+                    print('Error in source_dir, or directory does not exists')
+                    logr.error('Error in source_dir, or directory does not exists')
+                    return -1
+                source_path = Path(source_dir)
+                if not source_path.is_dir():
+                    print('Error in source_dir, not a directory')
+                    logr.error('Error in source_dir, not a directory')
+                    return -1
+
+                source_dir = os.path.abspath(source_dir)
+                bp_filename = os.path.join(source_dir, bp_filename)
+                if not os.path.exists(bp_filename):
+                    print('Invalid source file location for blueprint : ' + bp_filename)
+                    logr.error('Invalid source file location for blueprint : ' + bp_filename)
+                    return -1
+                
+                if output_blueprint_file != None:
+                    output_blueprint_file = os.path.join(working_dir, output_blueprint_file)
+
+            if working_dir:
+                working_dir = os.path.abspath(working_dir)
+                working_path = Path(working_dir)
+                if not os.path.exists(working_dir):
+                    logr.info("Creating the working directory: " + working_dir)
+                    working_path.mkdir(parents=True, exist_ok=True)                
+
+            print("Sync - " + bp_filename)
+            logr.info("Sync - " + bp_filename)
+
+            morph = bpsync.BlueprintMorphius(blueprint_lite_file = bp_filename, working_dir = working_dir)
+            bp = morph.sync()
+            errors = morph.get_errors()
+            if len(errors) > 0:
+                eprint(errors)
+                return -1
+
+            out_yaml_str = bp.to_yaml_str()
+            logr.debug(out_yaml_str)
+
+            if output_blueprint_file == None or output_blueprint_file == '':
+                print(out_yaml_str)
+            else:
+                with open(output_blueprint_file, 'w') as yaml_file:
+                    yaml_file.write(out_yaml_str)
+
     elif args.command == 'run':
         if args.sub_command and args.bp_file and args.input_file :
             command = args.sub_command
@@ -167,11 +268,40 @@ def main():
             bp_filename = args.bp_file
             input_file = args.input_file
             source_dir = args.source_dir
-            if source_dir != None:
-                bp_filename = os.path.join(source_dir, bp_filename)
-                input_file = os.path.join(source_dir, input_file)
             working_dir = args.working_dir
             output_blueprint_file = args.out_file
+
+            if source_dir:
+                if not os.path.exists(source_dir):
+                    print('Error in source_dir, or directory does not exists')
+                    logr.error('Error in source_dir, or directory does not exists')
+                    return -1
+                source_path = Path(source_dir)
+                if not source_path.is_dir():
+                    print('Error in source_dir, not a directory')
+                    logr.error('Error in source_dir, not a directory')
+                    return -1
+
+                source_dir = os.path.abspath(source_dir)
+                bp_filename = os.path.join(source_dir, bp_filename)
+                if not os.path.exists(bp_filename):
+                    print('Invalid source file location for blueprint : ' + bp_filename)
+                    logr.error('Invalid source file location for blueprint : ' + bp_filename)
+                    return -1
+
+                input_file = os.path.join(source_dir, input_file)
+                if not os.path.exists(input_file):
+                    print('Invalid input data file location for blueprint : ' + input_file)
+                    logr.error('Invalid input data file location for blueprint : ' + input_file)
+                    return -1
+
+            if working_dir:
+                working_dir = os.path.abspath(working_dir)
+                working_path = Path(working_dir)
+                if not os.path.exists(working_dir):
+                    logr.info("Creating the working directory: " + working_dir)
+                    working_path.mkdir(parents=True, exist_ok=True)                
+
             if output_blueprint_file != None:
                 output_blueprint_file = os.path.join(working_dir, output_blueprint_file)
 

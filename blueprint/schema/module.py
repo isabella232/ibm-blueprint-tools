@@ -216,6 +216,36 @@ class Module(dict):
                 if p.value == value_ref:
                     return p.name
         return None
+    
+    def get_input_var_names(self):
+        var_names = []
+        if self.inputs != None and len(self.inputs) == 0:
+            return var_names
+
+        for p in self.inputs:
+            var_names.append(p.name)
+        
+        return var_names
+
+    def get_output_var_names(self):
+        var_names = []
+        if self.outputs != None and len(self.outputs) == 0:
+            return var_names        
+
+        for p in self.outputs:
+            var_names.append(p.name)
+        
+        return var_names
+
+    def get_setting_var_names(self):
+        var_names = []
+        if self.settings != None and len(self.settings) == 0:
+            return var_names        
+
+        for p in self.settings:
+            var_names.append(p.name)
+        
+        return var_names
 
     def set_source(self, source):
         errors = source.validate(BPError)
@@ -258,6 +288,28 @@ class Module(dict):
                 self.settings.append(param)
         return errors
 
+    def get_input_attr(self, param_name, param_attr):
+        for p in self.inputs:
+            if p.name == param_name:
+                if hasattr(p, param_attr):
+                    return getattr(p, param_attr)
+                else:
+                    return None
+        return None
+
+    def set_input_attr(self, param_name, param_attr, param_value):
+        errors = []
+        param_copy = []
+        for p in self.inputs:
+            if p.name == param_name:
+                setattr(p, param_attr, param_value)
+            e = p.validate(BPError)
+            if len(e) == 0:
+                param_copy.append(p)
+            errors += e
+        self.inputs = param_copy
+        return errors
+
     def set_input_value(self, param_name, param_value):
         errors = []
         param_copy = []
@@ -284,6 +336,28 @@ class Module(dict):
         self.inputs = param_copy
         return errors
 
+    def get_output_attr(self, param_name, param_attr):
+        for p in self.outputs:
+            if p.name == param_name:
+                if hasattr(p, param_attr):
+                    return getattr(p, param_attr)
+                else:
+                    return None
+        return None
+
+    def set_output_attr(self, param_name, param_attr, param_value):
+        errors = []
+        param_copy = []
+        for p in self.outputs:
+            if p.name == param_name:
+                setattr(p, param_attr, param_value)
+            e = p.validate(BPError)
+            if len(e) == 0:
+                param_copy.append(p)
+            errors += e
+        self.outputs = param_copy
+        return errors
+
     def set_output_value(self, param_name, param_value):
         errors = []
         param_copy = []
@@ -308,6 +382,28 @@ class Module(dict):
                 param_copy.append(p)
             errors += e
         self.outputs = param_copy
+        return errors
+
+    def get_setting_attr(self, param_name, param_attr):
+        for p in self.settings:
+            if p.name == param_name:
+                if hasattr(p, param_attr):
+                    return getattr(p, param_attr)
+                else:
+                    return None
+        return None
+
+    def set_setting_attr(self, param_name, param_attr, param_value):
+        errors = []
+        param_copy = []
+        for p in self.settings:
+            if p.name == param_name:
+                setattr(p, param_attr, param_value)
+            e = p.validate(BPError)
+            if len(e) == 0:
+                param_copy.append(p)
+            errors += e
+        self.settings = param_copy
         return errors
 
     def set_setting_value(self, param_name, param_value):

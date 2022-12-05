@@ -14,13 +14,10 @@
 
 import os
 import sys
-from blueprint.run import git
-from blueprint.run import local
-
-from blueprint.schema import blueprint
+from blueprint.lib import git
+from blueprint.lib import local
+from blueprint.lib import terraform
 from blueprint.lib import event
-
-from blueprint.run import terraform
 
 from blueprint.lib.logger import logr
 # import logging
