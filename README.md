@@ -160,7 +160,7 @@ Refer to examples in the `examples/run` folder.
   The library includes the following schema elements, that can be used to define your blueprint manifest
   * schema.blueprint.Blueprint
   * schema.module.Module
-  * schema.source.Source
+  * schema.source.TemplateSource
   * schema.source.GitSource
   * schema.source.CatalogSource
   * schema.param.Input
@@ -181,7 +181,7 @@ Refer to examples in the `examples/run` folder.
   |   | Example             | Folder     | Description           |
   |---|---------------------|------------|-----------------------|
   | 1 | Schema validator    | `./examples/validate/app.py` | The `validate/app.py` illustrate the use of the `blueprint.schema.validate.validator.Validator` class to validate a blueprint configuration file.|
-  | 2 | Schema merge        | `./examples/validate/app.py` | The `merge/app.py` illustrate the use of `blueprint.merge.bpload.BPLoader` class to load manifest file, to generate a blueprint configuration file. </br> The `./examples/validate/data-1/manifest.yaml` & `./examples/validate/data-2/manifest.yaml` are sample blueprint manifest file. |
+  | 2 | Schema merge        | `./examples/validate/app.py` | The `merge/app.py` illustrate the use of `blueprint.merge.manifest.BlueprintManifest` class to load manifest file, to generate a blueprint configuration file. </br> The `./examples/validate/data-1/manifest.yaml` & `./examples/validate/data-2/manifest.yaml` are sample blueprint manifest file. |
   | 3 | Schema sync         | `./examples/sync/app.py` | The `sync/app.py` illustrate the ability to sync the module definitions (inputs & outputs) in the blueprint configuration file, with the corresponding definition the Terraform repository. |
   | 4 | Schema generate     | `./examples/generate/bp_basic.py` | The `generate/bp_basic.py` illustrate the use of `blueprint.schema` & `blueprint.circuit` library classes to generate a blueprint configuation file, using Python code |
   | 5 | Blueprint run       | `./examples/run/app.py` | The `run/app.py` illustrate the ability to run & verify the blueprint behaviour locally. |

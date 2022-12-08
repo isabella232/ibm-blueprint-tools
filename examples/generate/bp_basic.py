@@ -9,7 +9,6 @@ def new_blueprint():
     bp = blueprint.Blueprint(
         name        = "Blueprint Basic Example",
         description = "Simple blueprint to demonstrate module linking",
-        type        = blueprint.BlueprintType,
     )
 
     bp_storage_name = param.Input(name = "bp_storage_name")
@@ -47,7 +46,7 @@ def new_cos_module():
     cos_id                 = param.Output(name = "cos_id")
     cos_crn                = param.Output(name = "cos_crn")
 
-    storage_mod_source = source.Source(
+    storage_mod_source = source.TemplateSource(
                     type = "github", 
                     git = source.GitSource(
                         repo_url = "https://github.com/Cloud-Schematics/blueprint-example-modules/tree/main/IBM-Storage",
@@ -78,7 +77,7 @@ def new_rg_module():
     resource_group_name       = param.Output(name = "resource_group_name")
     resource_group_id         = param.Output(name = "resource_group_id")
 
-    rg_mod_source = source.Source(
+    rg_mod_source = source.TemplateSource(
                     type = "github", 
                     git = source.GitSource(
                         repo_url = "https://github.com/Cloud-Schematics/blueprint-example-modules/tree/main/IBM-DefaultResourceGroup",

@@ -3,6 +3,7 @@ import os
 from os.path import exists
 
 from blueprint.lib import event
+from blueprint.schema import blueprint
 
 from bp_basic import blueprint_manifest
 
@@ -57,7 +58,7 @@ def main(argv):
                     print("Loading blueprint file " + filename + " ...")
                     with open(filename) as f:
                         yaml_str = f.read()
-                        bp.from_yaml_str(yaml_str)
+                        bp = blueprint.Blueprint.from_yaml_str(yaml_str)
                     print("Success loading blueprint file " + filename + ". \nValidating ...")
                     errors = bp.validate(event.BPWarning)
                     if len(errors) == 0:

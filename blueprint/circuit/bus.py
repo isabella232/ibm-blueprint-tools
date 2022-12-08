@@ -96,33 +96,27 @@ class Wire:
         errors = []
         if isinstance(self.from_node, blueprint.Blueprint):
             self.from_node_type = "blueprint.Blueprint"
-            try:
-                self.from_param_ref = self.from_node.input_ref(self.from_param)
-                self.from_connector_type = Input
-            except: 
-                try:
-                    self.from_param_ref = self.from_node.output_ref(self.from_param)
-                    self.from_connector_type = Output
-                except:
-                    try:
-                        self.from_param_ref = self.from_node.setting_ref(self.from_param)
-                        self.from_connector_type = Setting
-                    except:
+            (self.from_param_ref, err) = self.from_node.input_ref(self.from_param)
+            self.from_connector_type = Input
+            if err != None: 
+                (self.from_param_ref, err) = self.from_node.output_ref(self.from_param)
+                self.from_connector_type = Output
+                if err != None: 
+                    (self.from_param_ref, err) = self.from_node.setting_ref(self.from_param)
+                    self.from_connector_type = Setting
+                    if err != None:
                         errors.append(event.ValidationEvent(event.BPError, "Invalid 'from' parameter name in the wire", self))
         elif isinstance(self.from_node, module.Module):
             self.from_node_type = "module.Module"
-            try:
-                self.from_param_ref  = self.from_node.input_ref(self.from_param)
-                self.from_connector_type = Input
-            except: 
-                try:
-                    self.from_param_ref = self.from_node.output_ref(self.from_param)
-                    self.from_connector_type = Output
-                except:
-                    try:
-                        self.from_param_ref  = self.from_node.setting_ref(self.from_param)
-                        self.from_connector_type = Setting
-                    except:
+            (self.from_param_ref, err)  = self.from_node.input_ref(self.from_param)
+            self.from_connector_type = Input
+            if err != None: 
+                (self.from_param_ref, err) = self.from_node.output_ref(self.from_param)
+                self.from_connector_type = Output
+                if err != None: 
+                    (self.from_param_ref, err)  = self.from_node.setting_ref(self.from_param)
+                    self.from_connector_type = Setting
+                    if err != None: 
                         errors.append(event.ValidationEvent(event.BPError, "Invalid 'from' parameter name in the wire", self))
         else:
             self.from_node_type = "Unknown"
@@ -130,33 +124,27 @@ class Wire:
 
         if isinstance(self.to_node, blueprint.Blueprint):
             self.to_node_type = "blueprint.Blueprint"
-            try:
-                self.to_param_ref = self.to_node.input_ref(self.to_param)
-                self.to_connector_type = Input
-            except: 
-                try:
-                    self.to_param_ref = self.to_node.output_ref(self.to_param)
-                    self.to_connector_type = Output
-                except:
-                    try:
-                        self.to_param_ref = self.to_node.setting_ref(self.to_param)
-                        self.to_connector_type = Setting
-                    except:
+            (self.to_param_ref, err) = self.to_node.input_ref(self.to_param)
+            self.to_connector_type = Input
+            if err != None: 
+                (self.to_param_ref, err) = self.to_node.output_ref(self.to_param)
+                self.to_connector_type = Output
+                if err != None: 
+                    (self.to_param_ref, err) = self.to_node.setting_ref(self.to_param)
+                    self.to_connector_type = Setting
+                    if err != None: 
                         errors.append(event.ValidationEvent(event.BPError, "Invalid 'to' parameter name in the wire", self))
         elif isinstance(self.to_node, module.Module):
             self.to_node_type = "module.Module"
-            try:
-                self.to_param_ref = self.to_node.input_ref(self.to_param)
-                self.to_connector_type = Input
-            except: 
-                try:
-                    self.to_param_ref = self.to_node.output_ref(self.to_param)
-                    self.to_connector_type = Output
-                except:
-                    try:
-                        self.to_param_ref = self.to_node.setting_ref(self.to_param)
-                        self.to_connector_type = Setting
-                    except:
+            (self.to_param_ref, err) = self.to_node.input_ref(self.to_param)
+            self.to_connector_type = Input
+            if err != None: 
+                (self.to_param_ref, err) = self.to_node.output_ref(self.to_param)
+                self.to_connector_type = Output
+                if err != None: 
+                    (self.to_param_ref, err) = self.to_node.setting_ref(self.to_param)
+                    self.to_connector_type = Setting
+                    if err != None: 
                         errors.append(event.ValidationEvent(event.BPError, "Invalid 'to' parameter name in the wire", self))
         else:
             self.to_node_type = "Unknown"

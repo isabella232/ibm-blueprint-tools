@@ -1,7 +1,7 @@
 import getopt
 import sys
 
-from blueprint.merge import bpload
+from blueprint.merge import manifest
 
 from blueprint.lib.logger import logr
 # import logging
@@ -15,29 +15,34 @@ def main(argv):
    input_manifest_file = ''
    output_blueprint_file = ''
    try:
-      opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
+      opts, args = getopt.getopt(argv,"hb:o:",["bfile=","ofile="])
    except getopt.GetoptError:
-      print('bpmerge.py -i <input_manifest_file> -o <output_blueprint_file>')
+      print('bpmerge.py -b <input_manifest_file> -o <output_blueprint_file>')
       sys.exit(2)
    for opt, arg in opts:
       if opt == '-h':
-         print('bpmerge.py -i <input_manifest_file>  -o <output_blueprint_file>')
+         print('Usage:')
+         print('  bpmerge.py -b <input_manifest_file>  -o <output_blueprint_file>')
          sys.exit()
-      elif opt in ("-i", "--ifile"):
+      elif opt in ("-b", "--bfile"):
          input_manifest_file = arg
       elif opt in ("-o", "--ofile"):
          output_blueprint_file = arg
    
-   if input_manifest_file == None or input_manifest_file == '':
-      input_manifest_file = 'data-1/manifest.yaml'
+   # if input_manifest_file == None or input_manifest_file == '':
+   #    input_manifest_file = './examples/merge/data-1/manifest.yaml'
 
-   loader = bpload.BPLoader(input_manifest_file)
-   errors = loader.get_errors()
+   if len(input_manifest_file) == 0:
+         print('Usage:')
+         print('  bpmerge.py -b <input_manifest_file>  -o <output_blueprint_file>')
+         sys.exit()
+
+   bp_manifest = manifest.BlueprintManifest.from_yaml_file(input_manifest_file)
+   (bp, errors) = bp_manifest.generate_blueprint()
    if len(errors) > 0:
       eprint(errors)
-      return -1
 
-   out_yaml_str = loader.to_yaml_str()
+   out_yaml_str = bp.to_yaml_str()
 
    if output_blueprint_file == None or output_blueprint_file == '':
       print(out_yaml_str)

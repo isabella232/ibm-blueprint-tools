@@ -14,12 +14,13 @@
 
 import yaml
 import sys
+from typing import List
 
-import blueprint.schema.param as param
-import blueprint.schema.source as src
+from blueprint.schema import param
+from blueprint.schema import source as src
 
-from blueprint.lib.validator import ModuleValidator
-from blueprint.lib.validator import BPError
+from blueprint.lib import validator
+from blueprint.lib import event
 
 from blueprint.lib.logger import logr
 # import logging
@@ -33,7 +34,22 @@ def eprint(*args, **kwargs):
 TerraformType = "terraform"
 
 class Module(dict):
-    def __init__(self, name, type=TerraformType, source={}, inputs=None, outputs=None, settings=None):
+    def __init__(self, 
+                    name: str                       = "__init__", 
+                    type: str                       = TerraformType, 
+                    source: src.TemplateSource              = {}, 
+                    inputs: List[param.Input]       = None, 
+                    outputs: List[param.Output]     = None, 
+                    settings: List[param.Setting]   = None):
+        """Module schema.
+
+        :param name: Name of the module
+        :param type: Type of module (default is `terraform`)
+        :param source: Source of module - Git source or Catalog source
+        :param inputs: List of input parameters (type param.Input)
+        :param outputs: List of output parameters (type param.Output)
+        :param settings: List of envitonment settings (type param.Setting)
+        """
         self.name = name
         self.module_type = type
         self.source = source
@@ -43,6 +59,12 @@ class Module(dict):
         self.set_inputs(inputs)
         self.set_outputs(outputs)
         self.set_settings(settings)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.name = "__init__"
 
     def __str__(self):
         txt = "Modules("
@@ -59,71 +81,88 @@ class Module(dict):
         return self.__str__()
 
     def remove_null_entries(self):
-        if self.name == None:
+        if hasattr(self, 'name') and self.name == None:
             del self.name
-        if self.module_type == None:
+        if hasattr(self, 'module_type') and self.module_type == None:
             del self.module_type
-        if self.source == None:
+        if hasattr(self, 'source') and self.source == None:
             del self.source
 
-        if self.inputs == None or (self.inputs != None and len(self.inputs) == 0):
-            del self.inputs
-        else:
-            for p in self.inputs:
-                p.remove_null_entries()
+        if hasattr(self, 'inputs'):
+            if self.inputs == None or (self.inputs != None and len(self.inputs) == 0):
+                del self.inputs
+            else:
+                for p in self.inputs:
+                    p.remove_null_entries()
 
-        if self.outputs == None or (self.outputs != None and len(self.outputs) == 0):
-            del self.outputs
-        else:
-            for p in self.outputs:
-                p.remove_null_entries()
+        if hasattr(self, 'outputs'):
+            if self.outputs == None or (self.outputs != None and len(self.outputs) == 0):
+                del self.outputs
+            else:
+                for p in self.outputs:
+                    p.remove_null_entries()
 
-        if self.settings == None or (self.settings != None and len(self.settings) == 0):
-            del self.settings
-        else:
-            for p in self.settings:
-                p.remove_null_entries()
+        if hasattr(self, 'settings'):
+            if self.settings == None or (self.settings != None and len(self.settings) == 0):
+                del self.settings
+            else:
+                for p in self.settings:
+                    p.remove_null_entries()
 
     def to_yaml(self):
         # yaml.encoding = None
-        errors = self.validate(BPError)
+        errors = self.validate(event.BPError)
         eprint(errors)
         return yaml.dump(self, sort_keys=False)
 
     @classmethod
-    def from_json(cls, data):
-        name = data['name']
+    def from_yaml(cls, yaml_data):
+        
+        if isinstance(yaml_data, Module):
+            return yaml_data
+
+        name = yaml_data['name']
         try:
-            module_type = data['module_type']
+            module_type = yaml_data['module_type']
         except KeyError:
             module_type = None
         try:
-            source = src.Source.from_json(data['source'])
+            source = src.TemplateSource.from_yaml(yaml_data['source'])
         except KeyError:
             source = None
         try:
             inputs = []
-            for p in data['inputs']:
-                inputs.append(param.Input.from_json(p))
+            for p in yaml_data['inputs']:
+                inputs.append(param.Input.from_yaml(p))
         except (KeyError, UnboundLocalError, TypeError):
             inputs = None
         try:
             outputs = []
-            for p in data['outputs']:
-                outputs.append(param.Output.from_json(p))
+            for p in yaml_data['outputs']:
+                outputs.append(param.Output.from_yaml(p))
         except (KeyError, UnboundLocalError, TypeError):
             outputs = None
         try:
             settings = []
-            for p in data['settings']:
-                settings.append(param.Setting.from_json(p))
+            for p in yaml_data['settings']:
+                settings.append(param.Setting.from_yaml(p))
         except (KeyError, UnboundLocalError, TypeError):
             settings = None
         
         return cls(name, module_type, source, inputs, outputs, settings)
 
-    def validate(self, level=BPError):
-        mod_validator = ModuleValidator()
+
+    @classmethod
+    def from_yaml_list(cls, yaml_data_list):
+        mods = []
+
+        for yaml_data in yaml_data_list:
+            mods.append(Module.from_yaml(yaml_data))
+
+        return mods
+
+    def validate(self, level=event.BPError):
+        mod_validator = validator.ModuleValidator()
         return mod_validator.validate_module(self, level)
 
     def input_value_refs(self):
@@ -154,26 +193,29 @@ class Module(dict):
         self.set_inputs(m.inputs)
         self.set_outputs(m.outputs)
         self.set_settings(m.settings)
-        return self.validate(BPError)
+        return self.validate(event.BPError)
 
     def module_ref(self, key):
-        try:
-            return self.input_ref(key)
-        except:
-            try:
-                return self.output_ref(key)
-            except:
-                try:
-                    return self.setting_ref(key)
-                except:
-                    raise ValueError('Module input parameter not found')
+        (mod_vars, err) = self.input_ref(key)
+        if err != None:
+            (mod_vars, err) = self.output_ref(key)
+            if err != None:
+                (mod_vars, err) = self.setting_ref(key)
+                if err != None:
+                    return (None, event.ValidationEvent(event.BPWarning, 'Module input parameter not found', self))
+                else:
+                    return mod_vars
+            else:
+                return mod_vars
+        else:
+            return mod_vars
 
     def input_ref(self, key):
         if hasattr(self, "inputs"):
             for p in self.inputs:
                 if p.name == key:
-                    return "$module." + self.name + ".inputs." + key
-        raise ValueError('Module input parameter not found')
+                    return ("$module." + self.name + ".inputs." + key, None)
+        return (None, event.ValidationEvent(event.BPWarning, 'Module input parameter not found', self))
 
     def find_input_ref(self, value_ref):
         if hasattr(self, "inputs"):
@@ -186,8 +228,8 @@ class Module(dict):
         if hasattr(self, "outputs"):
             for p in self.outputs:
                 if p.name == key:
-                    return "$module." + self.name + ".outputs." + key
-        raise ValueError('Module output parameter not found')
+                    return ("$module." + self.name + ".outputs." + key, None)
+        return (None, event.ValidationEvent(event.BPWarning, 'Module output parameter not found', self))
 
     def output_refs(self):
         value_refs = []
@@ -207,8 +249,8 @@ class Module(dict):
         if hasattr(self, "settings"):
             for p in self.settings:
                 if p.name == key:
-                    return "$module." + self.name + ".settings." + key
-        raise ValueError('Module settings parameter not found')
+                    return ("$module." + self.name + ".settings." + key, None)
+        return (None, event.ValidationEvent(event.BPWarning, 'Module settings parameter not found', self))
 
     def find_setting_ref(self, value_ref):
         if hasattr(self, "settings"):
@@ -248,7 +290,7 @@ class Module(dict):
         return var_names
 
     def set_source(self, source):
-        errors = source.validate(BPError)
+        errors = source.validate(event.BPError)
         self.source = source
         return errors
 
@@ -258,7 +300,7 @@ class Module(dict):
             self.inputs = []
             return errors
         for param in input_params:
-            errors += param.validate(BPError)
+            errors += param.validate(event.BPError)
         if len(errors) == 0:
             for param in input_params:
                 self.inputs.append(param)
@@ -270,7 +312,7 @@ class Module(dict):
             self.outputs = []
             return errors
         for param in output_params:
-            errors += param.validate(BPError)
+            errors += param.validate(event.BPError)
         if len(errors) == 0:
             for param in output_params:
                 self.outputs.append(param)
@@ -282,7 +324,7 @@ class Module(dict):
             self.settings = []
             return errors
         for param in setting_params:
-            errors += param.validate(BPError)
+            errors += param.validate(event.BPError)
         if len(errors) == 0:
             for param in setting_params:
                 self.settings.append(param)
@@ -303,7 +345,7 @@ class Module(dict):
         for p in self.inputs:
             if p.name == param_name:
                 setattr(p, param_attr, param_value)
-            e = p.validate(BPError)
+            e = p.validate(event.BPError)
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -316,7 +358,7 @@ class Module(dict):
         for p in self.inputs:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(BPError)
+            e = p.validate(event.BPError)
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -329,7 +371,7 @@ class Module(dict):
         for p in self.inputs:
             if p.name == param.name:
                 p.merge(param)
-            e = p.validate(BPError)
+            e = p.validate(event.BPError)
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -351,7 +393,7 @@ class Module(dict):
         for p in self.outputs:
             if p.name == param_name:
                 setattr(p, param_attr, param_value)
-            e = p.validate(BPError)
+            e = p.validate(event.BPError)
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -364,7 +406,7 @@ class Module(dict):
         for p in self.outputs:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(BPError)
+            e = p.validate(event.BPError)
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -377,7 +419,7 @@ class Module(dict):
         for p in self.outputs:
             if p.name == param.name:
                 p.merge(param)
-            e = p.validate(BPError)
+            e = p.validate(event.BPError)
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -399,7 +441,7 @@ class Module(dict):
         for p in self.settings:
             if p.name == param_name:
                 setattr(p, param_attr, param_value)
-            e = p.validate(BPError)
+            e = p.validate(event.BPError)
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -412,7 +454,7 @@ class Module(dict):
         for p in self.settings:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(BPError)
+            e = p.validate(event.BPError)
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -425,7 +467,7 @@ class Module(dict):
         for p in self.settings:
             if p.name == param.name:
                 p.merge(param)
-            e = p.validate(BPError)
+            e = p.validate(event.BPError)
             if len(e) == 0:
                 param_copy.append(p)
             errors += e

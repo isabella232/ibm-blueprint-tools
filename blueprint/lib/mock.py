@@ -17,7 +17,7 @@ import giturlparse
 from pathlib import Path
 import shutil
 
-class PsuedoGenTemplate:
+class MockTemplate:
     def __init__(self, git_url, mod):
         self.git_url = git_url
         self.mod_name = mod.name

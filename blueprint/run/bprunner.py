@@ -19,6 +19,8 @@ from blueprint.run import modrunner
 
 from blueprint.schema import blueprint
 from blueprint.lib import event
+from blueprint.lib import bfile
+
 import shutil
 
 from blueprint.lib.logger import logr
@@ -88,7 +90,7 @@ class BlueprintRunner:
         logr.debug("Loading blueprint file " + self.blueprint_file + " ...")
         with open(self.blueprint_file) as f:
             yaml_str = f.read()
-            self.bp.from_yaml_str(yaml_str)
+            self.bp = blueprint.Blueprint.from_yaml_str(yaml_str)
         logr.info("Success loading blueprint file " + self.blueprint_file + ". \nValidating ...")
         errors = self.bp.validate(event.BPWarning)
         
@@ -98,22 +100,22 @@ class BlueprintRunner:
         
         logr.debug("Loading input data file " + self.input_data_file + " ...")
         errors = []
-        with open(self.input_data_file) as f:
-            yaml_str = f.read()
-            self.input_data = yaml.safe_load(yaml_str)
-            logr.info("Success loading input data file " + self.input_data_file)
-            logr.debug("Validating ...")
-            for name in self.input_data:
-                self.bp.set_input_value(name, self.input_data[name])
-                try:
-                    self.module_data[self.bp.input_ref(name)] = self.input_data[name]
-                except (KeyError, ValueError) as e:
-                    try:
-                        self.module_data[self.bp.setting_ref(name)] = self.input_data[name]
-                    except:
-                        self.module_data[name] = self.input_data[name]
-            logr.debug("Propagating the blueprint input data ...")
-            self.bp.propagate_blueprint_input_data()
+        self.input_data = bfile.FileHelper.load(self.input_data_file)
+        logr.info("Success loading input data file " + self.input_data_file)
+        logr.debug("Validating ...")
+        for name in self.input_data:
+            self.bp.set_input_value(name, self.input_data[name])
+            (bp_vars, err) = self.bp.input_ref(name)
+            if err == None:
+                self.module_data[bp_vars] = self.input_data[name]
+            else:
+                (bp_vars, err) = self.bp.setting_ref(name)
+                if err == None:
+                    self.module_data[bp_vars] = self.input_data[name]
+                else:
+                    self.module_data[name] = self.input_data[name]
+        logr.debug("Propagating the blueprint input data ...")
+        self.bp.propagate_blueprint_input_data()
         return errors
 
     def load_module_runners(self, dry_run=False):

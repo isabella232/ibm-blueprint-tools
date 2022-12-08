@@ -14,18 +14,28 @@ def eprint(*args, **kwargs):
 def main(argv):
    input_file = ''
    try:
-      opts, args = getopt.getopt(argv,"hi:",["ifile="])
+      opts, args = getopt.getopt(argv,"hb:",["bfile="])
    except getopt.GetoptError:
-      print('validate.py -i <input_file>')
+      print('validate.py -b <input_file>')
       sys.exit(2)
+   
    for opt, arg in opts:
       if opt == '-h':
-         print('validate.py -i <input_file>')
+         print('Usage:')
+         print('   validate.py -b <input_file>')
          sys.exit()
-      elif opt in ("-i", "--ifile"):
+      elif opt in ("-b", "--bfile"):
          input_file = arg
-   
-   Validator(input_file)
+         Validator(input_file)
+         exit()
+      else:
+         print('Usage:')
+         print('   validate.py -b <input_file>')
+         sys.exit()
+
+   print('Usage:')
+   print('   validate.py -b <input_file>')
+   sys.exit()
 
 if __name__ == "__main__":
    main(sys.argv[1:])

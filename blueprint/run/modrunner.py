@@ -15,7 +15,7 @@
 import os
 import sys
 from blueprint.lib import git
-from blueprint.lib import local
+from blueprint.lib import mock
 from blueprint.lib import terraform
 from blueprint.lib import event
 
@@ -59,7 +59,7 @@ class ModuleRunner:
         # Generate terraform template in the module folder
         cwd = os.getcwd()
         git_url = self.module.source.git.git_repo_url
-        pseudoTemplate = local.PsuedoGenTemplate(git_url, self.module)
+        pseudoTemplate = mock.MockTemplate(git_url, self.module)
         self.working_dir = pseudoTemplate.get_working_dir()
 
     def get_errors(self):
@@ -113,12 +113,14 @@ class ModuleRunner:
                 input_data = {}
                 for input in self.module.inputs:
                     if not (str(input.value).startswith("$")):
-                        try:
-                            input_data[self.module.input_ref(input.name)] = input.value
-                        except ValueError:
-                            try:
-                                input_data[self.module.setting_ref(input.name)] = input.value
-                            except:
+                        (mod_vars, err) = self.module.input_ref(input.name)
+                        if err == None:
+                            input_data[mod_vars] = input.value
+                        else:
+                            (mod_vars, err) = self.module.setting_ref(input.name)
+                            if err == None:
+                                input_data[mod_vars] = input.value
+                            else:
                                 input_data[input.name] = input.value
                 self.parent.save_module_input_data(input_data)
 
@@ -140,7 +142,11 @@ class ModuleRunner:
                 output_data = dict()
                 for key in out_dict.keys():
                     if key in module_output_data_names:
-                        output_data[self.module.output_ref(key)] = out_dict[key]["value"]
+                        (mod_vars, err) = self.module.output_ref(key)
+                        if err == None:
+                            output_data[mod_vars] = out_dict[key]["value"]
+                        else:
+                            self.errors.append(err)
                 # print(output_data)
                 self.parent.save_module_output_data(output_data)
         else:
