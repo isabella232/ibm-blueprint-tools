@@ -147,7 +147,7 @@ class ModulePane(Node):
         Create a graphviz label string for ModulePane - name, inputs, outputs, settings;
         """
         title = f'<font point-size="14"><b>{html.escape(name)}</b></font><br/>'
-        subtitle = f'<font point-size="8">[{html.escape(key)}]<br/></font>' if key else ""
+        subtitle = f'<font point-size="9">[{html.escape(key)}]<br/></font>' if key else ""
         subtitle += f'<font point-size="12">-------------------------------<br/></font>'
         subtitle += f'<font point-size="9">[{_format_text(description)}]<br/></font>' if description else ""
         text = f'<font point-size="12">-------------------------------<br/></font>' if description else ""
@@ -230,7 +230,7 @@ class Relation(Edge):
         wrapper = textwrap.TextWrapper(width=24, max_lines=3)
         lines = [html.escape(line) for line in wrapper.wrap(description)]
         text = "<br/>".join(lines)
-        return f'<<font point-size="10">{text}</font>>'
+        return f'<<font point-size="12">{text}</font>>'
 
     def __str__(self) -> str:
         return str(self.name)
