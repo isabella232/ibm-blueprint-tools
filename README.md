@@ -19,10 +19,10 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
 ## Installation
   Install the blueprint dev-tools CLI using the following steps.
 
-  ### Prerequisite
+### Prerequisite
   * Must use [Python version 3.8](https://www.python.org/downloads/release/python-380/) and above.
 
-  ### Setup CLI
+### Setup CLI
 
   Steps:
   1. Download the released tgz file, or fork the [blueprint dev-tools](https://github.com/IBM-Cloud/ibm-blueprint-tools) repository.
@@ -45,82 +45,82 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
   * Merge or assemble the blueprint.yaml from its parts
   * Assemble the blueprint.yaml using Python libraries
   
-  ### Blueprint CLI usage
+### Blueprint CLI usage
 
   Use the `blueprint dev-tools` CLI to validate and work with the blueprint configuration files.
 
-  > blueprint -h
-      
-      usage: blueprint [-h] {validate,merge} ...
+    > blueprint -h
+        
+        usage: blueprint [-h] {validate,merge} ...
 
-      Blueprint helper tools for IBM Cloud Schematics
+        Blueprint helper tools for IBM Cloud Schematics
 
-      positional arguments:
-        {validate,merge,generate}
+        positional arguments:
+          {validate,merge,generate}
 
-      optional arguments:
-        -h, --help            show this help message and exit
+        optional arguments:
+          -h, --help            show this help message and exit
 
 
-  #### Blueprint schema validator usage
+#### _Blueprint schema validator usage_
 
   Use the `blueprint validate` command to verify the schema of the blueprint configuration file (blueprint.yaml)
 
-  > blueprint validate -h
+    > blueprint validate -h
 
-      usage: blueprint validate [-h] -b BP_FILE [-w WORKING_DIR]
+        usage: blueprint validate [-h] -b BP_FILE [-w WORKING_DIR]
 
-      optional arguments:
-        -h, --help                                          show this help message and exit
-        -b BP_FILE, --bp-file BP_FILE                       Input blueprint configuration yaml file
-        -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for input files
-        -l LOG_FILE, --log-file LOG_FILE                    log file
-        -e {DEBUG,INFO,WARNING,ERROR}, 
-            --log-level {DEBUG,INFO,WARNING,ERROR}          log level
+        optional arguments:
+          -h, --help                                          show this help message and exit
+          -b BP_FILE, --bp-file BP_FILE                       Input blueprint configuration yaml file
+          -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for input files
+          -l LOG_FILE, --log-file LOG_FILE                    log file
+          -e {DEBUG,INFO,WARNING,ERROR}, 
+              --log-level {DEBUG,INFO,WARNING,ERROR}          log level
 
   Refer to examples in the `examples/validate` folder. 
 
-  #### Blueprint schema draw usage
+#### _Blueprint schema draw usage_
 
   Use the `blueprint draw` command to verify the draw a graph illustrating dependencies between modules in a blueprint configuration file (blueprint.yaml)
 
-  > blueprint draw -h
+    > blueprint draw -h
 
-      usage: blueprint draw [-h] -b BP_FILE [-s SOURCE_DIR] [-o OUT_FILE] [-f {png,jpg,svg,pdf,dot}] [-l LOG_FILE]
-                            [-e {DEBUG,INFO,WARNING,ERROR}]
+        usage: blueprint draw [-h] -b BP_FILE [-s SOURCE_DIR] [-o OUT_FILE] [-f {png,jpg,svg,pdf,dot}] [-l LOG_FILE]
+                              [-e {DEBUG,INFO,WARNING,ERROR}]
 
-      optional arguments:
-        -h, --help                                          show this help message and exit
-        -b BP_FILE, --bp-file BP_FILE                       input blueprint configuration yaml file
-        -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for input files
-        -o OUT_FILE, --out-file OUT_FILE                    output blueprint drawing file
-        -f {png,jpg,svg,pdf,dot}, --out-format              format of the blueprint drawing file ("png", "jpg", "svg", "pdf", "dot")
-        -l LOG_FILE, --log-file LOG_FILE                    log file
-        -e {DEBUG,INFO,WARNING,ERROR}, 
-            --log-level {DEBUG,INFO,WARNING,ERROR}          log level
+        optional arguments:
+          -h, --help                                          show this help message and exit
+          -b BP_FILE, --bp-file BP_FILE                       input blueprint configuration yaml file
+          -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for input files
+          -o OUT_FILE, --out-file OUT_FILE                    output blueprint drawing file
+          -f {png,jpg,svg,pdf,dot}, --out-format              format of the blueprint drawing file ("png", "jpg", "svg", "pdf", "dot")
+          -l LOG_FILE, --log-file LOG_FILE                    log file
+          -e {DEBUG,INFO,WARNING,ERROR}, 
+              --log-level {DEBUG,INFO,WARNING,ERROR}          log level
 
   Refer to examples in the `examples/draw` folder. 
-
-  #### Blueprint schema merge usage
+  
+#### _Blueprint schema merge usage_
 
   Use the `blueprint merge` command to assemble the parts of the blueprint configuration file (blueprint.yaml) from a blueprint manifest (manifest.yaml file).
 
-  > blueprint merge -h
+    > blueprint merge -h
 
-      usage: blueprint merge [-h] -m MANIFEST_FILE [-w WORKING_DIR] [-o OUT_FILE]
+        usage: blueprint merge [-h] -m MANIFEST_FILE [-w WORKING_DIR] [-o OUT_FILE]
 
-      optional arguments:
-        -h, --help                                          show this help message and exit
-        -m MANIFEST_FILE, --manifest-file MANIFEST_FILE     input Blueprint manifest file
-        -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for input files
-        -o OUT_FILE, --out-file OUT_FILE                    output blueprint configuration yaml file
-        -l LOG_FILE, --log-file LOG_FILE                    log file
-        -e {DEBUG,INFO,WARNING,ERROR}, 
-            --log-level {DEBUG,INFO,WARNING,ERROR}          log level
+        optional arguments:
+          -h, --help                                          show this help message and exit
+          -m MANIFEST_FILE, --manifest-file MANIFEST_FILE     input Blueprint manifest file
+          -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for input files
+          -o OUT_FILE, --out-file OUT_FILE                    output blueprint configuration yaml file
+          -l LOG_FILE, --log-file LOG_FILE                    log file
+          -e {DEBUG,INFO,WARNING,ERROR}, 
+              --log-level {DEBUG,INFO,WARNING,ERROR}          log level
   
   Refer to examples in the `examples/merge` data folder.
 
-  #### Blueprint schema sync usage
+#### _Blueprint schema sync usage_
 
   Use the `blueprint sync` command to sychronize the module inputs & output parameters - in the blueprint configuration file (blueprint.yaml) with the corresponding definition in the Terraform template.
 
@@ -128,24 +128,23 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
   * Install (terraform-config-inspect)[https://github.com/ibm-cloud/terraform-config-inspect] in your machine
   * Set TERRAFORM_CONFIG_INSPECT_PATH to the install location of the terraform-config-inspect tool.
 
+    > blueprint sync -h
 
-  > blueprint sync -h
+        usage: blueprint sync [-h] -b BP_FILE [-s SOURCE_DIR] -o OUT_FILE -w WORKING_DIR [-l LOG_FILE] [-e {DEBUG,INFO,WARNING,ERROR}]
 
-      usage: blueprint sync [-h] -b BP_FILE [-s SOURCE_DIR] -o OUT_FILE -w WORKING_DIR [-l LOG_FILE] [-e {DEBUG,INFO,WARNING,ERROR}]
-
-      optional arguments:
-        -h, --help                                          show this help message and exit
-        -b BP_FILE, --bp-file BP_FILE                       input blueprint lite configuration yaml file
-        -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for input files
-        -w WORKING_DIR, --working-dir WORKING_DIR           working directory for the intermediate files
-        -o OUT_FILE, --out-file OUT_FILE                    output blueprint configuration yaml file
-        -l LOG_FILE, --log-file LOG_FILE                    log file
-        -e {DEBUG,INFO,WARNING,ERROR}, 
-            --log-level {DEBUG,INFO,WARNING,ERROR}          log level setting
+        optional arguments:
+          -h, --help                                          show this help message and exit
+          -b BP_FILE, --bp-file BP_FILE                       input blueprint lite configuration yaml file
+          -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for input files
+          -w WORKING_DIR, --working-dir WORKING_DIR           working directory for the intermediate files
+          -o OUT_FILE, --out-file OUT_FILE                    output blueprint configuration yaml file
+          -l LOG_FILE, --log-file LOG_FILE                    log file
+          -e {DEBUG,INFO,WARNING,ERROR}, 
+              --log-level {DEBUG,INFO,WARNING,ERROR}          log level setting
   
   Refer to examples in the `examples/sync` data folder.
 
-  #### Blueprint run usage
+#### _Blueprint run usage_
 
   Use the `blueprint run` command to run the *blueprint configuration file* (blueprint.yaml), using the input data in the local machine.  
   
@@ -153,24 +152,24 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
 
   The `--dry-run` option will _not_ download the template, instead it will generate a dummy Terraform template for each module (with inputs & outputs specified in the *blueprint configuration yaml* file).  You can use these dummy terraform templates to verify the data flows in the log files.
 
-  > blueprint run -h
+    > blueprint run -h
 
-      usage: blueprint run [-h] -c {init,plan,apply,destroy,output} [-d] -b BP_FILE -i INPUT_FILE [-s SOURCE_DIR] [-w WORKING_DIR] [-o OUT_FILE]
-                     [-l LOG_FILE] [-e {DEBUG,INFO,WARNING,ERROR}]
+        usage: blueprint run [-h] -c {init,plan,apply,destroy,output} [-d] -b BP_FILE -i INPUT_FILE [-s SOURCE_DIR] [-w WORKING_DIR] [-o OUT_FILE]
+                      [-l LOG_FILE] [-e {DEBUG,INFO,WARNING,ERROR}]
 
-      optional arguments:
-        -h, --help                                          show this help message and exit
-        -c {init,plan,apply,destroy}, 
-            --sub-command {init,plan,apply,destroy}         blueprint command
-        -d, --dry-run                                       dry run the command, to preview outcome
-        -b BP_FILE, --bp-file BP_FILE                       input blueprint configuration yaml file
-        -i INPUT_FILE, --input-file INPUT_FILE              input blueprint data file
-        -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for blueprint and input data files
-        -w WORKING_DIR, --working-dir WORKING_DIR           working directory for intermediate files
-        -o OUT_FILE, --out-file OUT_FILE                    output blueprint file
-        -l LOG_FILE, --log-file LOG_FILE                    log file
-        -e {DEBUG,INFO,WARNING,ERROR}, 
-            --log-level {DEBUG,INFO,WARNING,ERROR}          log level
+        optional arguments:
+          -h, --help                                          show this help message and exit
+          -c {init,plan,apply,destroy}, 
+              --sub-command {init,plan,apply,destroy}         blueprint command
+          -d, --dry-run                                       dry run the command, to preview outcome
+          -b BP_FILE, --bp-file BP_FILE                       input blueprint configuration yaml file
+          -i INPUT_FILE, --input-file INPUT_FILE              input blueprint data file
+          -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for blueprint and input data files
+          -w WORKING_DIR, --working-dir WORKING_DIR           working directory for intermediate files
+          -o OUT_FILE, --out-file OUT_FILE                    output blueprint file
+          -l LOG_FILE, --log-file LOG_FILE                    log file
+          -e {DEBUG,INFO,WARNING,ERROR}, 
+              --log-level {DEBUG,INFO,WARNING,ERROR}          log level
 
 Refer to examples in the `examples/run` folder.
 

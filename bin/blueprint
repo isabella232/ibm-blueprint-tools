@@ -227,13 +227,12 @@ def main():
             print("Merge - " + bp_manifest)
             logr.info("Merge - " + bp_manifest)
 
-            loader = manifest.BlueprintManifest(bp_manifest)
-            errors = loader.get_errors()
+            bp_manifest = manifest.BlueprintManifest.from_yaml_file(bp_manifest)
+            (bp, errors) = bp_manifest.generate_blueprint()
             if len(errors) > 0:
                 eprint(errors)
-                return -1
 
-            out_yaml_str = loader.to_yaml_str()
+            out_yaml_str = bp.to_yaml_str()
             logr.debug(out_yaml_str)
 
             if output_blueprint_file == None or output_blueprint_file == '':
@@ -296,12 +295,8 @@ def main():
             print("Sync - " + bp_filename)
             logr.info("Sync - " + bp_filename)
 
-            morph = bpsync.BlueprintMorphius(blueprint_lite_file = bp_filename, working_dir = working_dir)
-            bp = morph.sync()
-            errors = morph.get_errors()
-            if len(errors) > 0:
-                eprint(errors)
-                return -1
+            bm = bpsync.BlueprintMorphius.from_yaml_file(bp_filename)
+            bp = bm.sync_blueprint(working_dir, annotate = True)
 
             out_yaml_str = bp.to_yaml_str()
             logr.debug(out_yaml_str)

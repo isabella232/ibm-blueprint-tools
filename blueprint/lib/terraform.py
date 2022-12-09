@@ -32,6 +32,10 @@ class TerraformRunner(Terraform):
         # print("terraform apply")
         return super().apply(capture_output=capture_output, no_color=no_color, raise_on_error = raise_on_error, skip_plan = skip_plan)
 
+    def destroy(self, capture_output = False, no_color=IsFlagged, raise_on_error = False, skip_plan = True):
+        # print("terraform apply")
+        return super().destroy(capture_output=capture_output, no_color=no_color, raise_on_error = raise_on_error, skip_plan = skip_plan)
+
     def output(self):
         # print("terraform output")
         return super().output()

@@ -67,7 +67,7 @@ class BlueprintMorphius:
 
     @classmethod
     def from_yaml_data(cls, yaml_data):
-        name = yaml_data['name']
+        bp_name = yaml_data['name']
         try:
             description = yaml_data['description']
         except KeyError:
@@ -75,7 +75,9 @@ class BlueprintMorphius:
         
         modules=[]
         try:
-            modules = yaml_data['modules']
+            mods = yaml_data['modules']
+            for mod in mods:
+                modules.append(module.Module.from_yaml(mod))
         except KeyError:
             modules=[]
 
@@ -103,7 +105,7 @@ class BlueprintMorphius:
         except (KeyError, UnboundLocalError, TypeError) as e:
             logr.debug('Attribute error while reading & initializing modules from git_sources' + str(e))
 
-        return cls(name, description, modules)
+        return cls(bp_name, description, modules)
 
     def sync_blueprint(self, working_dir, annotate=False):
         cwd = os.getcwd()
@@ -112,7 +114,7 @@ class BlueprintMorphius:
         if tic_path == None:
             err_msg = 'Could not find terraform-config-inspect.  Install and set install path in environment $TERRAFORM_CONFIG_INSPECT_PATH'
             logr.error(err_msg)
-            raise ValueError('err_msg')
+            raise ValueError(err_msg)
 
         if not os.path.exists(working_dir):
             logr.info('Working directory does not exists.  Creating the required working director : ' + str(os.path.abspath(working_dir)))
