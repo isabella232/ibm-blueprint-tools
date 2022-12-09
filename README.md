@@ -80,6 +80,27 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
 
   Refer to examples in the `examples/validate` folder. 
 
+  #### Blueprint schema draw usage
+
+  Use the `blueprint draw` command to verify the draw a graph illustrating dependencies between modules in a blueprint configuration file (blueprint.yaml)
+
+  > blueprint draw -h
+
+      usage: blueprint draw [-h] -b BP_FILE [-s SOURCE_DIR] [-o OUT_FILE] [-f {png,jpg,svg,pdf,dot}] [-l LOG_FILE]
+                            [-e {DEBUG,INFO,WARNING,ERROR}]
+
+      optional arguments:
+        -h, --help                                          show this help message and exit
+        -b BP_FILE, --bp-file BP_FILE                       input blueprint configuration yaml file
+        -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for input files
+        -o OUT_FILE, --out-file OUT_FILE                    output blueprint drawing file
+        -f {png,jpg,svg,pdf,dot}, --out-format              format of the blueprint drawing file ("png", "jpg", "svg", "pdf", "dot")
+        -l LOG_FILE, --log-file LOG_FILE                    log file
+        -e {DEBUG,INFO,WARNING,ERROR}, 
+            --log-level {DEBUG,INFO,WARNING,ERROR}          log level
+
+  Refer to examples in the `examples/draw` folder. 
+
   #### Blueprint schema merge usage
 
   Use the `blueprint merge` command to assemble the parts of the blueprint configuration file (blueprint.yaml) from a blueprint manifest (manifest.yaml file).
@@ -180,11 +201,13 @@ Refer to examples in the `examples/run` folder.
 
   |   | Example             | Folder     | Description           |
   |---|---------------------|------------|-----------------------|
-  | 1 | Schema validator    | `./examples/validate/app.py` | The `validate/app.py` illustrate the use of the `blueprint.schema.validate.validator.Validator` class to validate a blueprint configuration file.|
-  | 2 | Schema merge        | `./examples/validate/app.py` | The `merge/app.py` illustrate the use of `blueprint.merge.manifest.BlueprintManifest` class to load manifest file, to generate a blueprint configuration file. </br> The `./examples/validate/data-1/manifest.yaml` & `./examples/validate/data-2/manifest.yaml` are sample blueprint manifest file. |
-  | 3 | Schema sync         | `./examples/sync/app.py` | The `sync/app.py` illustrate the ability to sync the module definitions (inputs & outputs) in the blueprint configuration file, with the corresponding definition the Terraform repository. |
-  | 4 | Schema generate     | `./examples/generate/bp_basic.py` | The `generate/bp_basic.py` illustrate the use of `blueprint.schema` & `blueprint.circuit` library classes to generate a blueprint configuation file, using Python code |
-  | 5 | Blueprint run       | `./examples/run/app.py` | The `run/app.py` illustrate the ability to run & verify the blueprint behaviour locally. |
+  | 1 | Schema validator    | `./examples/validate/validate_app.py` | Illustrate the use of the `blueprint.schema.validate.validator.Validator` class to validate a blueprint configuration file.|
+  | 2 | Schema draw         | `./examples/draw/draw_app.py` | Illustrate the use of the `blueprint.circuit.draw.BlueprintDraw` class to draw a graph depicting the blueprint configuration file.|
+  | 3 | Schema merge        | `./examples/validate/merge_app.py` | Illustrate the use of `blueprint.merge.manifest.BlueprintManifest` class to load manifest file, to generate a blueprint configuration file. </br> The `./examples/validate/data-1/manifest.yaml` & `./examples/validate/data-2/manifest.yaml` are sample blueprint manifest file. |
+  | 4 | Schema sync         | `./examples/sync/sync_app.py` | Illustrate the ability to sync the module definitions (inputs & outputs) in the blueprint configuration file, with the corresponding definition the Terraform repository. |
+  | 5 | Schema generate     | `./examples/generate/bp_basic.py` | Illustrate the use of `blueprint.schema` & `blueprint.circuit` library classes to generate a blueprint configuation file, using Python code |
+  | 6 | Blueprint run       | `./examples/run/run_app.py` | Illustrate the ability to run & verify the blueprint behaviour locally. |
+
 ---
 ## Future roadmap
 

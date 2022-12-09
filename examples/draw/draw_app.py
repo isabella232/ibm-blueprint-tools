@@ -36,6 +36,7 @@ def main(argv):
          return
 
    br = draw.BlueprintDraw(blueprint_file = blueprint_file)
+   br.prepare()
    br.draw()
 
 if __name__ == "__main__":

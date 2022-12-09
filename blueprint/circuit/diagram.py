@@ -16,7 +16,7 @@ def _format_text(text):
 
 #=======================================================================================#
 
-# def Blueprint(name, **kwargs):
+# def BlueprintPane(name, **kwargs):
 #     graph_attributes = {
 #         "label": html.escape(name),
 #         "bgcolor": "white",
@@ -26,7 +26,7 @@ def _format_text(text):
 #     graph_attributes.update(kwargs)
 #     return Cluster(name, graph_attr=graph_attributes)
 
-class Blueprint(Cluster):
+class BlueprintPane(Cluster):
 
     def __init__(
                 self,
@@ -37,7 +37,7 @@ class Blueprint(Cluster):
                 settings: List[str] = []
             ):
         """
-        Blueprint represents a cluster context.
+        BlueprintPane represents a Blueprint cluster context.
 
         :param name: Blueprint name.
         :param direction: Data flow direction. Default is 'left to right'.
@@ -53,13 +53,13 @@ class Blueprint(Cluster):
                 }
         super().__init__(label = name, direction = "LR", graph_attr = graph_attr)
         diagrams.setcluster(self)
-        self.bp_node = Module(name, description,
+        self.bp_node = ModulePane(name, description,
                 inputs, outputs,settings, 
                 type = "Blueprint")
 
     def _format_blueprint_label(self, name, description, inputs, outputs, settings):
         """
-        Create a graphviz label string for Module - name, inputs, outputs, settings;
+        Create a graphviz label string for BlueprintPane - name, inputs, outputs, settings;
         """
         title = f'<font point-size="14"><b>{html.escape(name)}</b></font><br/>'
         subtitle = f'<font point-size="12">-------------------------------<br/></font>'
@@ -79,7 +79,7 @@ class Blueprint(Cluster):
 
 #=======================================================================================#
 
-# def Module(name, inputs=[], outputs=[], settings=[], type="Module", **kwargs):
+# def ModulePane(name, inputs=[], outputs=[], settings=[], type="Module", **kwargs):
 #     line_count = len(inputs) + len(outputs) + len(settings)
 #     height = 0.5*line_count
 #     key = f"{type}"
@@ -97,7 +97,7 @@ class Blueprint(Cluster):
 #     node_attributes.update(kwargs)
 #     return Node(**node_attributes)
 
-class Module(Node):
+class ModulePane(Node):
     def __init__(
                 self, 
                 name: str, 
@@ -108,7 +108,7 @@ class Module(Node):
                 type: str = "Module"
             ):
         """
-        Module represents a blueprint component.
+        ModulePane represents a blueprint component.
 
         :param name: Name of the module.
         :param inputs: List of input parameter names 
@@ -144,7 +144,7 @@ class Module(Node):
 
     def _format_module_label(self, name, key, description, inputs, outputs, settings):
         """
-        Create a graphviz label string for Module - name, inputs, outputs, settings;
+        Create a graphviz label string for ModulePane - name, inputs, outputs, settings;
         """
         title = f'<font point-size="14"><b>{html.escape(name)}</b></font><br/>'
         subtitle = f'<font point-size="8">[{html.escape(key)}]<br/></font>' if key else ""
@@ -166,66 +166,66 @@ class Module(Node):
     def __str__(self) -> str:
         return str(self.name)
 
-    # def __rshift__(self, other: Union["Module", List["Module"], "Wire"]):
-    #     """Implements Self >> Module, Self >> [Modules] and Self Wire."""
+    # def __rshift__(self, other: Union["ModulePane", List["ModulePane"], "Relation"]):
+    #     """Implements Self >> ModulePane, Self >> [ModulePanes] and Self Relation."""
     #     if isinstance(other, list):
     #         print("N1:" + str(other))
-    #     elif isinstance(other, Module):
+    #     elif isinstance(other, ModulePane):
     #         print("N2:" + str(other))
     #     else:
     #         print("N3:" + str(other))
 
     #     super().__rshift__(other)
 
-    # def __lshift__(self, other: Union["Module", List["Module"], "Wire"]):
+    # def __lshift__(self, other: Union["ModulePane", List["ModulePane"], "Relation"]):
     #     super().__lshift__(other)
 
-    # def __rrshift__(self, other: Union[List["Module"], List["Wire"]]):
-    #     """Called for [Modules] and [Wires] >> Self because list don't have __rshift__ operators."""
+    # def __rrshift__(self, other: Union[List["ModulePane"], List["Relation"]]):
+    #     """Called for [ModulePanes] and [Relations] >> Self because list don't have __rshift__ operators."""
     #     print("N4: " + str(other))
     #     if other != None:
     #         super().__rrshift__(other)
 
-    # def __rlshift__(self, other: Union[List["Module"], List["Wire"]]):
-    #     """Called for [Modules] << Self because list of Modules don't have __lshift__ operators."""
+    # def __rlshift__(self, other: Union[List["ModulePane"], List["Relation"]]):
+    #     """Called for [ModulePanes] << Self because list of ModulePanes don't have __lshift__ operators."""
     #     print("N5: " + str(other))
     #     if other != None:
     #         super().__rlshift__(other)
 
 #=======================================================================================#
 
-# def Wire(from_pin="", to_pin="", **kwargs):
+# def Relation(from_param="", to_param="", **kwargs):
 #     edge_attribtues = {"style": "dashed", "color": "gray60"}
-#     if from_pin and to_pin:
-#         label = from_pin + '-->>--' + to_pin
+#     if from_param and to_param:
+#         label = from_param + '-->>--' + to_param
 #         edge_attribtues.update({"label": _format_wire_label(label)})
 #     edge_attribtues.update(kwargs)
 #     return Edge(**edge_attribtues)
 
-class Wire(Edge):
+class Relation(Edge):
 
     def __init__(
                 self,
-                from_pin: str = None, 
-                to_pin: str = None
+                from_param: str = None, 
+                to_param: str = None
             ):
         """
-        Wire connects the output of one module to inputs of another module.
+        Relation connects the output of one module to inputs of another module.
 
-        :param from_pin: From module output parameter name
-        :param to_pin: To module input parameter name
+        :param from_param: From module output parameter name
+        :param to_param: To module input parameter name
         """
-        self.name = f'{from_pin} >> {to_pin}'
+        self.name = f'{from_param} >> {to_param}'
         edge_attribtues = {"style": "dashed", "color": "gray60"}
-        if from_pin and to_pin:
-            label = from_pin + '-->>--' + to_pin
+        if from_param and to_param:
+            label = from_param + '-->>--' + to_param
             edge_attribtues.update({"label": self._format_wire_label(label)})
         
         super().__init__(**edge_attribtues)
 
     def _format_wire_label(self, description):
         """
-        Create a graphviz label string for a Wire that connects two modules
+        Create a graphviz label string for a Relation that connects two modules
         """
         wrapper = textwrap.TextWrapper(width=24, max_lines=3)
         lines = [html.escape(line) for line in wrapper.wrap(description)]
@@ -235,29 +235,29 @@ class Wire(Edge):
     def __str__(self) -> str:
         return str(self.name)
 
-    # def __rshift__(self, other: Union["Module", "Wire", List["Module"]]):
-    #     """Implements Self >> Module or Wire and Self >> [Modules]."""
+    # def __rshift__(self, other: Union["ModulePane", "Relation", List["ModulePane"]]):
+    #     """Implements Self >> ModulePane or Relation and Self >> [ModulePanes]."""
     #     if isinstance(other, list):
     #         print("E1:" + str(other))
-    #     elif isinstance(other, Module):
+    #     elif isinstance(other, ModulePane):
     #         print("E2:" + str(other))
     #     else:
     #         print("E3:" + str(other))
 
     #     super().__rshift__(other)
 
-    # def __lshift__(self, other: Union["Module", "Wire", List["Module"]]):
-    #     """Implements Self << Module or Wire and Self << [Modules]."""
+    # def __lshift__(self, other: Union["ModulePane", "Relation", List["ModulePane"]]):
+    #     """Implements Self << ModulePane or Relation and Self << [ModulePanes]."""
     #     super().__lshift__(other)
 
-    # def __rrshift__(self, other: Union[List["Module"], List["Wire"]]) -> List["Wire"]:
-    #     """Called for [Modules] or [Wires] >> Self because list of Wires don't have __rshift__ operators."""
+    # def __rrshift__(self, other: Union[List["ModulePane"], List["Relation"]]) -> List["Relation"]:
+    #     """Called for [ModulePanes] or [Relations] >> Self because list of Relations don't have __rshift__ operators."""
     #     print("E4: " + str(other))
     #     if other != None:
     #         super().__rrshift__(other)
 
-    # def __rlshift__(self, other: Union[List["Module"], List["Wire"]]) -> List["Wire"]:
-    #     """Called for [Modules] or [Wires] << Self because list of Wires don't have __lshift__ operators."""
+    # def __rlshift__(self, other: Union[List["ModulePane"], List["Relation"]]) -> List["Relation"]:
+    #     """Called for [ModulePanes] or [Relations] << Self because list of Relations don't have __lshift__ operators."""
     #     print("E5: " + str(other))
     #     if other != None:
     #         super().__rlshift__(other)

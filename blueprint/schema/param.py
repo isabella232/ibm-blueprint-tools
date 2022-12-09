@@ -80,6 +80,9 @@ class Parameter(dict):
     def set_value(self, val):
             self.value = val
 
+    def get_value(self):
+            return self.value
+
 #========================================================================
 class Input (Parameter):
 
