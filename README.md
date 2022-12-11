@@ -20,7 +20,22 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
   Install the blueprint dev-tools CLI using the following steps.
 
 ### Prerequisite
-  * Must use [Python version 3.8](https://www.python.org/downloads/release/python-380/) and above.
+  * Must use [Python version 3.9](https://www.python.org/downloads/) and above.
+  * requirements.txt
+    * yamale >= 4.0.4
+    * PyYAML >= 6.0
+    * ruamel.yaml >=  0.17.21
+    * GitPython >= 3.1.29
+    * python-terraform >= 0.10.1
+    * git-url-parse >= 1.2.2
+    * graphviz >= 0.19.0
+    * diagrams >= 0.23.1
+    * pygraphviz >= 1.10
+
+> Note: Use the following command to install `pygraphviz` in your Mac OS
+> 
+> python3 -m pip install --global-option=build_ext --global-option="-I$(brew --prefix graphviz)/include/"  --global-option="-L$(brew --prefix graphviz)/lib/" pygraphviz
+> 
 
 ### Setup CLI
 

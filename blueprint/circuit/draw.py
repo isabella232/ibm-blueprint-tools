@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import os
+import sys
 import diagrams
 
 from blueprint.schema import blueprint
+from blueprint.schema import module
+
 from blueprint.lib import bfile
 from blueprint.sync import bpsync
 from blueprint.merge import manifest
@@ -95,16 +98,23 @@ class BlueprintDraw:
             end = bus.to_node
             for wire in bus.wires:
                 if isinstance(start, blueprint.Blueprint):
-                    start_pane = bpd.bp_node
+                    start_pane = bpd.in_bp_node
                 else: # isinstance(start, module.Module)
                     start_pane = mod_diag[start.name]
                 
                 if isinstance(end, blueprint.Blueprint):
-                    end_pane = bpd.bp_node
+                    end_pane = bpd.out_bp_node
                 else: # isinstance(end, module.Module)
                     end_pane = mod_diag[end.name]
-                
-                start_pane >> diag.Relation(wire.from_param, wire.to_param) >> end_pane
+
+                if isinstance(bus.from_node, module.Module) and isinstance(bus.to_node, module.Module):
+                    edge_attribtues = {"style": "dashed", "color": " black"}
+                if isinstance(bus.from_node, blueprint.Blueprint):
+                    edge_attribtues = {"style": "dashed", "color": "blue"}
+                if isinstance(bus.to_node, blueprint.Blueprint):
+                    edge_attribtues = {"style": "dashed", "color": "red"}
+
+                start_pane >> diag.Relation(from_param = wire.from_param, to_param = wire.to_param, edge_attribtues = edge_attribtues) >> end_pane
 
         if bpd._parent:
             bpd._parent.subgraph(bpd.dot)

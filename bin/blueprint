@@ -29,7 +29,8 @@ from blueprint.validate import validator
 from blueprint.merge import manifest
 from blueprint.sync import bpsync
 from blueprint.run import bprunner
-from blueprint.circuit import draw as graph
+from blueprint.circuit import draw as viz
+from blueprint.circuit import schem_draw as ic
 
 from blueprint.lib.logger import logr
 import logging
@@ -60,6 +61,7 @@ def main():
 
     draw.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint configuration yaml file', default=None)
     draw.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for input files', default=None)
+    draw.add_argument('-t', '--out-file-type', choices=["viz", "ic"], required=False, help='type of output blueprint drawing file', default="viz")
     draw.add_argument('-o', '--out-file', type=str, required=False, help='output blueprint drawing file', default="out_blueprint")
     draw.add_argument('-f', '--out-format', choices=["png", "jpg", "svg", "pdf", "dot"], required=False, help='format of the blueprint drawing file ("png", "jpg", "svg", "pdf", "dot")', default="png")
     draw.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
@@ -160,6 +162,7 @@ def main():
             source_dir = args.source_dir
             output_draw_file = args.out_file
             output_draw_format = args.out_format
+            output_draw_type = args.out_file_type
             if source_dir:
                 if not os.path.exists(source_dir):
                     print('Error in source_dir, or directory does not exists')
@@ -191,9 +194,14 @@ def main():
 
             logr.info("Draw - " + bp_filename)
             print("Draw - " + bp_filename)
-            bd = graph.BlueprintDraw(blueprint_file = bp_filename)
-            bd.prepare()
-            bd.draw(output_draw_file, output_draw_format)
+            if output_draw_type == 'ic':
+                bd = ic.BlueprintBoard(blueprint_file = bp_filename)
+                bd.prepare()
+                bd.draw(shape='a', bend='z')
+            else:
+                bd = viz.BlueprintDraw(blueprint_file = bp_filename)
+                bd.prepare()
+                bd.draw(output_draw_file, output_draw_format)
         else:
             eprint("Blueprint configuration file parameter is required")
         
@@ -418,8 +426,9 @@ def main():
 
 
 if __name__ == '__main__':
-    if sys.version_info[0] < 3 and sys.version_info[1] < 9:
-        print("Pre-requisite error - use Python 3.9 or higher")
+    ver = sys.version_info[0] * 100 + sys.version_info[1]
+    if ver < 309:
+        print("Pre-requisite error, please use Python 3.9 or higher")
         exit(-1)
     else:
         main()
