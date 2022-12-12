@@ -10,6 +10,7 @@
 | **Blueprint manifest file**| An YAML file with hyperlinks to multiple smaller YAML file snippets that describe the inputs, outputs, modules, etc.  It can be used to generate a larger `Blueprint configuration file` |
 | **Blueprint lite file** | An YAML file that may have partial input / output definition. It can be sync'd with the corresponding input/output definition of the Terraform modules, in the Git repository |
 
+---
 
 ### How to validate your `blueprint configuration file` ?
 
@@ -53,6 +54,8 @@ As illustrated in the followint code snippet:
         eprint(event.format_events(err, event.Format.Table))
 
 ```
+
+---
 
 ### How to generate `blueprint configuration file` from a `manifest file` ?
 
@@ -112,6 +115,7 @@ You can use the `blueprint merge` command to expand the manifest file into a com
 * You can use the `blueprint validate` tool to validate the blueprint yaml file.
 * You can use the `blueprint draw` tool to visualize the connections - as you edit / update the blueprint yaml file.
 
+---
 
 ### How to prepare a `blueprint configuration file` using terraform modules sourced from git repositories ?
 
@@ -150,6 +154,8 @@ The output yaml file will be prefilled with all the modules, its inputs & output
 * You can use the `blueprint draw` tool to visualize the connections - as you edit / update the blueprint yaml file.
 * You can use the `blueprint validate` tool to validate the blueprint yaml file.
 
+---
+
 ### How to sync the input/output definitions in the `blueprint configuration file` with the corresponding vars/outputs of the terraform modules in git repositories ?
 
 In the lifecycle of `blueprint configuration file`, the input/output definitions of the Terraform modules can go out of sync.  In other words, the Terraform module developer may change the inputs variable names, add a new output variable, or change the variable type, etc.  
@@ -160,19 +166,28 @@ The following tool can help you to sync the blueprint definition.
 
 The output file will have annotation to add, delete or update the input / output variables used in the module definitions.
 
+---
+
 ### How to codify a `blueprint configuration file` in Python ?
 
 *Docs: Work in progress*
+
+---
 
 ### How to run the  `blueprint configuration file` using the local Terraform CLI ?
 
 *Docs: Work in progress*
 
+---
+
 ### How to dry-run the `blueprint configuration file` using the local Terraform CLI ?
 
 *Docs: Work in progress*
+
+---
 
 ### How to visualize the `blueprint configuration file` ?
 
 *Docs: Work in progress*
 
+---
