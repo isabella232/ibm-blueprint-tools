@@ -1,7 +1,10 @@
 import sys
 import getopt
 
-from blueprint.validate.validator import Validator
+from blueprint.lib import bfile
+from blueprint.lib import event
+from blueprint.validate import schema_validator
+from blueprint.validate import blueprint_validator
 
 from blueprint.lib.logger import logr
 # import logging
@@ -26,8 +29,27 @@ def main(argv):
          sys.exit()
       elif opt in ("-b", "--bfile"):
          input_file = arg
-         Validator(input_file)
-         exit()
+         bv = schema_validator.SchemaValidator(input_file)
+         print("\Schema validation ... \n")
+         (msg, err) = bv.validate()
+         if err == None:
+            print(msg)
+         else:
+            eprint(err)
+            
+         print("\nAdvanced validation ... \n")
+         bp = bfile.FileHelper.load_blueprint(input_file)
+         if bp == None:
+            eprint("Error in loading the blueprint file")
+            sys.exit()
+
+         bpv = blueprint_validator.BlueprintValidator()
+         errors = bpv.validate_blueprint(bp)
+         if errors != None:
+            # eprint(str(errors))
+            eprint(event.format_events(errors, event.Format.Table))
+
+         sys.exit()
       else:
          print('Usage:')
          print('   validate.py -b <input_file>')

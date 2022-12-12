@@ -19,7 +19,7 @@ from typing import List
 from blueprint.schema import param
 from blueprint.schema import source as src
 
-from blueprint.lib import validator
+from blueprint.validate import blueprint_validator
 from blueprint.lib import event
 
 from blueprint.lib.logger import logr
@@ -112,8 +112,8 @@ class Module(dict):
     def to_yaml(self):
         # yaml.encoding = None
         errors = self.validate(event.BPError)
-        eprint(errors)
-        return yaml.dump(self, sort_keys=False)
+        # eprint(errors)
+        return (yaml.dump(self, sort_keys=False), errors)
 
     @classmethod
     def from_yaml(cls, yaml_data):
@@ -162,7 +162,7 @@ class Module(dict):
         return mods
 
     def validate(self, level=event.BPError):
-        mod_validator = validator.ModuleValidator()
+        mod_validator = blueprint_validator.ModuleValidator()
         return mod_validator.validate_module(self, level)
 
     def input_value_refs(self):

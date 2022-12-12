@@ -20,8 +20,8 @@ from blueprint.schema import module
 from blueprint.schema import param
 
 from blueprint.lib import dag
-from blueprint.lib import validator
 from blueprint.lib import event
+from blueprint.validate import blueprint_validator
 
 from blueprint.lib.logger import logr
 # import logging
@@ -143,16 +143,16 @@ class Blueprint(dict):
     def to_yaml(self, stream = None):
         self.remove_null_entries()
         errors = self.validate(event.BPWarning)
-        eprint(errors)
+        # eprint(errors)
 
-        return yaml.safe_load(self.to_yaml_str())
+        return (yaml.safe_load(self.to_yaml_str()), errors)
 
     def to_yaml_str(self, stream = None) -> str:
         self.remove_null_entries()
         errors = self.validate(event.BPWarning)
-        if len(errors) > 0:
-            eprint(errors)
-        return yaml.dump(self, sort_keys=False)
+        # if len(errors) > 0:
+        #     eprint(errors)
+        return (yaml.dump(self, sort_keys=False), errors)
 
 
     def generate_input_file(self, stream = None):
@@ -222,7 +222,7 @@ class Blueprint(dict):
                     inputs, outputs, settings, modules)
 
     def validate(self, level=event.BPError):
-        bp_validator = validator.BlueprintValidator()
+        bp_validator = blueprint_validator.BlueprintValidator()
         return bp_validator.validate_blueprint(self, level)
 
     def input_ref(self, key):

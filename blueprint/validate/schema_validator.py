@@ -18,6 +18,8 @@ import os
 import sys
 import pkgutil
 
+from typing import Tuple
+
 from pathlib import Path
 from typing import Dict
 from blueprint.validate.custom.settings import Settings
@@ -103,58 +105,55 @@ def _get_lc_dict(path: Path) -> Dict[str, int]:
     return dict_key_line
 
 
-def validate(path_schema: Path, path_data: Path):
-    """
-    Validates the config yaml file according to the schema yaml file.
 
-    Will be silent if good and will exit the program if there is an error,
-    and will output an detailed error message to fix the config file.
-
-    Parameters
-    ----------
-    path_schema : Path
-        Path to the schema yaml file.
-    path_data : Path
-        Path to the config yaml file.
-    """
-    validators = DefaultValidators.copy()  # This is a dictionary
-    validators[Settings.tag]=Settings
-    # Create a schema object
-    schema = yamale.make_schema(path=path_schema, parser="PyYAML",validators=validators)
-
-    # Create a Data object
-    config = yamale.make_data(path=path_data, parser="ruamel")
-    # Validate data against the schema. Throws a ValueError if data is invalid.
-    try:
-        yamale.validate(schema, config)
-        print("Blueprint yaml schema validation success!👍")
-        logr.info("Blueprint yaml schema validation success!")
-    except yamale.YamaleError as e:
-        errmsg = "Blueprint yaml schema validation failed!\n"
-        lc = _get_lc_dict(path_data)
-        for result in e.results:
-            title1 = "Schema"
-            title2 = "Config"
-            sep = f"{'-'*40}\n"
-            errmsg += f"{title1:<10} : {result.schema}\n{title2:<10} : {result.data}\n{sep}"
-            for error in result.errors:
-                keyerr = error.split(":", 1)
-                keypath = keyerr[0]
-                err = keyerr[1]
-                l_num = lc.get(keypath, "?")
-                errmsg += f"* line {l_num:>4}:  {keypath:<40} : {err}\n"
-            errmsg += f"{sep}"
-        logr.error(errmsg)
-        eprint(errmsg)
-
-class Validator():
+class SchemaValidator():
     def __init__(self, filename):
         
         logr.debug("Loading blueprint yaml schema file")
-        schema = os.path.join(os.path.dirname(__file__), '../schema/schema.yaml')
-        
-        validate(path_schema = schema, path_data = filename)
+        self.schema = os.path.join(os.path.dirname(__file__), '../schema/schema.yaml')
+        self.filename = filename 
 
+    def validate(self):
+        """
+        Validates the config yaml file according to the schema yaml file.
+
+        Will be silent if good and will exit the program if there is an error,
+        and will output an detailed error message to fix the config file.
+        """
+        validators = DefaultValidators.copy()  # This is a dictionary
+        validators[Settings.tag]=Settings
+        # Create a schema object
+        schema = yamale.make_schema(path=self.schema, parser="PyYAML",validators=validators)
+
+        # Create a Data object
+        config = yamale.make_data(path=self.filename, parser="ruamel")
+
+        try:
+            # Validate data against the schema. Throws a ValueError if data is invalid.
+            yamale.validate(schema, config)
+            ret_str = "\nBlueprint yaml schema validation success!👍 \n\n"
+            logr.info("Blueprint yaml schema validation success!")
+            return (ret_str, None)
+        
+        except yamale.YamaleError as e:
+            errmsg = "Blueprint yaml schema validation failed!\n"
+
+            lc = _get_lc_dict(self.filename)
+            for result in e.results:
+                title1 = "Schema"
+                title2 = "Config"
+                sep = f"{'-'*40}\n"
+                errmsg += f"{title1:<10} : {result.schema}\n{title2:<10} : {result.data}\n{sep}"
+                for error in result.errors:
+                    keyerr = error.split(":", 1)
+                    keypath = keyerr[0]
+                    err = keyerr[1]
+                    l_num = lc.get(keypath, "?")
+                    errmsg += f"* line {l_num:>4}:  {keypath:<40} : {err}\n"
+                errmsg += f"{sep}"
+                
+            logr.error(errmsg)
+            return (None, errmsg)
 
 
 

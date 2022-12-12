@@ -222,7 +222,16 @@ class BlueprintManifest:
                 else:
                     errors.append(event.ValidationEvent(event.BPError, 'Invalid input definition'))
             else :
-                errors.append(event.ValidationEvent(event.BPError, 'Unknown input section: ' + str(input)))
+                keys = input.keys()
+                if 'name' in keys:
+                    tempInput = param.Input.from_yaml(input)
+                    if not self._hasattr(bpyaml, 'inputs') or bpyaml.inputs == None:
+                        bpyaml.inputs = param.Input.from_yaml_list([tempInput])
+                    else:
+                        bpyaml_inputs = self._merge(bpyaml.inputs, tempInput)
+                        bpyaml.inputs = param.Input.from_yaml_list(bpyaml_inputs)
+                else:
+                    errors.append(event.ValidationEvent(event.BPError, 'Unknown input section: ' + str(input)))
         
         os.chdir(cwd)
         return (bpyaml, errors)
@@ -266,7 +275,16 @@ class BlueprintManifest:
                 else:
                     errors.append(event.ValidationEvent(event.BPError, 'Invalid output definition'))
             else :
-                errors.append(event.ValidationEvent(event.BPError, 'Unknown output section: ' + str(output)))
+                keys = output.keys()
+                if 'name' in keys:
+                    tempOutput = param.Output.from_yaml(output)
+                    if not self._hasattr(bpyaml, 'outputs') or bpyaml.outputs == None:
+                        bpyaml.outputs = param.Output.from_yaml_list([tempOutput])
+                    else:
+                        bpyaml_outputs = self._merge(bpyaml.outputs, tempOutput)
+                        bpyaml.outputs = param.Output.from_yaml_list(bpyaml_outputs)
+                else:
+                    errors.append(event.ValidationEvent(event.BPError, 'Unknown output section: ' + str(output)))
        
         os.chdir(cwd)
         return (bpyaml, errors)
@@ -309,7 +327,16 @@ class BlueprintManifest:
                 else:
                     errors.append(event.ValidationEvent(event.BPError, 'Invalid setting definition'))
             else :
-                errors.append(event.ValidationEvent(event.BPError, 'Unknown setting section: ' + str(setting)))
+                keys = setting.keys()
+                if 'name' in keys:
+                    tempSetting = param.Setting.from_yaml(setting)
+                    if not self._hasattr(bpyaml, 'settings') or bpyaml.settings == None:
+                        bpyaml.settings = param.Setting.from_yaml_list([tempSetting])
+                    else:
+                        bpyaml_settings = self._merge(bpyaml.settings, tempSetting)
+                        bpyaml.settings = param.Setting.from_yaml_list(bpyaml_settings)
+                else:
+                    errors.append(event.ValidationEvent(event.BPError, 'Unknown setting section: ' + str(setting)))
         
         os.chdir(cwd)
         return (bpyaml, errors)
@@ -352,7 +379,16 @@ class BlueprintManifest:
                 else:
                     errors.append(event.ValidationEvent(event.BPError, 'Invalid module definition'))
             else :
-                errors.append(event.ValidationEvent(event.BPError, 'Unknown module section: ' + str(mod)))
+                keys = mod.keys()
+                if 'name' in keys:
+                    tempMod = module.Module.from_yaml(mod)
+                    if not self._hasattr(bpyaml, 'modules') or bpyaml.modules == None:
+                        bpyaml.modules = module.Module.from_yaml_list([tempMod])
+                    else:
+                        bpyaml_modules = self._merge(bpyaml.modules, tempMod)
+                        bpyaml.modules = module.Module.from_yaml_list(bpyaml_modules)
+                else:
+                    errors.append(event.ValidationEvent(event.BPError, 'Unknown module section: ' + str(mod)))
         
         os.chdir(cwd)
         return (bpyaml, errors)

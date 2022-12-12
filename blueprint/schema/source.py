@@ -70,8 +70,8 @@ class GitSource:
     def to_yaml(self):
         # yaml.encoding = None
         errors = self.validate(event.BPWarning)
-        eprint(errors)
-        return yaml.dump(self, sort_keys=False)
+        # eprint(errors)
+        return (yaml.dump(self, sort_keys=False), errors)
 
     @classmethod
     def from_yaml(cls, data):
@@ -132,8 +132,8 @@ class CatalogSource:
     def to_yaml(self):
         # yaml.encoding = None
         errors = self.validate(event.BPWarning)
-        eprint(errors)
-        return yaml.dump(self, sort_keys=False)
+        # eprint(errors)
+        return (yaml.dump(self, sort_keys=False), errors)
 
     @classmethod
     def from_yaml(cls, data):
@@ -201,8 +201,8 @@ class TemplateSource(dict):
     def to_yaml(self):
         # yaml.encoding = None
         errors = self.validate(event.BPWarning)
-        eprint(errors)
-        return yaml.dump(self, sort_keys=False)
+        # eprint(errors)
+        return (yaml.dump(self, sort_keys=False), errors)
 
     @classmethod
     def from_yaml(cls, data):

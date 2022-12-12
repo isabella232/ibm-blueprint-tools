@@ -42,7 +42,10 @@ def main(argv):
    if len(errors) > 0:
       eprint(errors)
 
-   out_yaml_str = bp.to_yaml_str()
+   (out_yaml_str, errors) = bp.to_yaml_str()
+   if len(errors) > 0:
+      eprint(errors)
+
 
    if output_blueprint_file == None or output_blueprint_file == '':
       print(out_yaml_str)

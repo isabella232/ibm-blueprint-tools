@@ -25,10 +25,13 @@ import argparse
 from os.path import exists
 from pathlib import Path
 
-from blueprint.validate import validator
+from blueprint.validate import schema_validator
+from blueprint.validate import blueprint_validator
 from blueprint.merge import manifest
 from blueprint.sync import bpsync
 from blueprint.run import bprunner
+from blueprint.lib import bfile
+from blueprint.lib import event
 from blueprint.circuit import bpdraw as viz
 from blueprint.circuit import schem_draw as ic
 
@@ -58,6 +61,7 @@ def main():
     validate.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for input files', default=None)
     validate.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
     validate.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
+    validate.add_argument('-j', '--log-json', action='store_false', help='logs error messages in json format')
 
     draw.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint configuration yaml file', default=None)
     draw.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for input files', default=None)
@@ -66,12 +70,14 @@ def main():
     draw.add_argument('-f', '--out-format', choices=["png", "jpg", "svg", "pdf", "dot"], required=False, help='format of the blueprint drawing file ("png", "jpg", "svg", "pdf", "dot")', default="png")
     draw.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
     draw.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
+    draw.add_argument('-j', '--log-json', action='store_false', help='logs error messages in json format')
 
     merge.add_argument('-m', '--manifest-file', type=str, required=True, help='input blueprint manifest file', default=None)
     merge.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for input files', default=None)
     merge.add_argument('-o', '--out-file', type=str, required=True, help='output blueprint configuration yaml file', default=None)
     merge.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
     merge.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
+    merge.add_argument('-j', '--log-json', action='store_false', help='logs error messages in json format')
 
     # generate.add_argument('-p', '--python-file', type=str, required=True, help='Python file used to describe the blueprint yaml', default=None)
     # generate.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for python files', default='.')
@@ -85,6 +91,7 @@ def main():
     sync.add_argument('-w', '--working-dir', type=str, required=True, help='working directory for the intermediate files', default='.')
     sync.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
     sync.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
+    sync.add_argument('-j', '--log-json', action='store_false', help='logs error messages in json format')
 
     run.add_argument('-c', '--sub-command', choices= ['init', 'plan', 'apply', 'destroy'], required=True, help='blueprint command', default=None)
     run.add_argument('-d', '--dry-run', action='store_false', help='dry run the command, to preview outcome', default=None)
@@ -95,6 +102,7 @@ def main():
     run.add_argument('-o', '--out-file', type=str, required=False, help='output blueprint file', default=None)
     run.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
     run.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
+    run.add_argument('-j', '--log-json', action='store_false', help='logs error messages in json format')
 
     # Execute the parse_args() method
     args = arg_parser.parse_args()
@@ -121,12 +129,12 @@ def main():
             logrLevel = logging.ERROR
         else:
             logrLevel = logging.WARNING
-        
-        # logr.setLevel(logrLevel)
-        
+                    
         logging.basicConfig(filename = log_file, format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', encoding='utf-8', level=logrLevel)
     else:
         logging.basicConfig(filename = "logfile.log", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', encoding='utf-8', level=logging.INFO)
+
+    log_json_format = args.log_json
 
     if args.command == 'validate':
         if args.bp_file:
@@ -152,7 +160,23 @@ def main():
 
             logr.info("Validate - " + bp_filename)
             print("Validate - " + bp_filename)
-            validator.Validator(bp_filename)
+            bv = schema_validator.SchemaValidator(bp_filename)
+            (msg, err) = bv.validate()
+            if err != None:
+                eprint(err)
+            else:
+                print(msg)
+            
+            logr.info("Advanced validation - " + bp_filename)
+            print("Advanced validation - " + bp_filename)
+            bp = bfile.FileHelper.load_blueprint(bp_filename)
+            if bp == None:
+                eprint("Error loading blueprint, for advanced validation")
+            else:
+                bpv = blueprint_validator.BlueprintValidator()
+                errors = bpv.validate_blueprint(bp)
+                if errors != None:
+                    eprint(event.format_events(errors, event.Format.Table if log_json_format else event.Format.Json))
         else:
             eprint("Blueprint configuration file parameter is required")
 
@@ -239,10 +263,14 @@ def main():
             bp_manifest = manifest.BlueprintManifest.from_yaml_file(bp_manifest)
             (bp, errors) = bp_manifest.generate_blueprint()
             if len(errors) > 0:
-                eprint(errors)
+                eprint("Error generating blueprints from manifest:")
+                eprint(event.format_events(errors, event.Format.Table if log_json_format else event.Format.Json))
 
-            out_yaml_str = bp.to_yaml_str()
+            (out_yaml_str, errors) = bp.to_yaml_str()
             logr.debug(out_yaml_str)
+            if len(errors) > 0:
+                eprint("Validation errors:")
+                eprint(event.format_events(errors, event.Format.Table if log_json_format else event.Format.Json))
 
             if output_blueprint_file == None or output_blueprint_file == '':
                 print(out_yaml_str)
@@ -307,8 +335,10 @@ def main():
             bm = bpsync.BlueprintMorphius.from_yaml_file(bp_filename)
             bp = bm.sync_blueprint(working_dir, annotate = True)
 
-            out_yaml_str = bp.to_yaml_str()
+            (out_yaml_str, errors) = bp.to_yaml_str()
             logr.debug(out_yaml_str)
+            if len(errors) > 0:
+                eprint(event.format_events(errors, event.Format.Table if log_json_format else event.Format.Json))
 
             if output_blueprint_file == None or output_blueprint_file == '':
                 print(out_yaml_str)
@@ -410,7 +440,10 @@ def main():
             else:
                 logr.error("Invalid command name")
 
-            bp_yaml_str = br.bp.to_yaml_str()
+            (bp_yaml_str, errors) = br.bp.to_yaml_str()
+            if len(errors) > 0:
+                eprint(event.format_events(errors, event.Format.Table if log_json_format else event.Format.Json))
+
             logr.debug(bp_yaml_str)
             logr.debug("Module data: \n" + str(br.module_data))
 

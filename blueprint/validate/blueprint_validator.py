@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from blueprint.lib.dag import BlueprintGraph
 from blueprint.lib.event import ValidationEvent
 from blueprint.lib.event import BPError
 from blueprint.lib.event import BPWarning
@@ -22,6 +21,7 @@ import logging
 logr = logging.getLogger(__name__)
 
 class BlueprintValidator:
+
     def validate_blueprint(self, bp, level=BPError):
         bperrors = []
         logr.debug("Validating blueprint name: " + bp.name)

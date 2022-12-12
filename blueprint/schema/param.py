@@ -16,7 +16,7 @@ import yaml
 import sys
 
 from blueprint.lib import event
-from blueprint.lib import validator
+from blueprint.validate import blueprint_validator
 
 from blueprint.lib.logger import logr
 # import logging
@@ -74,7 +74,7 @@ class Parameter(dict):
             del self.value
 
     def validate(self, level=event.BPError):
-        param_validator = validator.ParameterValidator()
+        param_validator = blueprint_validator.ParameterValidator()
         return param_validator.validate_param(self, level)
 
     def set_value(self, val):
@@ -131,8 +131,8 @@ class Input (Parameter):
     def to_yaml(self):
         # yaml.encoding = None
         errors = self.validate(event.BPWarning)
-        eprint(errors)
-        return yaml.dump(self, sort_keys=False)
+        # eprint(errors)
+        return (yaml.dump(self, sort_keys=False), errors)
 
     @classmethod
     def from_yaml(cls, yaml_data):
@@ -165,7 +165,7 @@ class Input (Parameter):
         return pars
 
     def validate(self, level=event.BPError):
-        param_validator = validator.ParameterValidator()
+        param_validator = blueprint_validator.ParameterValidator()
         return param_validator.validate_input(self, level)
 
     def set_value(self, val):
@@ -218,8 +218,8 @@ class Output (Parameter):
     def to_yaml(self):
         # yaml.encoding = None
         errors = self.validate(event.BPWarning)
-        eprint(errors)
-        return yaml.dump(self, sort_keys=False)
+        # eprint(errors)
+        return (yaml.dump(self, sort_keys=False), errors)
 
     @classmethod
     def from_yaml(cls, yaml_data):
@@ -254,7 +254,7 @@ class Output (Parameter):
         return pars
 
     def validate(self, level=event.BPError):
-        param_validator = validator.ParameterValidator()
+        param_validator = blueprint_validator.ParameterValidator()
         return param_validator.validate_output(self, level)
 
     def set_value(self, val):
@@ -308,8 +308,8 @@ class Setting (Parameter):
     def to_yaml(self):
         # yaml.encoding = None
         errors = self.validate(event.BPWarning)
-        eprint(errors)
-        return yaml.dump(self, sort_keys=False)
+        # eprint(errors)
+        return (yaml.dump(self, sort_keys=False), errors)
 
     @classmethod
     def from_yaml(cls, yaml_data):
@@ -345,7 +345,7 @@ class Setting (Parameter):
 
 
     def validate(self, level=event.BPError):
-        param_validator = validator.ParameterValidator()
+        param_validator = blueprint_validator.ParameterValidator()
         return param_validator.validate_setting(self, level)
 
     def set_value(self, val):

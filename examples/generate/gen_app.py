@@ -41,8 +41,11 @@ def main(argv):
                 eprint(errors)
         
         elif menu_choice == 2:
-            bpyaml = bp.to_yaml_str()
-            print(bpyaml)
+            (bpyaml, errors) = bp.to_yaml_str()
+            if len(errors) > 0:
+                eprint(errors)
+            else:
+                print(bpyaml)
         
         elif menu_choice == 3:
             sample_inputs = bp.generate_input_file()
