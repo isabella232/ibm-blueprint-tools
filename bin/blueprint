@@ -29,7 +29,7 @@ from blueprint.validate import validator
 from blueprint.merge import manifest
 from blueprint.sync import bpsync
 from blueprint.run import bprunner
-from blueprint.circuit import draw as viz
+from blueprint.circuit import bpdraw as viz
 from blueprint.circuit import schem_draw as ic
 
 from blueprint.lib.logger import logr
