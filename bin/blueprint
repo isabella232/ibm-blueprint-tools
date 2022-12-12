@@ -206,15 +206,12 @@ def main():
                     return -1
 
             if output_draw_file == None or len(output_draw_file) == 0 or os.path.exists(output_draw_file) == False:
-                print('Error in output file : ' + str(output_draw_file))
-                print('Using "out_blueprint" as the output file')
-                logr.error('Error in output file : ' + str(output_draw_file))
-                output_draw_file = "out_blueprint"
+                print('Output file path has not defined or path not exists. Default to ' + str(output_draw_file))
+                logr.error('Output file path has not defined or path not exists. Default to ' + str(output_draw_file))
 
             if output_draw_format == None or output_draw_format not in ["png", "jpg", "svg", "pdf", "dot"]:
                 print('Invalid output file format, using default : png')
                 logr.error('Invalid output file format, using default : png')
-                output_draw_format = "png"
 
             logr.info("Draw - " + bp_filename)
             print("Draw - " + bp_filename)
