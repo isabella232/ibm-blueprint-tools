@@ -3,7 +3,7 @@ import sys
 import getopt
 import logging
 
-from blueprint.circuit import draw
+from blueprint.circuit import bpdraw
 from blueprint.lib import dag
 
 from blueprint.lib.logger import logr
@@ -35,7 +35,7 @@ def main(argv):
          eprint("Usage: \n\n  draw.py -b <blueprint_file>")
          return
 
-   br = draw.BlueprintDraw(blueprint_file = blueprint_file)
+   br = bpdraw.BlueprintDraw(blueprint_file = blueprint_file)
    br.prepare()
    br.draw()
 

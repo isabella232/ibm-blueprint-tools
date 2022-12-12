@@ -29,6 +29,7 @@ from blueprint.validate import validator
 from blueprint.merge import manifest
 from blueprint.sync import bpsync
 from blueprint.run import bprunner
+from blueprint.circuit import bpdraw
 
 from blueprint.lib.logger import logr
 import logging
@@ -59,7 +60,7 @@ def main():
 
     draw.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint configuration yaml file', default=None)
     draw.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for input files', default=None)
-    draw.add_argument('-o', '--out-file', type=str, required=False, help='output blueprint drawing file', default="out_blueprint.png")
+    draw.add_argument('-o', '--out-file', type=str, required=False, help='output blueprint drawing file', default="out_blueprint")
     draw.add_argument('-f', '--out-format', choices=["png", "jpg", "svg", "pdf", "dot"], required=False, help='format of the blueprint drawing file ("png", "jpg", "svg", "pdf", "dot")', default="png")
     draw.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
     draw.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
@@ -178,19 +179,16 @@ def main():
                     return -1
 
             if output_draw_file == None or len(output_draw_file) == 0 or os.path.exists(output_draw_file) == False:
-                print('Error in output file : ' + str(output_draw_file))
-                print('Using "out_blueprint.png" as the output file')
-                logr.error('Error in output file : ' + str(output_draw_file))
-                output_draw_file = "out_blueprint.png"
+                print('Output file path has not defined or path not exists. Default to ' + str(output_draw_file))
+                logr.error('Output file path has not defined or path not exists. Default to ' + str(output_draw_file))
 
             if output_draw_format == None or output_draw_format not in ["png", "jpg", "svg", "pdf", "dot"]:
                 print('Invalid output file format, using default : png')
                 logr.error('Invalid output file format, using default : png')
-                output_draw_format = "png"
 
             logr.info("Validate - " + bp_filename)
             print("Validate - " + bp_filename)
-            bd = draw.BlueprintDraw(blueprint_file = bp_filename)
+            bd = bpdraw.BlueprintDraw(blueprint_file = bp_filename)
             bd.prepare()
             bd.draw(output_draw_file, output_draw_format)
         else:
