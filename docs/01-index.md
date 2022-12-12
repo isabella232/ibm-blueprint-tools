@@ -1,7 +1,7 @@
-## How to ...
+# How to ...
 
 
-### Terminologies
+## Terminologies
 
 | Term         | Description |
 |--------------|-------------|
@@ -12,182 +12,23 @@
 
 ---
 
-### How to validate your `blueprint configuration file` ?
+## Scenarios
 
-You can use the following CLI to validate the `blueprint configuration file`. 
+| Sl | Scenario  | How to... |
+|----|-----------|-----------|
+| 1  | I have hand-coded a blueprint configuration file.  </br> * Can it be validated for its correctness and completeness (syntax and semantics) ?  | Refer to - [validate blueprint](./02-validate.md) </br>How to validate my `blueprint configuration file` ?  |
+| 2  | My python code generates a blueprint configuration file.  </br> * Can I validate the schema for its correctness and completeness, before generating the final blueprint yaml file ? | Refer to the code snippet in '[validate blueprint](./02-validate.md)'. |
+|    |           |           |
+| 3  | I have a very large cloud environment, with multiple terraform modules and complex input schema. It runs into 1000+ lines of yaml file.   I find it difficult to edit & update a single large blueprint configuration file. </br> * Can I break the blueprint yaml file into multiple parts, and work with them independently ? </br> * Can I combine the parts - validate, and visualize the resulting blueprint yaml file ? | Use the manifest file, and use [blueprint merge](./03-manifest.md) tool to combine multiple parts of a bluepring yaml file. </br>You can also try the `blueprint validate` & `blueprint draw` commands to validate & visualize the resulting blueprint yaml file |
+|    |           |           |
+| 4  | I am preparing a blueprint configuration file from scratch.  It is exhausting! I have to refer to multiple Terraform modules, find the input & output variables of each module, and transcode them into my blueprint file. </br> * Can I automatically generate a starter blueprint yaml file, from a collection of Git repo URLs pointing to the Terraform modules. | Refer to the [blueprint sync](./04-synchronize.md) tool to learn how to generate a `starter blueprint file` from a simple collection of Git repo URLs. |
+| 5  | My blueprint configuration file is not sync with the current version of Terraform modules.  I want to know the differences between the input/output configuration of the Terraform module (in the Git repo) and the corresponding entries in the blueprint configuration file. | Use the [blueprint sync](./04-synchronize.md) tool to find the difference and sync the module configuration definitions in the blueprint yaml file. |
+|    |           |            |
+| 6  | I am familiar with Python, and I want to program the IBM Cloud using Python, Blueprint and Terraform.  </br> * Can I generate the blueprint configuration file using reusable Python modules ? </br> * Can I run the blueprint commands locally (such as, init, plan, apply & destroy action) - using the local Terraform CLI ? | Refer to the [blueprint program](./05-program.md) tool to learn about - how to program the Cloud iusing Python and Blueprint.  </br>Further, refer to the code snippets in the [blueprint run](./06-run.md) tool to run the `blueprint init`, `blueprint plan`, `blueprint apply` & `blueprint destroy` commands. |
+|    |           |            |
+| 7  | It takes a lot of effort and time, to test the blueprint configuration file with IBM Cloud Schematics.  </br> * Can the development cycle time be reduced by performing a `dry-run` of the blueprint configuration file ? </br> * Can I use the local version of Terraform CLI to test the blueprint yaml, instead of using IBM Cloud Schematics ? | Use the `blueprint run` tool to dry-run & run the blueprint configuration file, using the local Terraform CLI |
+|    |           |            |
+| 8  | My blueprint configuration file has multiple modules, and there are several dependencies between the module input and output variables.  Since, my blueprint configuration file is very large (500+ lines), it is very difficult to understand the dependencies between them.  </br> * Can I visualize the dependencies between the modules, using a graph / network diagram ? </br> * Can I see the validation errors be annotated on the network diagram, for a quick visual analysis ? | Refer to the [blueprint draw](./07-visualize.md) tool description, to understand the differen ways of displaying the blueprint configuration file. |
 
-> blueprint validate [-h] -b BP_FILE [-w WORKING_DIR]
-
-It performs two levels of validation
-1. YAML Schema validation - to verify whether your blueprint yaml file, is compliant to the prescribed schema
-2. Advanced semantic validation - to verify whether the input / output variable definitions are used correctly, are they linked properly, etc.
-
-The result of validation can be obtained in tabular or json format.
-
-In addition, you can progamatically validate your `blueprint configuration file` using the following Python modules.
-* blueprint.validate.schema_validator.SchemaValidator
-* blueprint.validate.blueprint_validator.BlueprintValidator
-
-As illustrated in the followint code snippet:
-
-```python
-    input_file = 'blueprint.yaml' 
-
-    # Perform Blueprint schema validation               #
-    ##=================================================##
-    bsv = schema_validator.SchemaValidator(input_file)
-    (msg, err) = bsv.validate()
-    if err != None:
-        eprint(err)
-    
-    # Load Blueprint yaml file, for advanced validation #
-    ##=================================================##
-    bp = bfile.FileHelper.load_blueprint(input_file)
-    if bp == None:
-        eprint("Error in loading the blueprint file")
-
-    # Perform advanced semantic validation of Blueprint #
-    ##=================================================##
-    bpv = blueprint_validator.BlueprintValidator()
-    err = bpv.validate_blueprint(bp)
-    if err != None:
-        eprint(event.format_events(err, event.Format.Table))
-
-```
-
----
-
-### How to generate `blueprint configuration file` from a `manifest file` ?
-
-When you try to codify the automation for a large cloud environment in a `blueprint configuration file`, comprising of multiple modules, inputs & outputd sections - it can soon become very large and complex to manage.  The `blueprint manifest file` aims to simplify this experience using a simple easily consumable format, such as the following:
-
-```yaml
-name: "SAP on secure Power Virtual Servers"
-schema_version: "1.0.0"
-description: "Solution to deploy SAP on secure Power Virtual Servers"
-type: "blueprint"
-inputs:
-  - name: test_ibmcloud_api_key
-    type: string
-    sensitive: true
-    required: true
-  - ${{inputs-creds.yaml}}
-  - ${{./inputs-resource-meta.yaml}}
-outputs:
-  - ${{outputs-bp.yaml}}
-modules:
-  - ${{./mod-secure-infrastructure.yaml}}
-  - ${{./mod-power-infrastructure.yaml}}
-  - ${{./mod-sap-secure-powervs.yaml}}
-```
-
-In the above example, the `inputs-resource-meta.yaml` will be a separate yaml file, with the following content:
-
-```yaml
-inputs:
-  - name: prefix
-    default: secure-vpc
-    description: A unique identifier for resources
-    type: string
-    optional: true
-  - name: powervs_zone
-    description: powervs zone
-    type: string
-    default: eu-de-1
-    required: true
-  - name: powervs_resource_group_name
-    description: powervs resource group name
-    type: string
-    default: Default
-    required: true
-  - name: region
-    default: us-east
-    type: string
-    description: Region where vpc will be created
-    optional: true
-```
-
-You can use the `blueprint merge` command to expand the manifest file into a complete `blueprint configuration file`, on demand.  This can easily simplify the task of managing a large blueprint configuration file - by dividing them into smaller parts, and work with them independently.
-
-> blueprint merge [-h] -m MANIFEST_FILE [-w WORKING_DIR] [-o OUT_FILE]
-
-**Next step:**
-* You can use the `blueprint validate` tool to validate the blueprint yaml file.
-* You can use the `blueprint draw` tool to visualize the connections - as you edit / update the blueprint yaml file.
-
----
-
-### How to prepare a `blueprint configuration file` using terraform modules sourced from git repositories ?
-
-When you wish to prepare a `blueprint configuation file` from scratch, you will start with the Terraform modules.  You must analyze the Terraform modules to understand the input & output definitions.  Further, you must accurately transcribe these input / output variable names, type & description to the new blueprint yaml file.
-
-What-if, you have a tool that can reads the terraform modules from the git repository, identifies the inputs & output variables and generate a skeleton blueprint configuration file, from the following blueprint lite file:
-```yaml
-name: "Blueprint Basic Example"
-type: "blueprint"
-schema_version: "1.0.0"
-description: "Simple blueprint to demonstrate module linking"
-git_sources:
-  - git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/cloudless"
-    git_branch: main
-  - git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/local-file"
-    git_branch: main
-  - git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/medium"
-    git_branch: main
-  - git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/rg-tf"
-    git_branch: main
-  - git_repo_url: "https://github.com/albee-jhoney/test-tf/tree/main/simple"
-    git_branch: main
-```
-
-Try the following `blueprint sync` command:
-
-> blueprint sync [-h] -b BP_FILE [-s SOURCE_DIR] -o OUT_FILE -w WORKING_DIR 
-
-The output yaml file will be prefilled with all the modules, its inputs & outputs.  You can review the content, and start wiring the output & input variables.  This tool WILL NOT do the following:
-* Add input/output variables, at the blueprint level
-* Add `value` to the input variables
-* Add `type` to the input / output variables
-* Automatically wire or connect the values of the input / output variables
-
-**Next step:**
-* You can use the `blueprint draw` tool to visualize the connections - as you edit / update the blueprint yaml file.
-* You can use the `blueprint validate` tool to validate the blueprint yaml file.
-
----
-
-### How to sync the input/output definitions in the `blueprint configuration file` with the corresponding vars/outputs of the terraform modules in git repositories ?
-
-In the lifecycle of `blueprint configuration file`, the input/output definitions of the Terraform modules can go out of sync.  In other words, the Terraform module developer may change the inputs variable names, add a new output variable, or change the variable type, etc.  
-
-The following tool can help you to sync the blueprint definition.
-
-> blueprint sync [-h] -b BP_FILE [-s SOURCE_DIR] -o OUT_FILE -w WORKING_DIR 
-
-The output file will have annotation to add, delete or update the input / output variables used in the module definitions.
-
----
-
-### How to codify a `blueprint configuration file` in Python ?
-
-*Docs: Work in progress*
-
----
-
-### How to run the  `blueprint configuration file` using the local Terraform CLI ?
-
-*Docs: Work in progress*
-
----
-
-### How to dry-run the `blueprint configuration file` using the local Terraform CLI ?
-
-*Docs: Work in progress*
-
----
-
-### How to visualize the `blueprint configuration file` ?
-
-*Docs: Work in progress*
 
 ---
