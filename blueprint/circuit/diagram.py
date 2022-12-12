@@ -34,7 +34,8 @@ class BlueprintPane(Cluster):
                 description: str = "",
                 inputs: List[str] = [], 
                 outputs: List[str] = [],
-                settings: List[str] = []
+                settings: List[str] = [],
+                **kwargs
             ):
         """
         BlueprintPane represents a Blueprint cluster context.
@@ -51,10 +52,14 @@ class BlueprintPane(Cluster):
                     "style": "dashed",
                     "direction": "LR"
                 }
-        super().__init__(label = name, direction = "LR", graph_attr = graph_attr)
+        super().__init__(label = name, direction = "LR", graph_attr = graph_attr, **kwargs)
         diagrams.setcluster(self)
-        self.bp_node = ModulePane(name, description,
-                inputs, outputs,settings, 
+        self.in_bp_node = ModulePane('in:'+name, description,
+                inputs, [], settings, 
+                type = "Blueprint")
+
+        self.out_bp_node = ModulePane('out:'+name, description,
+                [], outputs, [], 
                 type = "Blueprint")
 
     def _format_blueprint_label(self, name, description, inputs, outputs, settings):
@@ -105,7 +110,8 @@ class ModulePane(Node):
                 inputs: List[str] = [], 
                 outputs: List[str] = [],
                 settings: List[str] = [], 
-                type: str = "Module"
+                type: str = "Module",
+                **kwargs
             ):
         """
         ModulePane represents a blueprint component.
@@ -132,7 +138,7 @@ class ModulePane(Node):
             "fontcolor": "white",
         }
         
-        super().__init__(**node_attributes)
+        super().__init__(**node_attributes, **kwargs)
     
     def _module_color(self, type):
         if type.lower() == "module":
@@ -147,7 +153,7 @@ class ModulePane(Node):
         Create a graphviz label string for ModulePane - name, inputs, outputs, settings;
         """
         title = f'<font point-size="14"><b>{html.escape(name)}</b></font><br/>'
-        subtitle = f'<font point-size="8">[{html.escape(key)}]<br/></font>' if key else ""
+        subtitle = f'<font point-size="9">[{html.escape(key)}]<br/></font>' if key else ""
         subtitle += f'<font point-size="12">-------------------------------<br/></font>'
         subtitle += f'<font point-size="9">[{_format_text(description)}]<br/></font>' if description else ""
         text = f'<font point-size="12">-------------------------------<br/></font>' if description else ""
@@ -207,7 +213,9 @@ class Relation(Edge):
     def __init__(
                 self,
                 from_param: str = None, 
-                to_param: str = None
+                to_param: str = None,
+                edge_attribtues = {"style": "dashed", "color": "gray60"},
+                **kwargs
             ):
         """
         Relation connects the output of one module to inputs of another module.
@@ -216,12 +224,11 @@ class Relation(Edge):
         :param to_param: To module input parameter name
         """
         self.name = f'{from_param} >> {to_param}'
-        edge_attribtues = {"style": "dashed", "color": "gray60"}
         if from_param and to_param:
             label = from_param + '-->>--' + to_param
             edge_attribtues.update({"label": self._format_wire_label(label)})
         
-        super().__init__(**edge_attribtues)
+        super().__init__(**edge_attribtues, **kwargs)
 
     def _format_wire_label(self, description):
         """
@@ -230,7 +237,7 @@ class Relation(Edge):
         wrapper = textwrap.TextWrapper(width=24, max_lines=3)
         lines = [html.escape(line) for line in wrapper.wrap(description)]
         text = "<br/>".join(lines)
-        return f'<<font point-size="10">{text}</font>>'
+        return f'<<font point-size="12">{text}</font>>'
 
     def __str__(self) -> str:
         return str(self.name)
