@@ -35,6 +35,10 @@ class FileHelper:
 
     @classmethod
     def discover(cls, filename):
+        """
+        Discover the type of input file.  
+        It returns BPFile, BPManifest, BPLite or OtherDataFile
+        """
         with open(filename) as f:
             yaml_str = f.read()
             yaml_data = yaml.load(yaml_str, yaml.SafeLoader)

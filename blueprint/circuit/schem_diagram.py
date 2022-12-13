@@ -18,6 +18,10 @@ class BlueprintIc:
         BlueprintIc represents a Blueprint cluster context.
 
         :param name: Blueprint name.
+        :param description: Blueprint description 
+        :param inputs: List of input parameter names for the Blueprint
+        :param outputs: List of output parameter names for the Blueprint
+        :param settings: List of env setting parameter names for the Blueprint
         """        
         self.name = name
         self.width = width
@@ -81,7 +85,7 @@ class ModuleIc:
                 settings: List[str] = [], 
                 **kwargs):
         """
-        ModulePane represents a blueprint component.
+        ModulePane represents a module component, in a blueprint
 
         :param name: Name of the module.
         :param inputs: List of input parameter names 

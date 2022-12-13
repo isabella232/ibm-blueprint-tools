@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from blueprint.lib.event import ValidationEvent
-from blueprint.lib.event import BPError
-from blueprint.lib.event import BPWarning
+from typing import List 
+
+from blueprint.lib import event
 
 from blueprint.lib.logger import logr
 import logging
@@ -22,7 +22,7 @@ logr = logging.getLogger(__name__)
 
 class BlueprintValidator:
 
-    def validate_blueprint(self, bp, level=BPError):
+    def validate_blueprint(self, bp, level=event.BPError) -> List[event.ValidationEvent]:
         bperrors = []
         logr.debug("Validating blueprint name: " + bp.name)
         # validate all modules (parameters, bp-references, input-types)
@@ -31,7 +31,7 @@ class BlueprintValidator:
             for m in bp.modules:
                 mverror = mod_validator.validate_module(m, level)
                 if len(mverror) > 0:
-                    e = ValidationEvent(BPError, "Error in blueprint modules", bp, m, mverror)
+                    e = event.ValidationEvent(event.BPError, "Error in blueprint modules", bp, m, mverror)
                     bperrors.append(e)
                     logr.debug("Found issues in module - " + m.name)
                     logr.debug(e)
@@ -105,8 +105,8 @@ class BlueprintValidator:
                 unused_bp_vars.add(bp_inputs)      
 
         if len(unused_bp_vars) > 0:
-            if level >= BPWarning:
-                e = ValidationEvent(BPWarning, "Unused input parameters declared in the blueprint", bp, list(unused_bp_vars))
+            if level >= event.BPWarning:
+                e = event.ValidationEvent(event.BPWarning, "Unused input parameters declared in the blueprint", bp, list(unused_bp_vars))
                 bperrors.append(e)
                 logr.warning(str(e))
         #===============================================
@@ -117,8 +117,8 @@ class BlueprintValidator:
                     undeclared_bp_vars.add(mod_inputs)      
 
         if len(undeclared_bp_vars) > 0:
-            if level >= BPError:
-                e = ValidationEvent(BPError, "Undeclared blueprint parameters used by modules", bp, list(undeclared_bp_vars))
+            if level >= event.BPError:
+                e = event.ValidationEvent(event.BPError, "Undeclared blueprint parameters used by modules", bp, list(undeclared_bp_vars))
                 bperrors.append(e)
                 logr.error(str(e))
         #===============================================
@@ -129,8 +129,8 @@ class BlueprintValidator:
                     undeclared_mod_vars.add(mod_inputs)      
 
         if len(undeclared_mod_vars) > 0:
-            if level >= BPError:
-                e = ValidationEvent(BPError, "Undeclared output parameters used by modules", bp, list(undeclared_mod_vars))
+            if level >= event.BPError:
+                e = event.ValidationEvent(event.BPError, "Undeclared output parameters used by modules", bp, list(undeclared_mod_vars))
                 bperrors.append(e)
                 logr.error(str(e))
         #===============================================
@@ -140,22 +140,22 @@ class BlueprintValidator:
                 unused_mod_vars.add(mod)
 
         if len(unused_mod_vars) > 0:
-            if level >= BPWarning:
-                e = ValidationEvent(BPWarning, "Unused output parameters declared in the modules", bp, list(unused_mod_vars))
+            if level >= event.BPWarning:
+                e = event.ValidationEvent(event.BPWarning, "Unused output parameters declared in the modules", bp, list(unused_mod_vars))
                 bperrors.append(e)
                 logr.warning(str(e))
         #===============================================
         if len(uninit_bp_output_vals) > 0:
-            if level >= BPError:
-                e = ValidationEvent(BPError, "Blueprint output parameters is left hanging", bp, list(uninit_bp_output_vals))
+            if level >= event.BPError:
+                e = event.ValidationEvent(event.BPError, "Blueprint output parameters is left hanging", bp, list(uninit_bp_output_vals))
                 bperrors.append(e)
                 logr.error(str(e))
         #===============================================
         # are there any circular references between modules
         dag = bp.build_dag()
         if dag.isCyclic() == True:
-            if level >= BPError:
-                e = ValidationEvent(BPError, "Found circular dependencies between modules", bp, dag.getCyclicPath())
+            if level >= event.BPError:
+                e = event.ValidationEvent(event.BPError, "Found circular dependencies between modules", bp, dag.getCyclicPath())
                 bperrors.append(e)
                 logr.error(str(e))
         #===============================================
@@ -169,7 +169,7 @@ class BlueprintValidator:
 ##====================================================================##
 
 class ModuleValidator:
-    def validate_module(self, mod, level=BPError):
+    def validate_module(self, mod, level=event.BPError):
         param_names = []
         duplicate_names = []
         value_refs = []
@@ -236,15 +236,15 @@ class ModuleValidator:
         ret_errors = []
         # parameters with empty input values
         if len(invalid_params) > 0:
-            if level >= BPError:
-                e = ValidationEvent(BPError, "Error in the input parameters for the modules", self, invalid_params, mverrors)
+            if level >= event.BPError:
+                e = event.ValidationEvent(event.BPError, "Error in the input parameters for the modules", self, invalid_params, mverrors)
                 ret_errors.append(e)
                 logr.error(str(e))
 
         # duplicate parameters (inputs, outputs, settings) with same name
         if len(duplicate_names) > 0:
-            if level >= BPWarning:
-                e = ValidationEvent(BPWarning, "Duplicate parameter names in the module", self, duplicate_names, mverrors)
+            if level >= event.BPWarning:
+                e = event.ValidationEvent(event.BPWarning, "Duplicate parameter names in the module", self, duplicate_names, mverrors)
                 ret_errors.append(e)
                 logr.warning(str(e))
 
@@ -255,8 +255,8 @@ class ModuleValidator:
                 invalid_self_references.append(val)
 
         if len(invalid_self_references) > 0:
-            if level >= BPError:
-                e = ValidationEvent(BPError, "Self referential values in the module", self, invalid_self_references, mverrors)
+            if level >= event.BPError:
+                e = event.ValidationEvent(event.BPError, "Self referential values in the module", self, invalid_self_references, mverrors)
                 ret_errors.append(e)
                 logr.error(str(e))
 
@@ -266,42 +266,42 @@ class ModuleValidator:
 
 class ParameterValidator:
 
-    def validate_param(self, param, level=BPError):
+    def validate_param(self, param, level=event.BPError):
         pverrors = []        
         if hasattr(param, "type") and (param.type != None and param.type.lower() == "boolean"):
             if hasattr(param, "value") and param.value != None:
                 if isinstance(param.value, str) and (param.value.lower() == "true" or param.value.lower() == "false"):
                     param.value = True if param.value.lower() == "true" else False
                 if not (param.value == True or param.value == False) :
-                    if level >= BPError:
-                        e = ValidationEvent(BPError, "Type mismatch for boolean parameter", param, param.value)
+                    if level >= event.BPError:
+                        e = event.ValidationEvent(event.BPError, "Type mismatch for boolean parameter", param, param.value)
                         pverrors.append(e)
                         logr.error(str(e))
         return pverrors
 
-    def validate_input(self, param, level=BPError):
+    def validate_input(self, param, level=event.BPError):
         pverrors = self.validate_param(param, level)
         if hasattr(param, "value") and param.value == None:
-            if level >= BPWarning:
-                e = ValidationEvent(BPWarning, "Input parameter is not initialized with any value", param, param.value)
+            if level >= event.BPWarning:
+                e = event.ValidationEvent(event.BPWarning, "Input parameter is not initialized with any value", param, param.value)
                 pverrors.append(e)
                 logr.warning(str(e))
         return pverrors
 
-    def validate_output(self, param, level=BPError):
+    def validate_output(self, param, level=event.BPError):
         pverrors = self.validate_param(param, level)
         # if hasattr(param, "value") and param.value == None:
-        #     if level >= BPWarning:
-        #         ValidationEvent(BPWarning, "Output parameter is not initialized with any value", param, param.value)
+        #     if level >= event.BPWarning:
+        #         event.ValidationEvent(event.BPWarning, "Output parameter is not initialized with any value", param, param.value)
         #         pverrors.append(e)
         #         logr.warning(str(e))
         return pverrors
 
-    def validate_setting(self, param, level=BPError):
+    def validate_setting(self, param, level=event.BPError):
         pverrors = self.validate_param(param, level)
         if param.value == None:
-            if level >= BPWarning:
-                e = ValidationEvent(BPWarning, "Setting parameter is not initialized with any value", param, param.value)
+            if level >= event.BPWarning:
+                e = event.ValidationEvent(event.BPWarning, "Setting parameter is not initialized with any value", param, param.value)
                 pverrors.append(e)
                 logr.warning(str(e))
         return pverrors

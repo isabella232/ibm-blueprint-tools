@@ -13,6 +13,9 @@
 # limitations under the License.
 
 import sys
+
+from typing import List
+
 import schemdraw
 import schemdraw.elements as elm
 import networkx as nx
@@ -20,6 +23,7 @@ import networkx as nx
 from blueprint.schema import blueprint
 from blueprint.schema import module
 from blueprint.lib import bfile
+from blueprint.lib import event
 from blueprint.sync import bpsync
 from blueprint.merge import manifest
 
@@ -97,13 +101,27 @@ def bound(node_pos):
 
 class BlueprintBoard:
 
-    def __init__(self, blueprint_file: str = None):
+    def __init__(self, blueprint_file: str = None, blueprint_object: blueprint.Blueprint = None):
+        """
+        BlueprintBoard - a breadboard to draw the Blueprint circuit
+
+        :param blueprint_file: Name of the Blueprint file ()
+        :param blueprint_object: Blueprint object
+
+        Initialized using one-of blueprint_file or blueprint_object; these parameters are mutually exclusive
+        """ 
         self.bp_file    = blueprint_file
-        self.bp         = None # blueprint.Blueprint instance
+        self.bp         = blueprint_object # blueprint.Blueprint instance
         self.circuit    = None # circuit.Circuit instance
 
 
-    def prepare(self, width=24, height=10, working_dir = "."):
+    def prepare(self, width=24, height=10, working_dir = ".")  -> List[event.ValidationEvent]:
+        """
+        Prepare the Blueprint breadboard using the blueprint file as input, and build the circuit.
+
+        :param working_dir: Working directory used while processing the blueprint files and other intermediate / temporary files.
+        """
+        err = None
         if self.bp_file != None:
             filetype = bfile.FileHelper.discover(self.bp_file)
             if filetype == bfile.BPFile:
@@ -121,6 +139,12 @@ class BlueprintBoard:
                 (self.bp, errors) = bp_manifest.generate_blueprint()
             else:
                 eprint("Invalid blueprint file type")
+        elif (self.bp != None):
+            logr.info("The blueprint object is already primed")
+        else:
+            logr.error("The blueprint file & blueprint object is not initialized")
+            err = event.ValidationEvent(event.BPError, "BlueprintBoard: blueprint file & blueprint object is not initialized", self)
+            return [err]
 
         self.circuit = wirebus.Circuit(self.bp)
         self.circuit.read()
@@ -145,8 +169,27 @@ class BlueprintBoard:
             self.node_pos = transform(node_pos, self.max_width, self.max_height)
             (self.width, self.height) = bound(self.node_pos)
 
+        return err
 
-    def draw(self, shape='L', bend='n', arrow = '->', out_file = None, outformat = "png"):
+
+    def draw(self, shape='L', bend='n', arrow = '->', out_file = None, out_format = "png") -> List[event.ValidationEvent]:
+        """
+        Draw the Blueprint Configuation using SchemeDraw libraries
+
+        :param out_file: Name of the output blueprint image file (with full path)
+        :param out_format: Format of the output blueprint image file (png or jpg)
+        """
+
+        if self.bp == None:
+            logr.error("The blueprint object is not initialized & prepared")
+            err = event.ValidationEvent(event.BPError, "BlueprintBoard: blueprint object is not initialized & prepared", self)
+            return [err]
+
+        if self.circuit == None:
+            logr.error("The blueprint circuit is prepared; call prepare() before draw()")
+            err = event.ValidationEvent(event.BPError, "BlueprintBoard: blueprint circuit is prepared; call prepare() before draw()", self)
+            return [err]
+
         logr.info("Draw the blueprint yaml")
 
         d = schemdraw.Drawing()
@@ -219,4 +262,11 @@ class BlueprintBoard:
             if out_file.endswith('.png', '.svg', '.jpg'):
                 d.save(fname = out_file, transparent=False)
             else:
-                d.save(fname = out_file+'.png', transparent=False)
+                if out_format == None:
+                    d.save(fname = out_file+'.png', transparent=False)
+                elif out_format.endswith('png', 'svg', 'jpg'):
+                    d.save(fname = out_file+out_format, transparent=False)
+                else:
+                    d.save(fname = out_file+'.png', transparent=False)
+        
+        return None

@@ -16,16 +16,6 @@ def _format_text(text):
 
 #=======================================================================================#
 
-# def BlueprintPane(name, **kwargs):
-#     graph_attributes = {
-#         "label": html.escape(name),
-#         "bgcolor": "white",
-#         "margin": "16",
-#         "style": "dashed",
-#     }
-#     graph_attributes.update(kwargs)
-#     return Cluster(name, graph_attr=graph_attributes)
-
 class BlueprintPane(Cluster):
 
     def __init__(
@@ -41,8 +31,10 @@ class BlueprintPane(Cluster):
         BlueprintPane represents a Blueprint cluster context.
 
         :param name: Blueprint name.
-        :param direction: Data flow direction. Default is 'left to right'.
-        :param graph_attr: Provide graph_attr dot config attributes.
+        :param description: Blueprint description 
+        :param inputs: List of input parameter names for the Blueprint
+        :param outputs: List of output parameter names for the Blueprint
+        :param settings: List of env setting parameter names for the Blueprint
         """
 
         graph_attr = {
@@ -84,24 +76,6 @@ class BlueprintPane(Cluster):
 
 #=======================================================================================#
 
-# def ModulePane(name, inputs=[], outputs=[], settings=[], type="Module", **kwargs):
-#     line_count = len(inputs) + len(outputs) + len(settings)
-#     height = 0.5*line_count
-#     key = f"{type}"
-#     node_attributes = {
-#         "label": _format_module_label(name, key, inputs, outputs, settings),
-#         "labelloc": "u",
-#         "shape": "rect",
-#         "width": "2.6",
-#         "height": str(height),
-#         "fixedsize": "true",
-#         "style": "filled",
-#         "fillcolor": "dodgerblue3",
-#         "fontcolor": "white",
-#     }
-#     node_attributes.update(kwargs)
-#     return Node(**node_attributes)
-
 class ModulePane(Node):
     def __init__(
                 self, 
@@ -114,7 +88,7 @@ class ModulePane(Node):
                 **kwargs
             ):
         """
-        ModulePane represents a blueprint component.
+        ModulePane represents a module component in a blueprint
 
         :param name: Name of the module.
         :param inputs: List of input parameter names 
@@ -199,22 +173,13 @@ class ModulePane(Node):
     #         super().__rlshift__(other)
 
 #=======================================================================================#
-
-# def Relation(from_param="", to_param="", **kwargs):
-#     edge_attribtues = {"style": "dashed", "color": "gray60"}
-#     if from_param and to_param:
-#         label = from_param + '-->>--' + to_param
-#         edge_attribtues.update({"label": _format_wire_label(label)})
-#     edge_attribtues.update(kwargs)
-#     return Edge(**edge_attribtues)
-
 class Relation(Edge):
 
     def __init__(
                 self,
                 from_param: str = None, 
                 to_param: str = None,
-                edge_attribtues = {"style": "dashed", "color": "gray60"},
+                edge_attributes = {"style": "dashed", "color": "gray60"},
                 **kwargs
             ):
         """
@@ -222,13 +187,14 @@ class Relation(Edge):
 
         :param from_param: From module output parameter name
         :param to_param: To module input parameter name
+        :param edge_attributes: Drawing attributes for the edge
         """
         self.name = f'{from_param} >> {to_param}'
         if from_param and to_param:
             label = from_param + '-->>--' + to_param
-            edge_attribtues.update({"label": self._format_wire_label(label)})
+            edge_attributes.update({"label": self._format_wire_label(label)})
         
-        super().__init__(**edge_attribtues, **kwargs)
+        super().__init__(**edge_attributes, **kwargs)
 
     def _format_wire_label(self, description):
         """

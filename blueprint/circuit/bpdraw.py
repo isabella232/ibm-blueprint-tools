@@ -16,15 +16,20 @@ import os
 import sys
 import diagrams
 
+from typing import List
+
 from blueprint.schema import blueprint
 from blueprint.schema import module
 
 from blueprint.lib import bfile
+from blueprint.lib import event
 from blueprint.sync import bpsync
 from blueprint.merge import manifest
 
 from blueprint.circuit import bus
-from blueprint.circuit import diagram as diag
+from blueprint.circuit import bpdiagram as diag
+
+from blueprint.validate import blueprint_validator
 
 from blueprint.lib.logger import logr
 # import logging
@@ -36,14 +41,32 @@ def eprint(*args, **kwargs):
 
 class BlueprintDraw:
 
-    def __init__(self, blueprint_file: str = None):
+    def __init__(self, blueprint_file: str = None, blueprint_object: blueprint.Blueprint = None):
+        """
+        BlueprintDraw - a canvas to draw the Blueprint configuration
+
+        :param blueprint_file: Name of the Blueprint file ()
+        :param blueprint_object: Blueprint object
+
+        Initialized using one-of blueprint_file or blueprint_object; these parameters are mutually exclusive
+        """ 
+        if blueprint_file is not None and blueprint_object is not None:
+            raise ValueError("Must be initialized using one-of blueprint_file or blueprint_object, but not both")
+
         self.bp_file    = blueprint_file
-        self.bp         = None # blueprint.Blueprint instance
+        self.bp         = blueprint_object # blueprint.Blueprint instance
         self.circuit    = None # circuit.Circuit instance
 
 
-    def prepare(self,  working_dir = "."):
+    def prepare(self,  working_dir = ".") -> List[event.ValidationEvent]:
+        """
+        Prepare the BlueprintDraw canvas using the blueprint file as input, and build the circuit.
+
+        :param working_dir: Working directory used while processing the blueprint files and other intermediate / temporary files.
+        """
+        err = None
         if self.bp_file != None:
+            logr.info("Prepare the blueprint object using the blueprint yaml file")
             filetype = bfile.FileHelper.discover(self.bp_file)
             if filetype == bfile.BPFile:
                 print("file type: blueprint")
@@ -60,17 +83,45 @@ class BlueprintDraw:
                 (self.bp, errors) = bp_manifest.generate_blueprint()
             else:
                 eprint("Invalid blueprint file type")
+        elif (self.bp != None):
+            logr.info("The blueprint object is already primed")
+        else:
+            logr.error("The blueprint file & blueprint object is not initialized")
+            err = event.ValidationEvent(event.BPError, "BlueprintDraw: blueprint file & blueprint object is not initialized", self)
+            return [err]
+
+        bpv = blueprint_validator.BlueprintValidator()
+        err = bpv.validate_blueprint(self.bp)
 
         self.circuit = bus.Circuit(self.bp)
         self.circuit.read()
 
-    def draw(self, out_file = "testbp", outformat = "png"):
+        return err
+
+    def draw(self, out_file = "testbp", out_format = "png") -> List[event.ValidationEvent]:
+        """
+        Draw the Blueprint Configuation using GraphViz libraries
+
+        :param out_file: Name of the output blueprint image file (with full path)
+        :param out_format: Format of the output blueprint image file (png or jpg)
+        """
+
+        if self.bp == None:
+            logr.error("The blueprint object is not initialized & prepared")
+            err = event.ValidationEvent(event.BPError, "BlueprintDraw: blueprint object is not initialized & prepared", self)
+            return [err]
+
+        if self.circuit == None:
+            logr.error("The blueprint circuit is prepared; call prepare() before draw()")
+            err = event.ValidationEvent(event.BPError, "BlueprintDraw: blueprint circuit is prepared; call prepare() before draw()", self)
+            return [err]
+
         logr.info("Draw the blueprint yaml")
         graph_attr = {
             "splines": "spline",
         }
 
-        d = diagrams.Diagram(name = "Blueprint", filename = out_file, direction="TB", outformat = outformat, graph_attr=graph_attr)
+        d = diagrams.Diagram(name = "Blueprint", filename = out_file, direction="TB", outformat = out_format, graph_attr=graph_attr)
         diagrams.setdiagram(d)
 
         bpd = diag.BlueprintPane(name = self.bp.name,
@@ -125,3 +176,5 @@ class BlueprintDraw:
         d.render()
         os.remove(out_file)
         diagrams.setdiagram(None)
+
+        return None

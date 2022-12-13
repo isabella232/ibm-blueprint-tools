@@ -8,10 +8,13 @@ What-if, you are able to visualize the blueprint configuration in the following 
                               [-e {DEBUG,INFO,WARNING,ERROR}]
 
 A graphviz network diagram
+
 ![Blueprint GraphViz diagram](./images/sample_bp_viz.png?raw=true "Sample Blueprint visualization - viz")
 
+---
 
 A schemedraw circuit diagram
+
 ![Blueprint Circuit diagram](./images/sample_bp_ic.png?raw=true "Sample Blueprint visualization - viz")
 
 
