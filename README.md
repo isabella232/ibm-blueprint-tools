@@ -11,8 +11,9 @@ The `blueprint dev-tools` is used for analyzing, validating and working with the
 
 Refer to IBM Cloud Schematics docs for more information about [blueprint](https://cloud.ibm.com/docs/schematics?topic=schematics-blueprint-intro).
 
-> Note: These dev-tools are not supported by IBM.  It can be used on as-is basis.
-> When you find an issue, please raise a pull-request (with the fix).
+> Note: 
+> * These dev-tools are not supported by IBM.  It can be used on as-is basis.
+> * When you find an issue, please raise a Pull-Request (with the fix).
 
 ---
 
