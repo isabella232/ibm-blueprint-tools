@@ -1,0 +1,26 @@
+modules:
+  - name: power-infrastructure
+    layer: infrastructure
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/terraform-ibm-modules/terraform-ibm-powervs-infrastructure/tree/main/examples/ibm-catalog/standard-solution"
+    inputs:
+      - name: prerequisite_workspace_id
+        value: $module.secure-infrastructure.schematics_workspace_id
+        type: string
+      - name: ssh_private_key
+        value: $blueprint.ssh_private_key
+        type: string
+      - name: powervs_zone
+        value: $blueprint.powervs_zone
+        type: string
+      - name: powervs_resource_group_name
+        value: $blueprint.powervs_resource_group_name
+        type: string
+    outputs:
+      - name: powervs_workspace_name_id
+    settings:
+      - name: TF_VERSION
+        value: 1.1

@@ -1,0 +1,19 @@
+schema_version: 1.0.0
+name: Blueprint Basic Example
+type: blueprint
+description: Simple blueprint to demonstrate module linking
+inputs:
+  - name: bp_storage_name
+    type: string
+  - name: bp_storage_plan
+    type: string
+outputs:
+  - name: bp_storage_id
+    type: string
+settings:
+  - value: "1.0"
+    name: TF_VERSION
+    type: string
+modules:
+  - ${{./mod-cos.yaml}}
+  - ${{./mod-rg.yaml}}

@@ -15,7 +15,7 @@
 from yamale.validators import Validator
 
 class Settings(Validator):
-    """ Custom Date validator """
+    """ Custom validator """
     tag = 'settings'
 
     def __init__(self, *args, **kwargs):

@@ -1,0 +1,24 @@
+modules:
+  - name: secure-infrastructure
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/terraform-ibm-modules/terraform-ibm-landing-zone/tree/main/patterns/vsi"
+    inputs:
+      - name: ibmcloud_api_key
+        value: $blueprint.ibmcloud_api_key
+      - name: override_json_string
+        value: $blueprint.override_json_string
+      - name: prefix
+        value: $blueprint.prefix
+      - name: region
+        value: $blueprint.region
+      - name: ssh_public_key
+        value: $blueprint.ssh_public_key
+    outputs:
+      - name: schematics_workspace_id
+      - name: config
+    settings:
+      - name: TF_VERSION
+        value: 1.0

@@ -1,0 +1,3 @@
+outputs:
+  - name: out_key
+    description: Test output SSHKey for VSI

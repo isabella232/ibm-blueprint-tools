@@ -1,0 +1,26 @@
+modules:
+  - name: basic-cos-storage
+    module_type: terraform
+    source:
+      source_type: github
+      git:
+        git_repo_url: https://github.com/Cloud-Schematics/blueprint-example-modules/tree/main/IBM-Storage
+        git_branch: main
+    inputs:
+      - value: $blueprint.inputs.bp_storage_name
+        name: cos_instance_name
+        type: string
+      - value: $blueprint.inputs.bp_storage_plan
+        name: cos_storage_plan
+        type: string
+      - value: ams03
+        name: cos_single_site_loc
+        type: string
+      - value: $module.basic-resource-group.outputs.resource_group_id
+        name: resource_group_id
+        type: string
+    outputs:
+      - name: cos_id
+        type: string
+      - name: cos_crn
+        type: string

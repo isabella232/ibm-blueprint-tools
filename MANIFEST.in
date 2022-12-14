@@ -11,4 +11,10 @@ include LICENSE
 include setup.py
 
 include *
-include tools/validator/schema/*
+include blueprint/lib/*
+include blueprint/run/*
+include blueprint/schema/*
+include blueprint/circuit/*
+include blueprint/merge/*
+include blueprint/validate/*
+include blueprint/sync/*
