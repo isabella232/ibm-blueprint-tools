@@ -67,12 +67,12 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
 
     > blueprint -h
         
-        usage: blueprint [-h] {validate,merge} ...
+        usage: blueprint [-h] {validate,draw,merge,sync,run} ...
 
         Blueprint helper tools for IBM Cloud Schematics
 
         positional arguments:
-          {validate,merge,generate}
+          {validate,draw,merge,sync,run}
 
         optional arguments:
           -h, --help            show this help message and exit
@@ -237,6 +237,7 @@ Refer to examples in the `examples/run` folder.
 
   Contact the author(s) of the tool:
 
+  - Albee Jhoney (albee.jhoney@in.ibm.com)
   - Nishu Bharti (nishu.bharti1@ibm.com)
 
 ---
