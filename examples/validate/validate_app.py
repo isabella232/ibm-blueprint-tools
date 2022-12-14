@@ -1,3 +1,4 @@
+import os
 import sys
 import getopt
 
@@ -22,42 +23,45 @@ def main(argv):
       print('validate.py -b <input_file>')
       sys.exit(2)
    
+   blueprint_file = ''
+
    for opt, arg in opts:
       if opt == '-h':
          print('Usage:')
          print('   validate.py -b <input_file>')
          sys.exit()
       elif opt in ("-b", "--bfile"):
-         input_file = arg
-         bv = schema_validator.SchemaValidator(input_file)
-         print("\Schema validation ... \n")
-         (msg, err) = bv.validate()
-         if err == None:
-            print(msg)
-         else:
-            eprint(err)
-            
-         print("\nAdvanced validation ... \n")
-         bp = bfile.FileHelper.load_blueprint(input_file)
-         if bp == None:
-            eprint("Error in loading the blueprint file")
-            sys.exit()
+         blueprint_file = arg
 
-         bpv = blueprint_validator.BlueprintValidator()
-         errors = bpv.validate_blueprint(bp)
-         if errors != None:
-            # eprint(str(errors))
-            eprint(event.format_events(errors, event.Format.Table))
+   # if blueprint_file == "":
+   #    blueprint_file = os.environ['BLUEPRINT_FILE']
+   #    if blueprint_file == "":
+   #       eprint("\nThe input blueprint_file is mandatory.")
+   #       eprint("Usage: \n\n  draw.py -b <blueprint_file>")
+   #       return
 
-         sys.exit()
-      else:
-         print('Usage:')
-         print('   validate.py -b <input_file>')
-         sys.exit()
+   bv = schema_validator.SchemaValidator(blueprint_file)
+   print("\Schema validation ... \n")
+   (msg, err) = bv.validate()
+   if err == None:
+      print(msg)
+   else:
+      eprint(err)
+      
+   print("\nAdvanced validation ... \n")
+   bp = bfile.FileHelper.load_blueprint(blueprint_file)
+   if bp == None:
+      eprint("Error in loading the blueprint file")
+      sys.exit()
 
-   print('Usage:')
-   print('   validate.py -b <input_file>')
+   bpv = blueprint_validator.BlueprintValidator()
+   errors = bpv.validate_blueprint(bp)
+   if errors != None:
+      # eprint(str(errors))
+      eprint(event.format_events(errors, event.Format.Table))
+
    sys.exit()
+
 
 if __name__ == "__main__":
    main(sys.argv[1:])

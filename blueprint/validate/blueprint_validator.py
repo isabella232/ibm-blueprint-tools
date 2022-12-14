@@ -51,7 +51,7 @@ class BlueprintValidator:
                 if hasattr(m, "inputs") and m.inputs != None:
                     for p in m.inputs:
                         (mod_vars, err) = bp.module_input_ref(m.name, p.name)
-                        if err != None:
+                        if err == None:
                             input_mod_var_names.add(mod_vars)
                         if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                             value_refs.add(p.value)
@@ -59,7 +59,7 @@ class BlueprintValidator:
                 if hasattr(m, "outputs") and m.outputs != None:
                     for p in m.outputs:
                         (mod_vars, err) = bp.module_output_ref(m.name, p.name)
-                        if err != None:
+                        if err == None:
                             output_mod_var_names.add(mod_vars)
                         if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                             value_refs.add(p.value)
@@ -67,7 +67,7 @@ class BlueprintValidator:
                 if hasattr(m, "settings") and m.settings != None:
                     for p in m.settings:
                         (mod_vars, err) = bp.module_setting_ref(m.name, p.name)
-                        if err != None:
+                        if err == None:
                             input_mod_var_names.add(mod_vars)
                         if hasattr(p, "value") and (p.value != None and isinstance(p.value, str) and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                             value_refs.add(p.value)
@@ -75,14 +75,14 @@ class BlueprintValidator:
         if hasattr(bp, "inputs") and bp.inputs != None:
             for p in bp.inputs:
                 (bp_vars, err) = bp.input_ref(p.name)
-                if err != None:
+                if err == None:
                     input_bp_var_names.add(bp_vars)
                 if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                     value_refs.add(p.value)
         if hasattr(bp, "outputs") and bp.outputs != None:
             for p in bp.outputs:
                 (bp_vars, err) = bp.output_ref(p.name)
-                if err != None:
+                if err == None:
                     output_bp_var_names.add(bp_vars)
                 if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None):
                     if (p.value.startswith("$module.") or p.value.startswith("$blueprint.")):
@@ -94,7 +94,7 @@ class BlueprintValidator:
         if hasattr(bp, "settings") and bp.settings != None:
             for p in bp.settings:
                 (bp_vars, err) = bp.setting_ref(p.name)
-                if err != None:
+                if err == None:
                     input_bp_var_names.add(bp_vars)
                 if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                     value_refs.add(p.value)
