@@ -11,6 +11,19 @@ It performs two levels of validation
 The result of validation can be obtained in tabular or json format.
 
 ---
+### List of advanced validation
+
+| Sl | Validation message | Description & remmediation |
+|----|--------------------|----------------------------|
+| 1 | Unused input parameters declared in the blueprint | Blueprint input variable (in the `inputs` section) is not being used by any module.  </br>Review the linked-data references (eg. $blueprint.inputs.vpc_zone) in all the modules, to ensure that it is being named & used correctly. | 
+| 2 | Undeclared blueprint parameters used by modules | A module is referring to an input variable that has not been declared in the `inputs` section of the blueprint. </br>Review the linked-data reference in the specified module (eg. $blueprint.inputs.vpc_zone), for any spelling mistakes or capitalization. |
+| 3 | Undeclared output parameters used by modules | A module is referring to an output variable that has not been declared in the `outputs` section of another module. </br>Review the linked-data reference in the specified module (eg. $modules.mod_name.outputs.vpc_zone), for any spelling mistakes or capitalization. |
+| 4 | Unused output parameters declared in the modules | A module has declared an output variable, that is not be used (or referred to) by other modules or the outputs of the blueprint.  </br>Review the linked-data references (eg. $modules.mod_name.outputs.vpc_zone) in all the modules and blueprint outputs, to ensure that it is being named & used correctly. |
+| 5 | Blueprint output parameters is left hanging | The output variable that is declared in the `outputs` section of the blueprint - does not have a valid linked-data reference, to the outputs produced by a module in the blueprint. </br>Ensure that all the blueprint outputs have cross-references (or links) to the correct module output variable.|
+| 6 | Found circular dependencies between modules | The links between the input and output variables in all the modules has resulted in a circular dependency.  For example, m1->m2->m3->m1.  </br>Review all the links between the input & output variables, to ensure that there is no circular dependencies between the modules. |
+
+
+---
 ### Programmatic blueprint validation
 
 In addition, you can progamatically validate your `blueprint configuration file` using the following Python modules.
