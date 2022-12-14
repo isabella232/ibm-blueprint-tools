@@ -40,25 +40,28 @@ def main(argv):
    #       eprint("Usage: \n\n  draw.py -b <blueprint_file>")
    #       return
 
-   bv = schema_validator.SchemaValidator(blueprint_file)
-   print("\Schema validation ... \n")
-   (msg, err) = bv.validate()
-   if err == None:
-      print(msg)
-   else:
-      eprint(err)
-      
-   print("\nAdvanced validation ... \n")
-   bp = bfile.FileHelper.load_blueprint(blueprint_file)
-   if bp == None:
-      eprint("Error in loading the blueprint file")
-      sys.exit()
+   if blueprint_file != "":
+      bv = schema_validator.SchemaValidator(blueprint_file)
+      print("\Schema validation ... \n")
+      (msg, err) = bv.validate()
+      if err == None:
+         print(msg)
+      else:
+         eprint(err)
+         
+      print("\nAdvanced validation ... \n")
+      bp = bfile.FileHelper.load_blueprint(blueprint_file)
+      if bp == None:
+         eprint("Error in loading the blueprint file")
+         sys.exit()
 
-   bpv = blueprint_validator.BlueprintValidator()
-   errors = bpv.validate_blueprint(bp)
-   if errors != None:
-      # eprint(str(errors))
-      eprint(event.format_events(errors, event.Format.Table))
+      bpv = blueprint_validator.BlueprintValidator()
+      errors = bpv.validate_blueprint(bp)
+      if errors != None:
+         # eprint(str(errors))
+         eprint(event.format_events(errors, event.Format.Table))
+   else:
+      print("Blueprint filename = None")
 
    sys.exit()
 

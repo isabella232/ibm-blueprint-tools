@@ -159,11 +159,44 @@ def format_events(events:List[ValidationEvent] = [], format = Format.Table) -> s
             ret_str += '\n\n'
     
     elif format == Format.Json:
-        ret_str = '['
-        for e in errors:
-            ret_str += e.toJson()
-            ret_str += ', '
-        ret_str += ']'
         # ret_str = json.dumps(errors + warnings + infos + debugs)
+
+        ret_str = '{errors: ['
+        if len(errors) == 0:
+            ret_str += '],'
+        else:
+            for e in errors:
+                ret_str += e.toJson()
+                ret_str += ', '
+            ret_str += ']'
+
+        ret_str = ', warnings: ['
+        if len(warnings) == 0:
+            ret_str += '],'
+        else: 
+            for e in warnings:
+                ret_str += e.toJson()
+                ret_str += ', '
+            ret_str += ']'
+
+        ret_str = ', infos: ['
+        if len(infos) == 0:
+            ret_str += '],'
+        else: 
+            for e in infos:
+                ret_str += e.toJson()
+                ret_str += ', '
+            ret_str += ']'
+
+        ret_str = ', debugs: ['
+        if len(debugs) == 0:
+            ret_str += '],'
+        else: 
+            for e in debugs:
+                ret_str += e.toJson()
+                ret_str += ', '
+            ret_str += ']'
+
+        ret_str += '}'
 
     return ret_str

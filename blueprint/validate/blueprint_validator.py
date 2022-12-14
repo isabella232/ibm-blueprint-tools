@@ -77,6 +77,8 @@ class BlueprintValidator:
                 (bp_vars, err) = bp.input_ref(p.name)
                 if err == None:
                     input_bp_var_names.add(bp_vars)
+                    alias_bp_vars = bp_vars.replace("$blueprint.inputs.", "$blueprint.")
+                    input_bp_var_names.add(alias_bp_vars)
                 if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                     value_refs.add(p.value)
         if hasattr(bp, "outputs") and bp.outputs != None:
@@ -96,6 +98,8 @@ class BlueprintValidator:
                 (bp_vars, err) = bp.setting_ref(p.name)
                 if err == None:
                     input_bp_var_names.add(bp_vars)
+                    alias_bp_vars = bp_vars.replace("$blueprint.settings.", "$blueprint.")
+                    input_bp_var_names.add(alias_bp_vars)
                 if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                     value_refs.add(p.value)
         #===============================================

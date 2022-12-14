@@ -61,6 +61,8 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
   * Merge or assemble the blueprint.yaml from its parts
   * Assemble the blueprint.yaml using Python libraries
   
+  Refer to the [User Guide docs](./docs/README.md) for the usage scenarios and details of how to use the tools
+
 ### Blueprint CLI usage
 
   Use the `blueprint dev-tools` CLI to validate and work with the blueprint configuration files.
@@ -72,11 +74,12 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
         Blueprint helper tools for IBM Cloud Schematics
 
         positional arguments:
-          {validate,draw,merge,sync,run}
+          {validate, draw, merge, sync, run}
 
         optional arguments:
           -h, --help            show this help message and exit
 
+  Refer to a few [example CLI commands](./docs/cli-reference.md) to help you kick start your journey.
 
 #### _Blueprint schema validator usage_
 
@@ -93,6 +96,7 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
           -l LOG_FILE, --log-file LOG_FILE                    log file
           -e {DEBUG,INFO,WARNING,ERROR}, 
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
+          -j, --log-json                                      logs error messages in json format
 
   Refer to examples in the `examples/validate` folder. 
 
@@ -109,11 +113,14 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
           -h, --help                                          show this help message and exit
           -b BP_FILE, --bp-file BP_FILE                       input blueprint configuration yaml file
           -s SOURCE_DIR, --source-dir SOURCE_DIR              source directory for input files
+          -t {viz,ic}, --out-file-type {viz,ic}               type of output blueprint drawing file
           -o OUT_FILE, --out-file OUT_FILE                    output blueprint drawing file
           -f {png,jpg,svg,pdf,dot}, --out-format              format of the blueprint drawing file ("png", "jpg", "svg", "pdf", "dot")
+          -w WORKING_DIR, --working-dir WORKING_DIR           working directory for the intermediate files
           -l LOG_FILE, --log-file LOG_FILE                    log file
           -e {DEBUG,INFO,WARNING,ERROR}, 
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
+          -j, --log-json                                      logs error messages in json format
 
   Refer to examples in the `examples/draw` folder. 
   
@@ -133,7 +140,8 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
           -l LOG_FILE, --log-file LOG_FILE                    log file
           -e {DEBUG,INFO,WARNING,ERROR}, 
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
-  
+          -j, --log-json                                      logs error messages in json format
+
   Refer to examples in the `examples/merge` data folder.
 
 #### _Blueprint schema sync usage_
@@ -157,7 +165,8 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
           -l LOG_FILE, --log-file LOG_FILE                    log file
           -e {DEBUG,INFO,WARNING,ERROR}, 
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level setting
-  
+          -j, --log-json                                      logs error messages in json format
+
   Refer to examples in the `examples/sync` data folder.
 
 #### _Blueprint run usage_
@@ -186,6 +195,7 @@ Refer to IBM Cloud Schematics docs for more information about [blueprint](https:
           -l LOG_FILE, --log-file LOG_FILE                    log file
           -e {DEBUG,INFO,WARNING,ERROR}, 
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
+          -j, --log-json                                      logs error messages in json format
 
 Refer to examples in the `examples/run` folder.
 
@@ -214,6 +224,8 @@ Refer to examples in the `examples/run` folder.
 ---
 ## Examples
 
+The example folders hold some test data (for illustration only), and sample Python code to illustrate the use of modules & libraries.
+
   |   | Example             | Folder     | Description           |
   |---|---------------------|------------|-----------------------|
   | 1 | Schema validator    | `./examples/validate/validate_app.py` | Illustrate the use of the `blueprint.schema.validate.validator.Validator` class to validate a blueprint configuration file.|
@@ -226,9 +238,10 @@ Refer to examples in the `examples/run` folder.
 ---
 ## Future roadmap
 
-  The roadmap for this tootset include the following:
-  - blueprint-gen: Support to generate blueprint configuration file from a simple bill-of-material
-  - blueprint-draw: Support to draw & visualize the blueprint configuration file
+  The roadmap for this dev tootset include the following:
+  - Add more validation rules - to the blueprint validator
+  - Annotate the blueprint image (graphviz) with validation errors & warnings
+  - Support advanced synchronization, by automatically binding input/output variables
   - and more.. 
 
 ---
