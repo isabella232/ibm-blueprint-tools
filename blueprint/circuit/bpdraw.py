@@ -159,13 +159,13 @@ class BlueprintDraw:
                     end_pane = mod_diag[end.name]
 
                 if isinstance(bus.from_node, module.Module) and isinstance(bus.to_node, module.Module):
-                    edge_attribtues = {"style": "dashed", "color": " black"}
+                    edge_attributes = {"style": "dashed", "color": " black"}
                 if isinstance(bus.from_node, blueprint.Blueprint):
-                    edge_attribtues = {"style": "dashed", "color": "blue"}
+                    edge_attributes = {"style": "dashed", "color": "blue"}
                 if isinstance(bus.to_node, blueprint.Blueprint):
-                    edge_attribtues = {"style": "dashed", "color": "red"}
+                    edge_attributes = {"style": "dashed", "color": "red"}
 
-                start_pane >> diag.Relation(from_param = wire.from_param, to_param = wire.to_param, edge_attribtues = edge_attribtues) >> end_pane
+                start_pane >> diag.Relation(from_param = wire.from_param, to_param = wire.to_param, edge_attributes = edge_attributes) >> end_pane
 
         if bpd._parent:
             bpd._parent.subgraph(bpd.dot)
