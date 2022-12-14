@@ -117,6 +117,29 @@ class Input (Parameter):
     def __repr__(self):
         return self.__str__()
 
+    def __eq__(self, other):
+        if other == None:
+            return False
+        self.name = "" if self.name == None else self.name
+        self.type = "" if self.type == None else self.type
+        self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
+        self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
+
+        other.name = "" if other.name == None else other.name
+        other.type = "" if other.type == None else other.type
+        other.value = "" if not hasattr(other, 'value') or other.value == None else other.value
+        other.description = "" if not hasattr(other, 'description') or other.description == None else other.description
+
+        return (self.name == other.name) and (self.type == other.type) and (self.value == other.value)
+
+    def __hash__(self):
+        self.name = "" if self.name == None else self.name
+        self.type = "" if self.type == None else self.type
+        self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
+        self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
+
+        return hash((self.name, self.type, self.value, self.description))
+
     def remove_null_entries(self):
         super().remove_null_entries()
         # if self.name == None:
@@ -203,6 +226,29 @@ class Output (Parameter):
 
     def __repr__(self):
         return self.__str__()
+
+    def __eq__(self, other):
+        if other == None:
+            return False
+        self.name = "" if self.name == None else self.name
+        self.type = "" if self.type == None else self.type
+        self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
+        self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
+
+        other.name = "" if other.name == None else other.name
+        other.type = "" if other.type == None else other.type
+        other.value = "" if not hasattr(other, 'value') or other.value == None else other.value
+        other.description = "" if not hasattr(other, 'description') or other.description == None else other.description
+
+        return (self.name == other.name) and (self.type == other.type) and (self.value == other.value)
+
+    def __hash__(self):
+        self.name = "" if self.name == None else self.name
+        self.type = "" if self.type == None else self.type
+        self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
+        self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
+
+        return hash((self.name, self.type, self.value, self.description))
 
     def remove_null_entries(self):
         super().remove_null_entries()
@@ -293,6 +339,29 @@ class Setting (Parameter):
 
     def __repr__(self):
         return self.__str__()
+
+    def __eq__(self, other):
+        if other == None:
+            return False
+        self.name = "" if self.name == None else self.name
+        self.type = "" if self.type == None else self.type
+        self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
+        self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
+
+        other.name = "" if other.name == None else other.name
+        other.type = "" if other.type == None else other.type
+        other.value = "" if not hasattr(other, 'value') or other.value == None else other.value
+        other.description = "" if not hasattr(other, 'description') or other.description == None else other.description
+
+        return (self.name == other.name) and (self.type == other.type) and (self.value == other.value)
+
+    def __hash__(self):
+        self.name = "" if self.name == None else self.name
+        self.type = "" if self.type == None else self.type
+        self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
+        self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
+
+        return hash((self.name, self.type, self.value, self.description))
 
     def remove_null_entries(self):
         super().remove_null_entries()

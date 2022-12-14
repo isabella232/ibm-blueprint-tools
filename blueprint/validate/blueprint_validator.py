@@ -43,6 +43,7 @@ class BlueprintValidator:
         input_mod_var_names     = set()
         output_mod_var_names    = set()
         input_bp_var_names      = set()
+        setting_bp_var_names    = set()
         output_bp_var_names     = set()
         uninit_bp_output_vals   = set()
         output_mod_value_refs   = set()
@@ -52,33 +53,33 @@ class BlueprintValidator:
                     for p in m.inputs:
                         (mod_vars, err) = bp.module_input_ref(m.name, p.name)
                         if err == None:
-                            input_mod_var_names.add(mod_vars)
+                            input_mod_var_names.add((mod_vars, p))
                         if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                             value_refs.add(p.value)
-                            input_mod_value_refs.add(p.value)
+                            input_mod_value_refs.add((p.value, p))
                 if hasattr(m, "outputs") and m.outputs != None:
                     for p in m.outputs:
                         (mod_vars, err) = bp.module_output_ref(m.name, p.name)
                         if err == None:
-                            output_mod_var_names.add(mod_vars)
+                            output_mod_var_names.add((mod_vars, p))
                         if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                             value_refs.add(p.value)
-                            output_mod_value_refs.add(p.value)
+                            output_mod_value_refs.add((p.value, p))
                 if hasattr(m, "settings") and m.settings != None:
                     for p in m.settings:
                         (mod_vars, err) = bp.module_setting_ref(m.name, p.name)
                         if err == None:
-                            input_mod_var_names.add(mod_vars)
+                            input_mod_var_names.add((mod_vars, p))
                         if hasattr(p, "value") and (p.value != None and isinstance(p.value, str) and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                             value_refs.add(p.value)
-                            input_mod_value_refs.add(p.value)
+                            input_mod_value_refs.add((p.value, p))
         if hasattr(bp, "inputs") and bp.inputs != None:
             for p in bp.inputs:
                 (bp_vars, err) = bp.input_ref(p.name)
                 if err == None:
-                    input_bp_var_names.add(bp_vars)
+                    input_bp_var_names.add((bp_vars, p))
                     alias_bp_vars = bp_vars.replace("$blueprint.inputs.", "$blueprint.")
-                    input_bp_var_names.add(alias_bp_vars)
+                    input_bp_var_names.add((alias_bp_vars, p))
                 if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                     value_refs.add(p.value)
         if hasattr(bp, "outputs") and bp.outputs != None:
@@ -89,74 +90,102 @@ class BlueprintValidator:
                 if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None):
                     if (p.value.startswith("$module.") or p.value.startswith("$blueprint.")):
                         value_refs.add(p.value)
-                        output_bp_value_refs.add(p.value)
+                        output_bp_value_refs.add((p.value, p))
                     else:
-                        uninit_bp_output_vals.add(p.name)
+                        uninit_bp_output_vals.add((p.name, p))
 
         if hasattr(bp, "settings") and bp.settings != None:
             for p in bp.settings:
                 (bp_vars, err) = bp.setting_ref(p.name)
                 if err == None:
-                    input_bp_var_names.add(bp_vars)
+                    setting_bp_var_names.add((bp_vars, p))
                     alias_bp_vars = bp_vars.replace("$blueprint.settings.", "$blueprint.")
-                    input_bp_var_names.add(alias_bp_vars)
+                    setting_bp_var_names.add((alias_bp_vars, p))
                 if hasattr(p, "value") and isinstance(p.value, str) and (p.value != None and (p.value.startswith("$module.") or p.value.startswith("$blueprint."))):
                     value_refs.add(p.value)
         #===============================================
         unused_bp_vars = set()
-        for bp_inputs in input_bp_var_names:
+        for bp_inputs_tup in input_bp_var_names:
+            (bp_inputs, ctx) = bp_inputs_tup
             if not (bp_inputs in value_refs):
-                unused_bp_vars.add(bp_inputs)      
+                unused_bp_vars.add(bp_inputs_tup)
 
         if len(unused_bp_vars) > 0:
-            for var in unused_bp_vars:
+            for var_tup in unused_bp_vars:
+                (var, ctx) = var_tup
                 if level >= event.BPWarning:
-                    e = event.ValidationEvent(event.BPWarning, "Unused input parameters declared in the blueprint", bp, var)
+                    e = event.ValidationEvent(event.BPWarning, "Unused input parameters declared in the blueprint", ctx, var)
+                    bperrors.append(e)
+                    logr.warning(str(e))
+        #===============================================
+        unused_bp_vars = set()
+        for bp_settings_tup in setting_bp_var_names:
+            (bp_settings, ctx) = bp_settings_tup
+            if not (bp_settings in value_refs):
+                unused_bp_vars.add(bp_settings_tup)
+
+        if len(unused_bp_vars) > 0:
+            for var_tup in unused_bp_vars:
+                (var, ctx) = var_tup
+                if level >= event.BPWarning:
+                    e = event.ValidationEvent(event.BPWarning, "Unused setting parameters declared in the blueprint", ctx, var)
                     bperrors.append(e)
                     logr.warning(str(e))
         #===============================================
         undeclared_bp_vars = set()
-        for mod_inputs in input_mod_value_refs:
+        i_bp_var_names = list(map(lambda x: x[0], input_bp_var_names))
+        s_bp_var_names = list(map(lambda x: x[0], setting_bp_var_names))
+        for mod_inputs_tup in input_mod_value_refs:
+            (mod_inputs, ctx) = mod_inputs_tup
             if mod_inputs.startswith("$blueprint."):
-                if mod_inputs not in input_bp_var_names:
-                    undeclared_bp_vars.add(mod_inputs)      
+                if mod_inputs not in i_bp_var_names and mod_inputs not in s_bp_var_names:
+                    undeclared_bp_vars.add((mod_inputs, ctx))
 
         if len(undeclared_bp_vars) > 0:
-            for var in undeclared_bp_vars:
+            for var_tup in undeclared_bp_vars:
+                (var, ctx) = var_tup
                 if level >= event.BPError:
-                    e = event.ValidationEvent(event.BPError, "Undeclared blueprint parameters used by modules", bp, var)
+                    e = event.ValidationEvent(event.BPError, "Undeclared blueprint parameters used by modules", ctx, var)
                     bperrors.append(e)
                     logr.error(str(e))
         #===============================================
         undeclared_mod_vars = set()
-        for mod_inputs in input_mod_value_refs:
+        for mod_inputs_tup in input_mod_value_refs:
+            (mod_inputs, ctx) = mod_inputs_tup
             if mod_inputs.startswith("$module.") and ".outputs." in mod_inputs:
-                if mod_inputs not in output_mod_var_names:
-                    undeclared_mod_vars.add(mod_inputs)      
+                o_mod_var_names = list(map(lambda x: x[0], output_mod_var_names))
+                if mod_inputs not in o_mod_var_names:
+                    undeclared_mod_vars.add((mod_inputs, ctx))
 
         if len(undeclared_mod_vars) > 0:
-            for var in undeclared_mod_vars:
+            for var_tup in undeclared_mod_vars:
+                (var, ctx) = var_tup
                 if level >= event.BPError:
-                    e = event.ValidationEvent(event.BPError, "Undeclared output parameters used by modules", bp, var)
+                    e = event.ValidationEvent(event.BPError, "Undeclared output parameters used by modules", ctx, var)
                     bperrors.append(e)
                     logr.error(str(e))
         #===============================================
         unused_mod_vars = set()
-        for mod in output_mod_var_names:
-            if (not (mod in output_bp_value_refs)) and (not (mod in input_mod_value_refs)):
-                unused_mod_vars.add(mod)
+        i_mod_value_refs = list(map(lambda x: x[0], input_mod_value_refs))
+        o_bp_value_refs = list(map(lambda x: x[0], output_bp_value_refs))
+        for mod_tup in output_mod_var_names:
+            (mod, ctx) = mod_tup
+            if (mod not in o_bp_value_refs) and (mod not in i_mod_value_refs):
+                unused_mod_vars.add((mod, ctx))
 
         if len(unused_mod_vars) > 0:
-            for var in unused_mod_vars:
+            for var_tup in unused_mod_vars:
+                (var, ctx) = var_tup
                 if level >= event.BPWarning:
-                    e = event.ValidationEvent(event.BPWarning, "Unused output parameters declared in the modules", bp, var)
+                    e = event.ValidationEvent(event.BPWarning, "Unused output parameters declared in the modules", ctx, var)
                     bperrors.append(e)
                     logr.warning(str(e))
         #===============================================
         if len(uninit_bp_output_vals) > 0:
-            for var in uninit_bp_output_vals:
+            for var_tup in uninit_bp_output_vals:
+                (var, ctx) = var_tup
                 if level >= event.BPError:
-                    e = event.ValidationEvent(event.BPError, "Blueprint output parameters is left hanging", bp, var)
+                    e = event.ValidationEvent(event.BPError, "Blueprint output parameters is left hanging", ctx, var)
                     bperrors.append(e)
                     logr.error(str(e))
         #===============================================
@@ -164,7 +193,8 @@ class BlueprintValidator:
         dag = bp.build_dag()
         if dag.isCyclic() == True:
             if level >= event.BPError:
-                e = event.ValidationEvent(event.BPError, "Found circular dependencies between modules", bp, dag.getCyclicPath())
+                dag.getCyclicPath()
+                e = event.ValidationEvent(event.BPError, "Found circular dependencies between modules", None, dag.getCyclicPath())
                 bperrors.append(e)
                 logr.error(str(e))
         #===============================================

@@ -80,6 +80,37 @@ class Module(dict):
     def __repr__(self):
         return self.__str__()
 
+    def __eq__(self, other):
+        if other == None:
+            return False
+
+        self.name = "" if self.name == None else self.name
+        self.module_type = "" if not hasattr(self, 'module_type') or self.module_type == None else self.module_type
+        self.source = "" if not hasattr(self, 'source') or self.source == None else str(self.source)
+        self.inputs = "" if not hasattr(self, 'inputs') or self.inputs == None else str(self.inputs)
+        self.outputs = "" if not hasattr(self, 'outputs') or self.outputs == None else str(self.outputs)
+        self.settings = "" if not hasattr(self, 'settings') or self.settings == None else str(self.settings)
+
+        other.name = "" if other.name == None else other.name
+        other.module_type = "" if not hasattr(other, 'module_type') or other.module_type == None else other.module_type
+        other.source = "" if not hasattr(other, 'source') or other.source == None else str(other.source)
+        other.inputs = "" if not hasattr(other, 'inputs') or other.inputs == None else str(other.inputs)
+        other.outputs = "" if not hasattr(other, 'outputs') or other.outputs == None else str(other.outputs)
+        other.settings = "" if not hasattr(other, 'settings') or other.settings == None else str(other.settings)
+
+        return (self.name == other.name) and (self.module_type == other.module_type) and (self.source == other.source) \
+            and (self.inputs == other.inputs) and (self.outputs == other.outputs) and (self.settings == other.settings)
+
+    def __hash__(self):
+        self.name = "" if self.name == None else self.name
+        self.module_type = "" if not hasattr(self, 'module_type') or self.module_type == None else self.module_type
+        self.source = "" if not hasattr(self, 'source') or self.source == None else self.source
+        self.inputs = "" if not hasattr(self, 'inputs') or self.inputs == None else str(self.inputs)
+        self.outputs = "" if not hasattr(self, 'outputs') or self.outputs == None else str(self.outputs)
+        self.settings = "" if not hasattr(self, 'settings') or self.settings == None else str(self.settings)
+
+        return hash((self.name, self.module_type, self.source, self.inputs, self.outputs, self.settings))
+
     def remove_null_entries(self):
         if hasattr(self, 'name') and self.name == None:
             del self.name

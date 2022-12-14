@@ -208,10 +208,24 @@ def main():
                     logr.error('Invalid source file location for blueprint : ' + bp_filename)
                     return -1
 
-            if output_draw_file == None or len(output_draw_file) == 0 or os.path.exists(output_draw_file) == False:
-                print('Output file path has not defined or path not exists. Default to ' + str(output_draw_file))
-                logr.error('Output file path has not defined or path not exists. Default to ' + str(output_draw_file))
+            if working_dir:
+                working_dir = os.path.abspath(working_dir)
+                working_path = Path(working_dir)
+                if not os.path.exists(working_dir):
+                    logr.info("Creating the working directory: " + working_dir)
+                    working_path.mkdir(parents=True, exist_ok=True)                
 
+            out_file_path = os.path.dirname(output_draw_file)
+            if out_file_path == None or len(out_file_path) == 0:
+                if working_dir != None and len(working_dir) > 0:
+                    print('Output file path has not defined or path not exists. Default to working_dir')
+                    logr.error('Output file path has not defined or path not exists. Default to working_dir')
+                    output_draw_file = os.path.join(working_dir, os.path.basename(output_draw_file))
+                else:
+                    print('Output file path and Working directory has not defined or path not exists. Default to "./"')
+                    logr.error('Output file path and Working directory has not defined or path not exists. Default to "./"')
+                    output_draw_file = os.path.join("./", os.path.basename(output_draw_file))
+            
             if output_draw_format == None or output_draw_format not in ["png", "jpg", "svg", "pdf", "dot"]:
                 print('Invalid output file format, using default : png')
                 logr.error('Invalid output file format, using default : png')
@@ -254,9 +268,12 @@ def main():
                     logr.error('Invalid source file location for blueprint manifest : ' + bp_manifest)
                     return -1
                 
-                if output_blueprint_file != None:
-                    output_blueprint_file = os.path.join(source_dir, output_blueprint_file)
-                
+            if output_blueprint_file != None:
+                out_file_path = os.path.dirname(output_blueprint_file)
+                if out_file_path == None or len(out_file_path) == 0:
+                    print('Output file path has not defined or path not exists. Default to "./"')
+                    logr.error('Output file path has not defined or path not exists. Default to "./"')
+                    output_blueprint_file = os.path.join("./", os.path.basename(output_blueprint_file))
 
             print("Merge - " + bp_manifest)
             logr.info("Merge - " + bp_manifest)
@@ -319,9 +336,25 @@ def main():
                     print('Invalid source file location for blueprint : ' + bp_filename)
                     logr.error('Invalid source file location for blueprint : ' + bp_filename)
                     return -1
-                
-                if output_blueprint_file != None:
-                    output_blueprint_file = os.path.join(working_dir, output_blueprint_file)
+
+            if working_dir:
+                working_dir = os.path.abspath(working_dir)
+                working_path = Path(working_dir)
+                if not os.path.exists(working_dir):
+                    logr.info("Creating the working directory: " + working_dir)
+                    working_path.mkdir(parents=True, exist_ok=True)                
+
+            if output_blueprint_file != None:
+                out_file_path = os.path.dirname(output_blueprint_file)
+                if out_file_path == None or len(out_file_path) == 0:
+                    if working_dir != None and len(working_dir) > 0:
+                        print('Output file path has not defined or path not exists. Default to working_dir')
+                        logr.error('Output file path has not defined or path not exists. Default to working_dir')
+                        output_blueprint_file = os.path.join(working_dir, os.path.basename(output_blueprint_file))
+                    else:
+                        print('Output file path and Working directory has not defined or path not exists. Default to "./"')
+                        logr.error('Output file path and Working directory has not defined or path not exists. Default to "./"')
+                        output_blueprint_file = os.path.join("./", os.path.basename(output_blueprint_file))
 
             if working_dir:
                 working_dir = os.path.abspath(working_dir)
@@ -389,7 +422,16 @@ def main():
                     working_path.mkdir(parents=True, exist_ok=True)                
 
             if output_blueprint_file != None:
-                output_blueprint_file = os.path.join(working_dir, output_blueprint_file)
+                out_file_path = os.path.dirname(output_blueprint_file)
+                if out_file_path == None or len(out_file_path) == 0:
+                    if working_dir != None and len(working_dir) > 0:
+                        print('Output file path has not defined or path not exists. Default to working_dir')
+                        logr.error('Output file path has not defined or path not exists. Default to working_dir')
+                        output_blueprint_file = os.path.join(working_dir, os.path.basename(output_blueprint_file))
+                    else:
+                        print('Output file path and Working directory has not defined or path not exists. Default to "./"')
+                        logr.error('Output file path and Working directory has not defined or path not exists. Default to "./"')
+                        output_blueprint_file = os.path.join("./", os.path.basename(output_blueprint_file))
 
             print("Run - (" + bp_filename + ", " + input_file + ")")
             logr.info("Run - (" + bp_filename + ", " + input_file + ")")
@@ -448,7 +490,7 @@ def main():
             logr.debug(bp_yaml_str)
             logr.debug("Module data: \n" + str(br.module_data))
 
-            if args.out_file == None or args.out_file == '':
+            if output_blueprint_file == None or output_blueprint_file == '':
                 print(bp_yaml_str)
             else:
                 with open(output_blueprint_file, 'w') as yaml_file:

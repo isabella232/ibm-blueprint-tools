@@ -33,12 +33,12 @@ def main(argv):
       elif opt in ("-b", "--bfile"):
          blueprint_file = arg
 
-   # if blueprint_file == "":
-   #    blueprint_file = os.environ['BLUEPRINT_FILE']
-   #    if blueprint_file == "":
-   #       eprint("\nThe input blueprint_file is mandatory.")
-   #       eprint("Usage: \n\n  draw.py -b <blueprint_file>")
-   #       return
+   if blueprint_file == "":
+      blueprint_file = os.environ['BLUEPRINT_FILE']
+      if blueprint_file == "":
+         eprint("\nThe input blueprint_file is mandatory.")
+         eprint("Usage: \n\n  draw.py -b <blueprint_file>")
+         return
 
    if blueprint_file != "":
       bv = schema_validator.SchemaValidator(blueprint_file)

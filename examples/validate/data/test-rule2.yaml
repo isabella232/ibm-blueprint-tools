@@ -1,6 +1,7 @@
-name: "Roks Landing Zone "
-schema_version: "1.0.0"
-description: "Roks landingzone configuration"
+name: Roks Landing Zone
+type: blueprint
+schema_version: 1.0.0
+description: Roks landingzone configuration
 tags:
   - "blueprint:roks-landing-zone"
 loction: us-south
