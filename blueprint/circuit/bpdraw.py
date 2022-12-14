@@ -56,6 +56,7 @@ class BlueprintDraw:
         self.bp_file    = blueprint_file
         self.bp         = blueprint_object # blueprint.Blueprint instance
         self.circuit    = None # circuit.Circuit instance
+        self.validation = None
 
 
     def prepare(self,  working_dir = ".") -> List[event.ValidationEvent]:
@@ -91,14 +92,14 @@ class BlueprintDraw:
             return [err]
 
         bpv = blueprint_validator.BlueprintValidator()
-        err = bpv.validate_blueprint(self.bp)
+        self.validation = bpv.validate_blueprint(self.bp)
 
         self.circuit = bus.Circuit(self.bp)
         self.circuit.read()
 
-        return err
+        return self.validation
 
-    def draw(self, out_file = "testbp", out_format = "png") -> List[event.ValidationEvent]:
+    def draw(self, annotate = ["validation"], out_file = "testbp", out_format = "png") -> List[event.ValidationEvent]:
         """
         Draw the Blueprint Configuation using GraphViz libraries
 
@@ -131,6 +132,9 @@ class BlueprintDraw:
                                     settings    = self.bp.get_setting_var_names()
                                     )
         diagrams.setcluster(bpd)
+
+        # if annotate.contains('validation'):
+        #     if len(self.validation) > 0:
 
         mods = self.bp.get_modules()
         if mods != None:

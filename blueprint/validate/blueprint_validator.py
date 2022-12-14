@@ -105,10 +105,11 @@ class BlueprintValidator:
                 unused_bp_vars.add(bp_inputs)      
 
         if len(unused_bp_vars) > 0:
-            if level >= event.BPWarning:
-                e = event.ValidationEvent(event.BPWarning, "Unused input parameters declared in the blueprint", bp, list(unused_bp_vars))
-                bperrors.append(e)
-                logr.warning(str(e))
+            for var in unused_bp_vars:
+                if level >= event.BPWarning:
+                    e = event.ValidationEvent(event.BPWarning, "Unused input parameters declared in the blueprint", bp, var)
+                    bperrors.append(e)
+                    logr.warning(str(e))
         #===============================================
         undeclared_bp_vars = set()
         for mod_inputs in input_mod_value_refs:
@@ -117,10 +118,11 @@ class BlueprintValidator:
                     undeclared_bp_vars.add(mod_inputs)      
 
         if len(undeclared_bp_vars) > 0:
-            if level >= event.BPError:
-                e = event.ValidationEvent(event.BPError, "Undeclared blueprint parameters used by modules", bp, list(undeclared_bp_vars))
-                bperrors.append(e)
-                logr.error(str(e))
+            for var in undeclared_bp_vars:
+                if level >= event.BPError:
+                    e = event.ValidationEvent(event.BPError, "Undeclared blueprint parameters used by modules", bp, var)
+                    bperrors.append(e)
+                    logr.error(str(e))
         #===============================================
         undeclared_mod_vars = set()
         for mod_inputs in input_mod_value_refs:
@@ -129,10 +131,11 @@ class BlueprintValidator:
                     undeclared_mod_vars.add(mod_inputs)      
 
         if len(undeclared_mod_vars) > 0:
-            if level >= event.BPError:
-                e = event.ValidationEvent(event.BPError, "Undeclared output parameters used by modules", bp, list(undeclared_mod_vars))
-                bperrors.append(e)
-                logr.error(str(e))
+            for var in undeclared_mod_vars:
+                if level >= event.BPError:
+                    e = event.ValidationEvent(event.BPError, "Undeclared output parameters used by modules", bp, var)
+                    bperrors.append(e)
+                    logr.error(str(e))
         #===============================================
         unused_mod_vars = set()
         for mod in output_mod_var_names:
@@ -140,16 +143,18 @@ class BlueprintValidator:
                 unused_mod_vars.add(mod)
 
         if len(unused_mod_vars) > 0:
-            if level >= event.BPWarning:
-                e = event.ValidationEvent(event.BPWarning, "Unused output parameters declared in the modules", bp, list(unused_mod_vars))
-                bperrors.append(e)
-                logr.warning(str(e))
+            for var in unused_mod_vars:
+                if level >= event.BPWarning:
+                    e = event.ValidationEvent(event.BPWarning, "Unused output parameters declared in the modules", bp, var)
+                    bperrors.append(e)
+                    logr.warning(str(e))
         #===============================================
         if len(uninit_bp_output_vals) > 0:
-            if level >= event.BPError:
-                e = event.ValidationEvent(event.BPError, "Blueprint output parameters is left hanging", bp, list(uninit_bp_output_vals))
-                bperrors.append(e)
-                logr.error(str(e))
+            for var in uninit_bp_output_vals:
+                if level >= event.BPError:
+                    e = event.ValidationEvent(event.BPError, "Blueprint output parameters is left hanging", bp, var)
+                    bperrors.append(e)
+                    logr.error(str(e))
         #===============================================
         # are there any circular references between modules
         dag = bp.build_dag()
@@ -236,17 +241,19 @@ class ModuleValidator:
         ret_errors = []
         # parameters with empty input values
         if len(invalid_params) > 0:
-            if level >= event.BPError:
-                e = event.ValidationEvent(event.BPError, "Error in the input parameters for the modules", self, invalid_params, mverrors)
-                ret_errors.append(e)
-                logr.error(str(e))
+            for p in invalid_params:
+                if level >= event.BPError:
+                    e = event.ValidationEvent(event.BPError, "Error in the input parameters for the modules", self, p)
+                    ret_errors.append(e)
+                    logr.error(str(e))
 
         # duplicate parameters (inputs, outputs, settings) with same name
         if len(duplicate_names) > 0:
-            if level >= event.BPWarning:
-                e = event.ValidationEvent(event.BPWarning, "Duplicate parameter names in the module", self, duplicate_names, mverrors)
-                ret_errors.append(e)
-                logr.warning(str(e))
+            for p in duplicate_names:
+                if level >= event.BPWarning:
+                    e = event.ValidationEvent(event.BPWarning, "Duplicate parameter names in the module", self, p)
+                    ret_errors.append(e)
+                    logr.warning(str(e))
 
         # self referential values in parameters (inputs, outputs, settings)
         invalid_self_references = []
@@ -255,10 +262,11 @@ class ModuleValidator:
                 invalid_self_references.append(val)
 
         if len(invalid_self_references) > 0:
-            if level >= event.BPError:
-                e = event.ValidationEvent(event.BPError, "Self referential values in the module", self, invalid_self_references, mverrors)
-                ret_errors.append(e)
-                logr.error(str(e))
+            for p in invalid_self_references:            
+                if level >= event.BPError:
+                    e = event.ValidationEvent(event.BPError, "Self referential values in the module", self, p)
+                    ret_errors.append(e)
+                    logr.error(str(e))
 
         return ret_errors
 

@@ -21,6 +21,12 @@ The result of validation can be obtained in tabular or json format.
 | 4 | Unused output parameters declared in the modules | A module has declared an output variable, that is not be used (or referred to) by other modules or the outputs of the blueprint.  </br>Review the linked-data references (eg. $modules.mod_name.outputs.vpc_zone) in all the modules and blueprint outputs, to ensure that it is being named & used correctly. |
 | 5 | Blueprint output parameters is left hanging | The output variable that is declared in the `outputs` section of the blueprint - does not have a valid linked-data reference, to the outputs produced by a module in the blueprint. </br>Ensure that all the blueprint outputs have cross-references (or links) to the correct module output variable.|
 | 6 | Found circular dependencies between modules | The links between the input and output variables in all the modules has resulted in a circular dependency.  For example, m1->m2->m3->m1.  </br>Review all the links between the input & output variables, to ensure that there is no circular dependencies between the modules. |
+| 7 | Error in the input parameters for the modules | The input variable of a module, does not have any input values or linked-data specified. </br>Review the module input variable definition, and ensure that there value or default attribute is not blank. |
+| 8 | Duplicate parameter names in the module | The module has duplicate variable name |
+| 9 | Self referential values in the module | The output variable of the module is linked to the input variable of the same module. Or, the input variable of the module is linked to the output variable of the same module. </br>Review the linked-data specification of the input & output variables in the module, and ensure that it refers to the correct modules. |
+| 10 | Type mismatch for boolean parameter | The values assigned to the input, output or settings variable does not match the boolean type, specified for that variable |
+| 11 | Input parameter is not initialized with any value | The `input` variable is not initialized with any value or linked-data reference.|
+| 12 | Setting parameter is not initialized with any value | The `setting` variable is not initialized with any value or linked-data reference.|
 
 
 ---
