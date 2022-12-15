@@ -108,11 +108,6 @@ def main():
     # Execute the parse_args() method
     args = arg_parser.parse_args()
 
-    if args.log_level:
-        level = "WARNING"
-    else:
-        level = args.log_level
-    # print("setting log level to " + str(level))
     if args.log_level == None:
         logrLevel = logging.WARNING
     elif args.log_level == 'DEBUG':
@@ -125,6 +120,8 @@ def main():
         logrLevel = logging.ERROR
     else:
         logrLevel = logging.WARNING
+
+    print("setting log level to " + str(logrLevel))
 
     if args.log_file != None and len(args.log_file) > 0:
         log_file = args.log_file

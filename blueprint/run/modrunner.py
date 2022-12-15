@@ -93,6 +93,10 @@ class ModuleRunner:
         if len(self.errors) == 0:
             self.set_env()
             tr = terraform.TerraformRunner(self.working_dir, var_file="blueprint.tfvars")
+            print("Running terraform init : " + str(self.module.name))
+            ret_code, stdout, stderr = tr.init()
+            print("terraform init, return code: " + str(ret_code))
+            tr = terraform.TerraformRunner(self.working_dir, var_file="blueprint.tfvars")
             print("Running terraform plan : " + str(self.module.name))
             ret_code, stdout, stderr = tr.plan()
             print("terraform plan, return code: " + str(ret_code))
@@ -128,6 +132,10 @@ class ModuleRunner:
                 self.parent.save_module_input_data(input_data)
 
             self.set_env()
+            tr = terraform.TerraformRunner(self.working_dir, var_file="blueprint.tfvars")
+            print("Running terraform init : " + str(self.module.name))
+            ret_code, stdout, stderr = tr.init()
+            print("terraform init, return code: " + str(ret_code))
             tr = terraform.TerraformRunner(self.working_dir, var_file="blueprint.tfvars")
             print("Running terraform apply : " + str(self.module.name))
             ret_code, stdout, stderr = tr.apply()
