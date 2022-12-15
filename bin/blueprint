@@ -111,7 +111,7 @@ def main():
     if args.log_level:
         level = "WARNING"
     else:
-        level = args.log_level
+        level = ""
     print("setting log level to " + level)
     if args.log_level == None:
         logrLevel = logging.WARNING
