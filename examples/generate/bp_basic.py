@@ -15,21 +15,21 @@ def new_blueprint():
     bp_storage_plan = param.Input(name = "bp_storage_plan")
     bp_storage_id   = param.Output(name = "bp_storage_id")
     bp_tf_settings  = param.Setting(name = "TF_VERSION", value = "1.0")
-    e = []
-    e += bp.set_inputs([
+    err = []
+    err += bp.set_inputs([
             bp_storage_name,
             bp_storage_plan,
         ])
 
-    e += bp.set_outputs([
+    err += bp.set_outputs([
             bp_storage_id
         ])
 
-    e += bp.set_settings([
+    err += bp.set_settings([
             bp_tf_settings
         ])
     
-    return (bp, e)
+    return (bp, err)
 
 #======================================================================
 
@@ -53,20 +53,20 @@ def new_cos_module():
                         branch = "main"
                     )
                 )
-    e = []
-    e += cos_mod.set_source(storage_mod_source)
-    e += cos_mod.set_inputs([
+    err = []
+    err += cos_mod.set_source(storage_mod_source)
+    err += cos_mod.set_inputs([
                     cos_instance_name, 
                     cos_storage_plan, 
                     cos_single_site_loc, 
                     cos_resource_group_id, 
                 ])
-    e += cos_mod.set_outputs([
+    err += cos_mod.set_outputs([
                     cos_id,
                     cos_crn
                 ])
 
-    return (cos_mod, e)
+    return (cos_mod, err)
 #======================================================================
 
 def new_rg_module():
@@ -84,47 +84,47 @@ def new_rg_module():
                         branch = "main"
                     )
                 )
-    e = []
-    e += rg_mod.set_source(rg_mod_source)
-    e += rg_mod.set_outputs([
+    err = []
+    err += rg_mod.set_source(rg_mod_source)
+    err += rg_mod.set_outputs([
                     resource_group_name,
                     resource_group_id
                 ]
             )
 
-    return (rg_mod, e)
+    return (rg_mod, err)
 
 #======================================================================
 
 def blueprint_manifest():
     
     errors = []
-    bp, e = new_blueprint()
-    errors += e
+    bp, err = new_blueprint()
+    errors += err
 
     #----------------Modules--------------------
-    cos_mod, e = new_cos_module()
+    cos_mod, err = new_cos_module()
     bp.add_module(cos_mod)
-    errors += e
+    errors += err
 
-    rg_mod, e = new_rg_module()
+    rg_mod, err = new_rg_module()
     bp.add_module(rg_mod)
-    errors += e
+    errors += err
     #----------------Modules--------------------
     
     #-------------Wiring starts-----------------
-    e = []
+    err = []
     bp_bus = bus.Bus(bp, cos_mod)
-    e += bp_bus.add_wire('bp_storage_name', 'cos_instance_name')
-    e += bp_bus.add_wire('bp_storage_plan', 'cos_storage_plan')
+    err += bp_bus.add_wire('bp_storage_name', 'cos_instance_name')
+    err += bp_bus.add_wire('bp_storage_plan', 'cos_storage_plan')
 
     mod_bus = bus.Bus(rg_mod, cos_mod)
-    e += mod_bus.add_wire('resource_group_id', 'resource_group_id')
+    err += mod_bus.add_wire('resource_group_id', 'resource_group_id')
 
     bp_out_bus = bus.Bus(cos_mod, bp)
-    e += bp_out_bus.add_wire('cos_id', 'bp_storage_id')
+    err += bp_out_bus.add_wire('cos_id', 'bp_storage_id')
     #-------------Wiring ends-----------------
 
-    return bp, (errors + e)
+    return bp, (errors + err)
 
 #======================================================================

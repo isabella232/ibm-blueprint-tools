@@ -109,19 +109,25 @@ def main():
     args = arg_parser.parse_args()
 
     if args.log_level == None:
-        logrLevel = logging.WARNING
+        level = logging.WARNING
+        logrLevel = event.BPWarning
     elif args.log_level == 'DEBUG':
-        logrLevel = logging.DEBUG
+        level = logging.DEBUG
+        logrLevel = event.BPDebug
     elif args.log_level == 'INFO':
-        logrLevel = logging.INFO
+        level = logging.INFO
+        logrLevel = event.BPInfo
     elif args.log_level == 'WARNING':
-        logrLevel = logging.WARNING
+        level = logging.WARNING
+        logrLevel = event.BPWarning
     elif args.log_level == 'ERROR':
-        logrLevel = logging.ERROR
+        level = logging.ERROR
+        logrLevel = event.BPError
     else:
-        logrLevel = logging.WARNING
+        level = logging.WARNING
+        logrLevel = event.BPWarning
 
-    print("setting log level to " + str(logrLevel))
+    print("setting log level to " + str(level))
 
     if args.log_file != None and len(args.log_file) > 0:
         log_file = args.log_file
@@ -129,7 +135,7 @@ def main():
         # fh = logging.FileHandler(log_file)
         # logr.addHandler(fh)
         
-        logging.basicConfig(filename = log_file, format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', encoding='utf-8', level=logrLevel)
+        logging.basicConfig(filename = log_file, format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', encoding='utf-8', level=level)
     else:
         logging.basicConfig(filename = "logfile.log", format='%(asctime)s - %(name)s - %(levelname)s: %(message)s', encoding='utf-8', level=logging.INFO)
 

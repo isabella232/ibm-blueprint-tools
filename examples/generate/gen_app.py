@@ -43,8 +43,13 @@ def main(argv):
         elif menu_choice == 2:
             (bpyaml, errors) = bp.to_yaml_str()
             if len(errors) > 0:
+                print("Validation errors: ")
                 eprint(errors)
+                
+                print("Blueprint Configuration file (with errors): ")
+                print(bpyaml)
             else:
+                print("Blueprint Configuration file: ")
                 print(bpyaml)
         
         elif menu_choice == 3:

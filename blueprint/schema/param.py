@@ -121,12 +121,12 @@ class Input (Parameter):
         if other == None:
             return False
         self.name = "" if self.name == None else self.name
-        self.type = "" if self.type == None else self.type
+        self.type = "" if not hasattr(self, 'type') or self.type == None else self.type
         self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
         self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
 
         other.name = "" if other.name == None else other.name
-        other.type = "" if other.type == None else other.type
+        other.type = "" if not hasattr(other, 'type') or other.type == None else other.type
         other.value = "" if not hasattr(other, 'value') or other.value == None else other.value
         other.description = "" if not hasattr(other, 'description') or other.description == None else other.description
 
@@ -134,8 +134,8 @@ class Input (Parameter):
 
     def __hash__(self):
         self.name = "" if self.name == None else self.name
-        self.type = "" if self.type == None else self.type
-        self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
+        self.type = "" if not hasattr(self, 'type') or self.type == None else self.type
+        self.value = "" if not hasattr(self, 'value') or self.value == None else str(self.value)
         self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
 
         return hash((self.name, self.type, self.value, self.description))
@@ -231,12 +231,12 @@ class Output (Parameter):
         if other == None:
             return False
         self.name = "" if self.name == None else self.name
-        self.type = "" if self.type == None else self.type
+        self.type = "" if not hasattr(self, 'type') or self.type == None else self.type
         self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
         self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
 
         other.name = "" if other.name == None else other.name
-        other.type = "" if other.type == None else other.type
+        other.type = "" if not hasattr(other, 'type') or other.type == None else other.type
         other.value = "" if not hasattr(other, 'value') or other.value == None else other.value
         other.description = "" if not hasattr(other, 'description') or other.description == None else other.description
 
@@ -244,8 +244,8 @@ class Output (Parameter):
 
     def __hash__(self):
         self.name = "" if self.name == None else self.name
-        self.type = "" if self.type == None else self.type
-        self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
+        self.type = "" if not hasattr(self, 'type') or self.type == None else self.type
+        self.value = "" if not hasattr(self, 'value') or self.value == None else str(self.value)
         self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
 
         return hash((self.name, self.type, self.value, self.description))
@@ -344,12 +344,12 @@ class Setting (Parameter):
         if other == None:
             return False
         self.name = "" if self.name == None else self.name
-        self.type = "" if self.type == None else self.type
+        self.type = "" if not hasattr(self, 'type') or self.type == None else self.type
         self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
         self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
 
         other.name = "" if other.name == None else other.name
-        other.type = "" if other.type == None else other.type
+        other.type = "" if not hasattr(other, 'type') or other.type == None else other.type
         other.value = "" if not hasattr(other, 'value') or other.value == None else other.value
         other.description = "" if not hasattr(other, 'description') or other.description == None else other.description
 
@@ -357,8 +357,8 @@ class Setting (Parameter):
 
     def __hash__(self):
         self.name = "" if self.name == None else self.name
-        self.type = "" if self.type == None else self.type
-        self.value = "" if not hasattr(self, 'value') or self.value == None else self.value
+        self.type = "" if not hasattr(self, 'type') or self.type == None else self.type
+        self.value = "" if not hasattr(self, 'value') or self.value == None else str(self.value)
         self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
 
         return hash((self.name, self.type, self.value, self.description))
