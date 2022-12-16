@@ -333,11 +333,15 @@ class Circuit:
                     
                     elif val.startswith('$blueprint.'):
                         split_val = val.split('.')
-                        # val = $blueprint.type.var_name
-                        node = split_val[0]
-                        type = split_val[1]
-                        var_name = split_val[2]
-
+                        # val = $blueprint.var_name
+                        if len(split_val) == 3:
+                            node = split_val[0]
+                            type = split_val[1]
+                            var_name = split_val[2]
+                        elif len(split_val) == 2:
+                            node = split_val[0]
+                            var_name = split_val[1]
+                    
                         self._add_wire(self.bp, var_name, mod, inp.name)
 
             if hasattr(mod, 'settings') and mod.settings != None and len(mod.settings) > 0:
