@@ -16,7 +16,7 @@ from typing import List
 from enum import Enum
 import json
 from prettytable import PrettyTable
-
+from textwrap import fill
 
 BPError   = int(0)
 BPWarning = int(1)
@@ -95,6 +95,8 @@ def format_events(events:List[ValidationEvent] = [], format = Format.Table) -> s
             debugs.append(e)
 
     ret_str = ''
+    Evd_Width = 40
+    Ctx_Width = 40
     if format == Format.Table:
         ret_str += f'Errors: {len(errors)}  Warnings: {len(warnings)}  Info: {len(infos)}  Debug: {len(debugs)}'
         ret_str += '\n'
@@ -106,10 +108,8 @@ def format_events(events:List[ValidationEvent] = [], format = Format.Table) -> s
             t.align = 'l'
             for e in errors:
                 ctx_str = '' if e.context==None else str(e.context)
-                context_str = (ctx_str[:40] + '..') if len(ctx_str) > 40 else ctx_str
                 evd_str = '' if e.evidence==None else str(e.evidence)
-                evidence_str = (evd_str[:40] + '..') if len(evd_str) > 40 else evd_str
-                t.add_row(['E', e.message, evidence_str, context_str])
+                t.add_row(['E', e.message, fill(evd_str, width=Evd_Width), fill(ctx_str, width=Ctx_Width)])
             ret_str += str(t)
             ret_str += '\n\n'
 
@@ -121,10 +121,8 @@ def format_events(events:List[ValidationEvent] = [], format = Format.Table) -> s
             t.align = 'l'
             for e in warnings:
                 ctx_str = '' if e.context==None else str(e.context)
-                context_str = (ctx_str[:40] + '..') if len(ctx_str) > 40 else ctx_str
                 evd_str = '' if e.evidence==None else str(e.evidence)
-                evidence_str = (evd_str[:40] + '..') if len(evd_str) > 40 else evd_str
-                t.add_row(['E', e.message, evidence_str, context_str])
+                t.add_row(['W', e.message, fill(evd_str, width=Evd_Width), fill(ctx_str, width=Ctx_Width)])
             ret_str += str(t)
             ret_str += '\n\n'
 
@@ -136,10 +134,8 @@ def format_events(events:List[ValidationEvent] = [], format = Format.Table) -> s
             t.align = 'l'
             for e in infos:
                 ctx_str = '' if e.context==None else str(e.context)
-                context_str = (ctx_str[:40] + '..') if len(ctx_str) > 40 else ctx_str
                 evd_str = '' if e.evidence==None else str(e.evidence)
-                evidence_str = (evd_str[:40] + '..') if len(evd_str) > 40 else evd_str
-                t.add_row(['E', e.message, evidence_str, context_str])
+                t.add_row(['I', e.message, fill(evd_str, width=Evd_Width), fill(ctx_str, width=Ctx_Width)])
             ret_str += str(t)
             ret_str += '\n\n'
 
@@ -151,10 +147,8 @@ def format_events(events:List[ValidationEvent] = [], format = Format.Table) -> s
             t.align = 'l'
             for e in debugs:
                 ctx_str = '' if e.context==None else str(e.context)
-                context_str = (ctx_str[:40] + '..') if len(ctx_str) > 40 else ctx_str
                 evd_str = '' if e.evidence==None else str(e.evidence)
-                evidence_str = (evd_str[:40] + '..') if len(evd_str) > 40 else evd_str
-                t.add_row(['E', e.message, evidence_str, context_str])
+                t.add_row(['D', e.message, fill(evd_str, width=Evd_Width), fill(ctx_str, width=Ctx_Width)])
             ret_str += str(t)
             ret_str += '\n\n'
     

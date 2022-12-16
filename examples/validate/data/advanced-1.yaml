@@ -8,7 +8,7 @@ loction: us-south
 inputs:
   ####### Resource Group ###########
   - name: resource_group_name
-  #- name: existing_resource_group_name
+  - name: existing_resource_group_name
   ####### activity_tracker #########
   - name: is_ats_instance
   - name: actvity_tracker_name
@@ -83,6 +83,7 @@ outputs:
     value: $module.activity-tracker-object-storage.outputs.atracker_target_crn
   - name: atracker_route_id
     value: $module.activity-tracker-object-storage.outputs.atracker_route_id
+  - name: unused_output_id
 settings:
   - name: TF_VERSION
     value: 1.0
@@ -99,8 +100,10 @@ modules:
     inputs:
       - name: resource_group_name
         value: $blueprint.resource_group_name
-      # - name: existing_resource_group_name
-      #   value: $blueprint.existing_resource_group_name
+      - name: existing_rg_name
+        value: $blueprint.existing_rg_name   # $blueprint.existing_resource_group_name
+      - name: temp_var
+        value: $module.circular-dependent-module.outputs.circular_id
     outputs:
       - name: resource_group_name
       - name: resource_group_id
@@ -130,7 +133,7 @@ modules:
       - name: region
         value: $blueprint.actvity_tracker_region
       - name: resource_group_id
-        value: $module.resource-groups.outputs.resource_group_id
+        value: $module.resource-groups.outputs.rg_id  # $module.resource-groups.outputs.resource_group_id
       - name: make_default_receiver
         value: $blueprint.activity_tracker_make_default_receiver
     outputs:
@@ -315,3 +318,19 @@ modules:
             value: 1.46.0
           - name: provider_source
             value: IBM-Cloud/ibm
+  - module_type: terraform
+    name: circular-dependent-module
+    layer: zero-layer
+    source:
+      source_type: github
+      git:
+        git_repo_url: "https://github.com/terraform-ibm-modules/terraform-ibm-atracker"
+    inputs:
+      - name: resource_group
+        value: $blueprint.resource_group_name
+      - name: target_crn
+        value: $module.cos-instance.outputs.cos_instance_id
+      - name: api_key
+        value: $module.cos-instance.outputs.cos_key_credentials.apikey
+    outputs:
+      - name: circular_id

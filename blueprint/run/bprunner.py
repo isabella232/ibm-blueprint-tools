@@ -38,6 +38,7 @@ class BlueprintRunner:
         self.blueprint_file = blueprint_file
         self.input_data_file = input_data_file
         self.working_dir = working_dir
+        self.dry_run = dry_run
 
         self.module_runners = dict()
         self.input_data = dict()
@@ -80,7 +81,7 @@ class BlueprintRunner:
             logr.error("Errors found while loading input data for the blueprint: " + str(e))
         
         logr.debug("Loading ModuleRunners for the blueprint")
-        e = self.load_module_runners(dry_run = True)
+        e = self.load_module_runners(dry_run)
         if len(e) > 0:
             logr.error("Errors found while loading ModuleRunner: " + str(e))
 
