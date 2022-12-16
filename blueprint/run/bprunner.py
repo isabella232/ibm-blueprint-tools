@@ -33,12 +33,13 @@ def eprint(*args, **kwargs):
 
 class BlueprintRunner:
 
-    def __init__(self, blueprint_file, input_data_file, dry_run = False, working_dir = '.'):
+    def __init__(self, blueprint_file, input_data_file, dry_run = False, ignore_validation_errors = False, working_dir = '.'):
         self.bp =  blueprint.Blueprint("Temp")
         self.blueprint_file = blueprint_file
         self.input_data_file = input_data_file
         self.working_dir = working_dir
         self.dry_run = dry_run
+        self.ignore_validation_errors = ignore_validation_errors
 
         self.module_runners = dict()
         self.input_data = dict()
@@ -81,7 +82,7 @@ class BlueprintRunner:
             logr.error("Errors found while loading input data for the blueprint: " + str(e))
         
         logr.debug("Loading ModuleRunners for the blueprint")
-        e = self.load_module_runners(dry_run)
+        e = self.load_module_runners(dry_run, ignore_validation_errors)
         if len(e) > 0:
             logr.error("Errors found while loading ModuleRunner: " + str(e))
 
@@ -119,11 +120,11 @@ class BlueprintRunner:
         self.bp.propagate_blueprint_input_data()
         return errors
 
-    def load_module_runners(self, dry_run=False):
+    def load_module_runners(self, dry_run=False, ignore_validation_errors=False):
         errors = []
         for mod in self.bp.modules:
             logr.debug("Loading module-runner for module : " + mod.name)
-            self.module_runners[mod.name] = modrunner.ModuleRunner(self, mod, dry_run)
+            self.module_runners[mod.name] = modrunner.ModuleRunner(self, mod, dry_run, ignore_validation_errors)
             errors.append(self.module_runners[mod.name].get_errors())
         logr.debug("Successful load all module-runners")
         

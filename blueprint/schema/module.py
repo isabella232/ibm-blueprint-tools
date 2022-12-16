@@ -192,6 +192,31 @@ class Module(dict):
 
         return mods
 
+    def repair_module(self, value_ref):
+        keys = value_ref.keys()
+        
+        if len(keys) == 0:
+            return
+
+        for p in self.inputs:
+            if hasattr(p, "value") and p.value != None and isinstance(p.value, str) and p.value.startswith("$blueprint."):
+                alias_val = value_ref.get(p.value)
+                if alias_val != None:
+                    p.value = alias_val
+
+        for p in self.outputs:
+            if hasattr(p, "value") and p.value != None and isinstance(p.value, str) and p.value.startswith("$blueprint."):
+                alias_val = value_ref.get(p.value)
+                if alias_val != None:
+                    p.value = alias_val
+        
+        for p in self.settings:
+            if hasattr(p, "value") and p.value != None and isinstance(p.value, str) and p.value.startswith("$blueprint."):
+                alias_val = value_ref.get(p.value)
+                if alias_val != None:
+                    p.value = alias_val
+
+
     def validate(self, level=event.BPError):
         mod_validator = blueprint_validator.ModuleValidator()
         return mod_validator.validate_module(self, level)

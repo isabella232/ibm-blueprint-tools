@@ -96,6 +96,7 @@ def main():
 
     run.add_argument('-c', '--sub-command', choices= ['init', 'plan', 'apply', 'destroy'], required=True, help='blueprint command', default=None)
     run.add_argument('-d', '--dry-run', action='store_false', help='dry run the command, to preview outcome', default=None)
+    run.add_argument('-g', '--ignore-validation-errors', action='store_false', help='ignore validation errors', default=None)
     run.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint configuration yaml file', default=None)
     run.add_argument('-i', '--input-file', type=str, required=True, help='input blueprint data file', default=None)
     run.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for blueprint and input data files', default='.')
@@ -387,12 +388,15 @@ def main():
     elif args.command == 'run':
         if args.sub_command and args.bp_file and args.input_file :
             command = args.sub_command
-            dry_run = args.dry_run
+            dry_run = False if args.dry_run == None else True
+            ignore_validation_errors = False if args.ignore_validation_errors == None else True
             bp_filename = args.bp_file
             input_file = args.input_file
             source_dir = args.source_dir
             working_dir = args.working_dir
             output_blueprint_file = args.out_file
+
+            print(" Ignore validation error : " + str(ignore_validation_errors))
 
             if source_dir:
                 if not os.path.exists(source_dir):
@@ -443,6 +447,7 @@ def main():
             br = bprunner.BlueprintRunner(blueprint_file = bp_filename, 
                                     input_data_file = input_file, 
                                     dry_run = dry_run,
+                                    ignore_validation_errors = ignore_validation_errors,
                                     working_dir = working_dir)
             if command == 'init':
                 print("Command > blueprint init")
@@ -487,15 +492,20 @@ def main():
             else:
                 logr.error("Invalid command name")
 
-            (bp_yaml_str, errors) = br.bp.to_yaml_str()
-            if len(errors) > 0:
-                eprint(event.format_events(errors, event.Format.Table if log_json_format else event.Format.Json))
-
+            (bp_yaml_str, errors) = br.bp.to_yaml_str(do_validate = False)
             logr.debug(bp_yaml_str)
             logr.debug("Module data: \n" + str(br.module_data))
 
             if output_blueprint_file == None or output_blueprint_file == '':
+                print('============================================================')
+                print('Updated blueprint configuration:')
+                print('============================================================')
                 print(bp_yaml_str)
+                print('============================================================')
+                print('Computed module data:')
+                print('============================================================')
+                print(str(br.module_data))
+                print('============================================================')
             else:
                 with open(output_blueprint_file, 'w') as yaml_file:
                     yaml_file.write(bp_yaml_str)

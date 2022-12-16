@@ -186,13 +186,14 @@ class Blueprint(dict):
 
         return (yaml.safe_load(self.to_yaml_str()), errors)
 
-    def to_yaml_str(self, stream = None) -> str:
+    def to_yaml_str(self, do_validate = True, stream = None) -> str:
         self.remove_null_entries()
-        errors = self.validate(event.BPWarning)
-        # if len(errors) > 0:
-        #     eprint(errors)
+        errors = []
+        if do_validate:
+            errors = self.validate(event.BPWarning)
+            # if len(errors) > 0:
+            #     eprint(errors)
         return (yaml.dump(self, sort_keys=False), errors)
-
 
     def generate_input_file(self, stream = None):
         inputs_data = {}
@@ -223,6 +224,7 @@ class Blueprint(dict):
 
     @classmethod
     def from_yaml_data(cls, yaml_data):
+        value_ref = dict()
         name = yaml_data['name']
         try:
             description = yaml_data['description']
@@ -232,28 +234,39 @@ class Blueprint(dict):
         try:
             inputs=[]
             for p in yaml_data['inputs']:
-                inputs.append(param.Input.from_yaml(p))
+                in_param = param.Input.from_yaml(p)
+                value_ref.update({"$blueprint." + in_param.name : "$blueprint.inputs." + in_param.name})
+                inputs.append(in_param)
         except (KeyError, UnboundLocalError, TypeError):
             inputs = None
 
         try:
             outputs=[]
             for p in yaml_data['outputs']:
-                outputs.append(param.Output.from_yaml(p))
+                out_param = param.Output.from_yaml(p)
+                value_ref.update({"$blueprint." + out_param.name : "$blueprint.outputs." + out_param.name})
+                outputs.append(out_param)
+
         except (KeyError, UnboundLocalError, TypeError):
             outputs = None
 
         try:
             settings=[]
             for p in yaml_data['settings']:
-                settings.append(param.Setting.from_yaml(p))
+                env_param = param.Setting.from_yaml(p)
+                value_ref.update({"$blueprint." + env_param.name : "$blueprint.settings." + env_param.name})
+                settings.append(env_param)
+
         except (KeyError, UnboundLocalError, TypeError):
             settings = None
 
         try:
             modules=[]
             for d in yaml_data['modules']:
-                modules.append(module.Module.from_yaml(d))
+                mod = module.Module.from_yaml(d)
+                mod.repair_module(value_ref)
+                modules.append(mod)
+                
         except (KeyError, UnboundLocalError, TypeError):
             modules = None
 
