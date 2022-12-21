@@ -65,22 +65,22 @@ class GitSource:
     def __eq__(self, other):
         if other == None:
             return False
-        self.git_repo_url = "" if self.git_repo_url == None else self.git_repo_url
-        self.git_branch = "" if not hasattr(self, 'git_branch') or self.git_branch == None else self.git_branch
-        self.git_token = "" if not hasattr(self, 'git_token') or self.git_token == None else self.git_token
+        self_git_repo_url = "" if self.git_repo_url == None else self.git_repo_url
+        self_git_branch = "" if not hasattr(self, 'git_branch') or self.git_branch == None else self.git_branch
+        self_git_token = "" if not hasattr(self, 'git_token') or self.git_token == None else self.git_token
 
-        other.git_repo_url = "" if other.git_repo_url == None else other.git_repo_url
-        other.git_branch = "" if not hasattr(other, 'git_branch') or other.git_branch == None else other.git_branch
-        other.git_token = "" if not hasattr(other, 'git_token') or other.git_token == None else other.git_token
+        other_git_repo_url = "" if other.git_repo_url == None else other.git_repo_url
+        other_git_branch = "" if not hasattr(other, 'git_branch') or other.git_branch == None else other.git_branch
+        other_git_token = "" if not hasattr(other, 'git_token') or other.git_token == None else other.git_token
 
-        return (self.git_repo_url == other.git_repo_url) and (self.git_branch == other.git_branch) and (self.git_token == other.git_token)
+        return (self_git_repo_url == other_git_repo_url) and (self_git_branch == other_git_branch) and (self_git_token == other_git_token)
 
     def __hash__(self):
-        self.git_repo_url = "" if self.git_repo_url == None else self.git_repo_url
-        self.git_branch = "" if not hasattr(self, 'git_branch') or self.git_branch == None else self.git_branch
-        self.git_token = "" if not hasattr(self, 'git_token') or self.git_token == None else self.git_token
+        self_git_repo_url = "" if self.git_repo_url == None else self.git_repo_url
+        self_git_branch = "" if not hasattr(self, 'git_branch') or self.git_branch == None else self.git_branch
+        self_git_token = "" if not hasattr(self, 'git_token') or self.git_token == None else self.git_token
 
-        return hash((self.git_repo_url, self.git_branch, self.git_token))
+        return hash((self_git_repo_url, self_git_branch, self_git_token))
 
     def remove_null_entries(self):
         if hasattr(self, 'git_repo_url') and self.git_repo_url == None:

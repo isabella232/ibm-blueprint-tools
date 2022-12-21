@@ -106,39 +106,39 @@ class Blueprint(dict):
         if other == None:
             return False
 
-        self.name = "" if self.name == None else self.name
-        self.schema_version = "" if self.schema_version == None else self.schema_version
-        self.type = "" if not hasattr(self, 'type') or self.type == None else self.type
-        self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
-        self.inputs = "" if not hasattr(self, 'inputs') or self.inputs == None else str(self.inputs)
-        self.outputs = "" if not hasattr(self, 'outputs') or self.outputs == None else str(self.outputs)
-        self.settings = "" if not hasattr(self, 'settings') or self.settings == None else str(self.settings)
-        self.modules = "" if not hasattr(self, 'modules') or self.modules == None else str(self.modules)
+        self_name = "" if self.name == None else self.name
+        self_schema_version = "" if self.schema_version == None else self.schema_version
+        self_type = "" if not hasattr(self, 'type') or self.type == None else self.type
+        self_description = "" if not hasattr(self, 'description') or self.description == None else self.description
+        self_inputs = "" if not hasattr(self, 'inputs') or self.inputs == None else str(self.inputs)
+        self_outputs = "" if not hasattr(self, 'outputs') or self.outputs == None else str(self.outputs)
+        self_settings = "" if not hasattr(self, 'settings') or self.settings == None else str(self.settings)
+        self_modules = "" if not hasattr(self, 'modules') or self.modules == None else str(self.modules)
 
-        other.name = "" if other.name == None else other.name
-        other.schema_version = "" if other.schema_version == None else other.schema_version
-        other.type = "" if not hasattr(other, 'type') or other.type == None else other.type
-        other.description = "" if not hasattr(other, 'description') or other.description == None else other.description
-        other.inputs = "" if not hasattr(other, 'inputs') or other.inputs == None else str(other.inputs)
-        other.outputs = "" if not hasattr(other, 'outputs') or other.outputs == None else str(other.outputs)
-        other.settings = "" if not hasattr(other, 'settings') or other.settings == None else str(other.settings)
-        other.modules = "" if not hasattr(other, 'modules') or other.modules == None else str(other.modules)
+        other_name = "" if other.name == None else other.name
+        other_schema_version = "" if other.schema_version == None else other.schema_version
+        other_type = "" if not hasattr(other, 'type') or other.type == None else other.type
+        other_description = "" if not hasattr(other, 'description') or other.description == None else other.description
+        other_inputs = "" if not hasattr(other, 'inputs') or other.inputs == None else str(other.inputs)
+        other_outputs = "" if not hasattr(other, 'outputs') or other.outputs == None else str(other.outputs)
+        other_settings = "" if not hasattr(other, 'settings') or other.settings == None else str(other.settings)
+        other_modules = "" if not hasattr(other, 'modules') or other.modules == None else str(other.modules)
 
-        return (self.name == other.name) and (self.type == other.type) and (self.schema_version == other.schema_version) \
-            and (self.description == other.description) and (self.modules == other.modules) \
-            and (self.inputs == other.inputs) and (self.outputs == other.outputs) and (self.settings == other.settings)
+        return (self_name == other_name) and (self_type == other_type) and (self_schema_version == other_schema_version) \
+            and (self_description == other_description) and (self_modules == other_modules) \
+            and (self_inputs == other_inputs) and (self_outputs == other_outputs) and (self_settings == other_settings)
 
     def __hash__(self):
-        self.name = "" if self.name == None else self.name
-        self.schema_version = "" if self.schema_version == None else self.schema_version
-        self.type = "" if not hasattr(self, 'type') or self.type == None else self.type
-        self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
-        self.inputs = "" if not hasattr(self, 'inputs') or self.inputs == None else str(self.inputs)
-        self.outputs = "" if not hasattr(self, 'outputs') or self.outputs == None else str(self.outputs)
-        self.settings = "" if not hasattr(self, 'settings') or self.settings == None else str(self.settings)
-        self.modules = "" if not hasattr(self, 'modules') or self.modules == None else str(self.modules)
+        self_name = "" if self.name == None else self.name
+        self_schema_version = "" if self.schema_version == None else self.schema_version
+        self_type = "" if not hasattr(self, 'type') or self.type == None else self.type
+        self_description = "" if not hasattr(self, 'description') or self.description == None else self.description
+        self_inputs = "" if not hasattr(self, 'inputs') or self.inputs == None else str(self.inputs)
+        self_outputs = "" if not hasattr(self, 'outputs') or self.outputs == None else str(self.outputs)
+        self_settings = "" if not hasattr(self, 'settings') or self.settings == None else str(self.settings)
+        self_modules = "" if not hasattr(self, 'modules') or self.modules == None else str(self.modules)
 
-        return hash((self.name, self.schema_version, self.type, self.description, self.inputs, self.outputs, self.settings, self.modules))
+        return hash((self_name, self_schema_version, self_type, self_description, self_inputs, self_outputs, self_settings, self_modules))
 
 
     def remove_null_entries(self):
