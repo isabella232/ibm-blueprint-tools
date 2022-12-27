@@ -274,8 +274,8 @@ class Blueprint(dict):
                     inputs, outputs, settings, modules)
 
     def validate(self, level=event.BPError):
-        bp_validator = blueprint_validator.BlueprintValidator()
-        return bp_validator.validate_blueprint(self, level)
+        bp_validator = blueprint_validator.BlueprintModel(self)
+        return bp_validator.validate_model()
 
     def input_ref(self, key):
         if hasattr(self, "inputs") and self.inputs != None:

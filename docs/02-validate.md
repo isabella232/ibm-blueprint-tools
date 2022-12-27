@@ -34,7 +34,7 @@ The result of validation can be obtained in tabular or json format.
 
 In addition, you can progamatically validate your `blueprint configuration file` using the following Python modules.
 * blueprint.validate.schema_validator.SchemaValidator
-* blueprint.validate.blueprint_validator.BlueprintValidator
+* blueprint.validate.blueprint_validator.BlueprintModel
 
 As illustrated in the following code snippet:
 
@@ -56,8 +56,8 @@ As illustrated in the following code snippet:
 
     # Perform advanced semantic validation of Blueprint #
     ##=================================================##
-    bpv = blueprint_validator.BlueprintValidator()
-    err = bpv.validate_blueprint(bp)
+    bpv = blueprint_validator.BlueprintModel(bp)
+    err = bpv.validate_model()
     if err != None:
         eprint(event.format_events(err, event.Format.Table))
 

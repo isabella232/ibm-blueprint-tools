@@ -30,13 +30,13 @@ def eprint(*args, **kwargs):
 class Parameter(dict):
     def __init__(self, 
                 name: str           = "__init__", 
-                type: str           = "string", 
+                type: str           = None, 
                 description: str    = None, 
                 value: str          = None):
         """Parameter schema (base).
 
         :param name: Name of the parameter
-        :param type: Type of paramter
+        :param type: Type of parameter
         :param description: Description of the parameter
         :param value: Parameter value
         """
@@ -88,7 +88,7 @@ class Input (Parameter):
 
     def __init__(self, 
                 name: str           = "__init__", 
-                type: str           = "string", 
+                type: str           = None, 
                 description: str    = None, 
                 value: str          = None,
                 default: str        = None,
@@ -97,7 +97,7 @@ class Input (Parameter):
         """Input parameter.
 
         :param name: Name of the input parameter
-        :param type: Type of input paramter
+        :param type: Type of input parameter
         :param description: Description of the input parameter
         :param value: Input parameter value
         """
@@ -179,7 +179,7 @@ class Input (Parameter):
         try:
             type = yaml_data['type']
         except KeyError:
-            type = "string"
+            type = None
         try:
             description = yaml_data['description']
         except KeyError:
@@ -223,13 +223,13 @@ class Input (Parameter):
 class Output (Parameter):
     def __init__(self,
                 name: str           = "__init__", 
-                type: str           = "string", 
+                type: str           = None, 
                 description: str    = None, 
                 value: str          = None):
         """Output parameter.
 
         :param name: Name of the output parameter
-        :param type: Type of output paramter
+        :param type: Type of output parameter
         :param description: Description of the output parameter
         :param value: Output parameter value
         """
@@ -295,7 +295,7 @@ class Output (Parameter):
         try:
             type = yaml_data['type']
         except KeyError:
-            type = "string"
+            type = None
         
         try:
             description = yaml_data['description']
@@ -329,14 +329,14 @@ class Setting (Parameter):
 
     def __init__(self,
                 name: str           = "__init__", 
-                type: str           = "string", 
+                type: str           = None, 
                 description: str    = None, 
                 default: str        = None,
                 value: str          = None):
         """Environment settings parameter.
 
         :param name: Name of the setting parameter
-        :param type: Type of setting paramter
+        :param type: Type of setting parameter
         :param description: Description of the setting parameter
         :param value: Environment setting parameter value
         """
@@ -410,7 +410,7 @@ class Setting (Parameter):
         try:
             type = yaml_data['type']
         except KeyError:
-            type = "string"
+            type = None
         
         try:
             description = yaml_data['description']

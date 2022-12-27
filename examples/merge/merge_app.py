@@ -29,8 +29,8 @@ def main(argv):
       elif opt in ("-o", "--ofile"):
          output_blueprint_file = arg
    
-   # if input_manifest_file == None or input_manifest_file == '':
-   #    input_manifest_file = './examples/merge/data-1/manifest.yaml'
+   if input_manifest_file == None or input_manifest_file == '':
+      input_manifest_file = './examples/merge/data-2/manifest.yaml'
 
    if len(input_manifest_file) == 0:
          print('Usage:')

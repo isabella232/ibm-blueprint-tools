@@ -9,6 +9,7 @@ inputs:
     required: true
   - ${{inputs-creds.yaml}}
   - ${{./inputs-resource-meta.yaml}}
+  - ${{./inputs-override-json.yaml}}
 outputs:
   - ${{outputs-bp.yaml}}
 modules:

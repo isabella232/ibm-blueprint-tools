@@ -47,7 +47,20 @@ class ValidationEvent(dict):
 
     def __repr__(self):
         return self.__str__()
-        
+
+    def __eq__(self, other):
+        if other == None:
+            return False
+        return self.level == other.level and self.message == other.message and \
+            self.context == other.context and self.evidence == other.evidence and \
+            self.chain == other.chain
+
+    def __lt__(self, other):
+            return self.message < other.message
+
+    def __hash__(self):
+        return hash((self.level, self.message, str(self.context), str(self.evidence), str(self.chain)))
+
     def toJson(self):
         ret_str = '{'
         if self.level == BPError: 
@@ -117,7 +130,7 @@ def format_events(events:List[ValidationEvent] = [], format = Format.Table) -> s
             ret_str += "\n-----------------------------\n"
             ret_str += f'  Warning count: {len(warnings)}'
             ret_str += "\n=============================\n"
-            t = PrettyTable(['T', 'Message', 'Context', 'Evidence'])
+            t = PrettyTable(['T', 'Message', 'Evidence', 'Context'])
             t.align = 'l'
             for e in warnings:
                 ctx_str = '' if e.context==None else str(e.context)
@@ -130,7 +143,7 @@ def format_events(events:List[ValidationEvent] = [], format = Format.Table) -> s
             ret_str += "\n-----------------------------\n"
             ret_str += f'  Info count: {len(infos)}'
             ret_str += "\n=============================\n"
-            t = PrettyTable(['T', 'Message', 'Context', 'Evidence'])
+            t = PrettyTable(['T', 'Message', 'Evidence', 'Context'])
             t.align = 'l'
             for e in infos:
                 ctx_str = '' if e.context==None else str(e.context)
@@ -143,7 +156,7 @@ def format_events(events:List[ValidationEvent] = [], format = Format.Table) -> s
             ret_str += "\n-----------------------------\n"
             ret_str += f'  Debug count: {len(debugs)}'
             ret_str += "\n=============================\n"
-            t = PrettyTable(['T', 'Message', 'Context', 'Evidence'])
+            t = PrettyTable(['T', 'Message', 'Evidence', 'Context'])
             t.align = 'l'
             for e in debugs:
                 ctx_str = '' if e.context==None else str(e.context)

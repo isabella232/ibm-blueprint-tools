@@ -55,8 +55,8 @@ def main(argv):
          eprint("Error in loading the blueprint file")
          sys.exit()
 
-      bpv = blueprint_validator.BlueprintValidator()
-      errors = bpv.validate_blueprint(bp, level=event.BPWarning)
+      bpv = blueprint_validator.BlueprintModel(bp)
+      errors = bpv.validate_model()
       if errors != None:
          # eprint(str(errors))
          eprint(event.format_events(errors, event.Format.Table))

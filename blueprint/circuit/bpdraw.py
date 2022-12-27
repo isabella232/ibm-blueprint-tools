@@ -91,8 +91,8 @@ class BlueprintDraw:
             err = event.ValidationEvent(event.BPError, "BlueprintDraw: blueprint file & blueprint object is not initialized", self)
             return [err]
 
-        bpv = blueprint_validator.BlueprintValidator()
-        self.validation = bpv.validate_blueprint(self.bp)
+        bpv = blueprint_validator.BlueprintModel(self.bp)
+        self.validation = bpv.validate_model()
 
         self.circuit = bus.Circuit(self.bp)
         self.circuit.read()
