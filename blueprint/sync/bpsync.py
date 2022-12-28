@@ -15,6 +15,7 @@
 import os
 import sys
 import yaml
+from typing import List
 
 from os.path import exists as file_exists
 import giturlparse
@@ -23,6 +24,7 @@ from blueprint.schema import blueprint
 from blueprint.schema import module
 from blueprint.schema import param
 from blueprint.schema import source as src
+from blueprint.circuit import bus
 
 from blueprint.lib import git
 from blueprint.lib import event
@@ -42,11 +44,18 @@ def eprint(*args, **kwargs):
 
 class BlueprintMorphius:
 
-    def __init__(self, name: str, 
-                description: str = '', 
-                modules: module.Module = None):
+    def __init__(self, 
+                    name: str                       = "__init__", 
+                    description: str                = None, 
+                    inputs: List[param.Input]       = None, 
+                    outputs: List[param.Output]     = None, 
+                    settings: List[param.Setting]   = None,
+                    modules: List[module.Module]    = None ):
         self.name = name
         self.description = description
+        self.inputs = inputs
+        self.outputs = outputs
+        self.settings = settings
         self.modules = modules
 
     @classmethod
@@ -57,13 +66,15 @@ class BlueprintMorphius:
         yaml_data = bfile.FileHelper.load(filename)        
 
         bp = BlueprintMorphius.from_yaml_data(yaml_data)
-        return cls(bp.name, bp.description, bp.modules)
+        return cls(name=bp.name, description=bp.description, inputs=bp.inputs, 
+                    outputs=bp.outputs, settings=bp.settings, modules=bp.modules)
 
     @classmethod
     def from_yaml_str(cls, yaml_str):
         yaml_data = yaml.safe_load(yaml_str)
         bp = BlueprintMorphius.from_yaml_data(yaml_data)
-        return cls(bp.name, bp.description, bp.modules)
+        return cls(name=bp.name, description=bp.description, inputs=bp.inputs, 
+                    outputs=bp.outputs, settings=bp.settings, modules=bp.modules)
 
     @classmethod
     def from_yaml_data(cls, yaml_data):
@@ -73,6 +84,30 @@ class BlueprintMorphius:
         except KeyError:
             description = None
         
+        inputs=[]
+        try:
+            params = yaml_data['inputs']
+            for p in params:
+                inputs.append(param.Input.from_yaml(p))
+        except KeyError:
+            inputs=[]
+
+        outputs=[]
+        try:
+            params = yaml_data['outputs']
+            for p in params:
+                outputs.append(param.Output.from_yaml(p))
+        except KeyError:
+            outputs=[]
+
+        settings=[]
+        try:
+            params = yaml_data['settings']
+            for p in params:
+                settings.append(param.Setting.from_yaml(p))
+        except KeyError:
+            settings=[]
+
         modules=[]
         try:
             mods = yaml_data['modules']
@@ -105,9 +140,10 @@ class BlueprintMorphius:
         except (KeyError, UnboundLocalError, TypeError) as e:
             logr.debug('Attribute error while reading & initializing modules from git_sources' + str(e))
 
-        return cls(bp_name, description, modules)
+        return cls(name=bp_name, description=description, inputs=inputs, 
+                    outputs=outputs, settings=settings, modules=modules)
 
-    def sync_blueprint(self, working_dir, annotate=False):
+    def sync_blueprint(self, working_dir, annotate=False) -> blueprint.Blueprint:
         cwd = os.getcwd()
 
         tic_path = os.getenv('TERRAFORM_CONFIG_INSPECT_PATH')
@@ -122,7 +158,12 @@ class BlueprintMorphius:
         working_dir = os.path.abspath(working_dir)
         os.chdir(working_dir)
 
-        bp = blueprint.Blueprint(name = self.name, description = self.description, modules = self.modules)
+        bp = blueprint.Blueprint(name=self.name, description=self.description, 
+                                    inputs=self.inputs,
+                                    outputs=self.outputs,
+                                    settings=self.settings,
+                                    modules=self.modules)
+        
         if bp.modules != None and len(bp.modules) > 0:
             for mod in bp.modules:
                 git_url = mod.source.git.git_repo_url
@@ -140,80 +181,109 @@ class BlueprintMorphius:
 
                 if config_json != None:
                     config_json_data = yaml.safe_load(config_json)
-                    input_vars = list(config_json_data['variables'].keys())
-                    logr.info('Processing inputs: ' + str(input_vars))
+
+                    #==============================
+                    # Processing input variables
+                    config_input_vars = list(config_json_data['variables'].keys())
+                    logr.info('Processing inputs: ' + str(config_input_vars))
                     existing_input_vars = mod.get_input_var_names()
 
-                    for key in input_vars:
-                        # If key already present in the 'mod', then skip
-                        if key in existing_input_vars:
-                            continue
+                    for key in config_input_vars:
 
-                        value = config_json_data['variables'][key]
-                        if 'type' in value.keys():
-                            type=value['type']
+                        config_value = config_json_data['variables'][key]
+                        if 'type' in config_value.keys():
+                            type=config_value['type']
                         else:
                             type=None
-                        if 'description' in value.keys():
-                            description=value['description']
+                        if 'description' in config_value.keys():
+                            description=config_value['description']
                         else:
                             description=''
-                        if 'default' in value.keys():
-                            val=value['default']
+                        if 'default' in config_value.keys():
+                            val=config_value['default']
                         else:
                             val=None
-                        if annotate:
-                            p = param.Input(key, type=type, description='_sync: add> ' + description, value=val)
+
+                        # If key already present in the 'mod', then update parameter
+                        if key in existing_input_vars:
+                            type2 = mod.get_input_attr(key, "type")
+                            description2 = mod.get_input_attr(key, "description")
+                            val2 = mod.get_input_attr(key, "value")
+                            comment2 = 'TODO: update param '
+                            is_updated = False
+                            if type != type2:
+                                comment2 += f'type({type2} --> {type}) '
+                                is_updated = True
+                            if description != description2:
+                                comment2 += f'description({description2} --> {description}) '
+                                is_updated = True
+                            if val != val2 and not (val2.startswith('$blueprint.') or val2.startswith('$module.')):
+                                comment2 += f'value({val2} --> {val})'
+                                is_updated = True
+                            if is_updated:
+                                p = param.Input(key, type=type, description=description, value=val, comment=comment2 if annotate else None)
+                                mod.update_input(p)
                         else:
-                            p = param.Input(key, type=type, description=description, value=val)
-                        mod.inputs.append(p)
+                            p = param.Input(key, type=type, description=description, value=val, comment='TODO: add param' if annotate else None)
+                            mod.inputs.append(p)
 
-                    input_vars = list(config_json_data['variables'].keys())
-                    existing_input_vars = mod.get_input_var_names()
+                        if p.value == None and key not in bp.get_input_var_names():
+                            bp_input = param.Input(key, type=type, description=description, value=val, comment='TODO: add param' if annotate else None)
+                            bp.add_input(bp_input)
+                            bp_bus = bus.Bus(bp, mod)
+                            bp_bus.add_wire(bp_input.name, p.name)
+
+                    config_input_vars = list(config_json_data['variables'].keys())
+                    # existing_input_vars = mod.get_input_var_names()
                     for key in existing_input_vars:
-                        if key not in input_vars:
-                            value = mod.get_input_attr(key, 'description')
-                            if value == None:
-                                value = ''
-
-                            if annotate:
-                                if '_sync: delete >' not in value:
-                                    mod.set_input_attr(key, 'description', '_sync: delete> ' + value)
-                            else:
-                                mod.set_input_attr(key, 'description', value)
-                        
-                    output_vars = list(config_json_data['outputs'].keys())
-                    logr.info('Processing outputs: ' + str(output_vars))
+                        if key not in config_input_vars and annotate:
+                            mod.set_input_attr(key, 'comment', 'TODO: delete param')
+                    
+                    #==============================
+                    # Processing output variables
+                    config_output_vars = list(config_json_data['outputs'].keys())
+                    logr.info('Processing outputs: ' + str(config_output_vars))
                     existing_output_vars = mod.get_output_var_names()
-                    for key in output_vars:
-                        # If key already present in the 'mod', then skip
-                        if key in existing_output_vars:
-                            continue
+                    for key in config_output_vars:
 
                         value = config_json_data['outputs'][key]
                         if 'description' in value.keys():
                             description=value['description']
                         else:
                             description=''
-                        if annotate:
-                            p = param.Output(key, description='_sync: add> ' + description)
+                        # If key already present in the 'mod', then skip
+                        if key in existing_output_vars:
+                            description2 = mod.get_output_attr(key, "description")
+                            comment2 = 'TODO: update param '
+                            is_updated = False
+                            if description != description2:
+                                comment2 += f'description({description} --> {description2})  '
+                                is_updated = True
+                            if is_updated:
+                                p = param.Output(key, description=description, comment=comment2 if annotate else None)
+                                mod.update_input(p)
                         else:
-                            p = param.Output(key, description=description)
-                        mod.outputs.append(p)
+                            p = param.Output(key, description=description, comment='TODO: add param' if annotate else None)
+                            mod.outputs.append(p)
 
-                    output_vars = list(config_json_data['outputs'].keys())
-                    existing_output_vars = mod.get_input_var_names()
+                        mod_ref = bp.module_output_ref(mod.name, p.name)
+                        is_p_linked = False
+                        for op in bp.outputs:
+                            if hasattr(op, 'value') and mod_ref == op.value:
+                                is_p_linked = True
+                                break
+
+                        if not is_p_linked and key not in bp.get_output_var_names():
+                            bp_output = param.Output(key, description=description, comment='TODO: add param' if annotate else None)
+                            bp.add_output(bp_output)
+                            bp_bus = bus.Bus(mod, bp)
+                            bp_bus.add_wire(p.name, bp_output.name)
+
+                    config_output_vars = list(config_json_data['outputs'].keys())
+                    # existing_output_vars = mod.get_input_var_names()
                     for key in existing_output_vars:
-                        if key not in output_vars:
-                            value = mod.get_output_attr(key, 'description')
-                            if value == None:
-                                value = ''
-
-                            if annotate:
-                                if '_sync: delete >' not in value:
-                                    mod.set_output_attr(key, 'description', '_sync: delete> ' + value)
-                            else:
-                                mod.set_output_attr(key, 'description', value)
+                        if key not in config_output_vars and annotate:
+                            mod.set_input_attr(key, 'comment', 'TODO: delete param')
 
         os.chdir(cwd)
         return bp

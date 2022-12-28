@@ -154,7 +154,7 @@ The first step is - Import your blueprint configuration file
 Further, you can validate the blueprint configuration, for any known errors
 
 ```python
-    err = bp.validate(event.BPWarning)
+    err = bp.validate()
     
     if len(err) != 0:
         print("Found validation errors !\n")

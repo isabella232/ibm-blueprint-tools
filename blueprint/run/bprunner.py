@@ -94,7 +94,7 @@ class BlueprintRunner:
             yaml_str = f.read()
             self.bp = blueprint.Blueprint.from_yaml_str(yaml_str)
         logr.info("Success loading blueprint file " + self.blueprint_file + ". \nValidating ...")
-        errors = self.bp.validate(event.BPWarning)
+        errors = self.bp.validate()
         
         return errors
 

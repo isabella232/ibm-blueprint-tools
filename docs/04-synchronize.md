@@ -66,13 +66,15 @@ After running the  `blueprint sync` command, the following output will be genera
   outputs:
   - name: resource_group_id
     type: string
-    description: '_sync: add> The ID of the resource group'
+    description: 'The ID of the resource group'
+    # comment: 'TODO: add param'
   - name: resource_group_name
     type: string
-    description: '_sync: add> The Name of the resource group'
+    description: 'The Name of the resource group'
+    # comment: 'TODO: add param'
 ```
 
-You will notice that the `description` is annotated with `_sync: add>`, denoting the addition of this new input/output variable.  
+You will notice a `# comment:` field annotated with `TODO: add param`, denoting the addition of this new input/output variable.  
 
 The next step for the _blueprint developer_ is to review all the annotations, and update the values for these input/output variables in the new module.
 
@@ -80,16 +82,16 @@ The next step for the _blueprint developer_ is to review all the annotations, an
 
 ## 5. Synchronize the `blueprint configuration file` with the terraform modules in git repositories
 
-During the course of continuous development (CI/CD) of the `Terraform modules` and the `blueprint configuration` - it is possible for the input/output definitions of the modules in `blueprint configuration` - to be out-of-sync with the correspoding definitions in the Terraform modules.  In other words, the *Terraform module developer* may change the inputs variable names, add a new output variable, or change the variable type, etc., while the *Blueprint developer* is not aware of these recent changes.
+During the course of continuous development (CI/CD) of the `Terraform modules` and the `blueprint configuration` - it is possible for the input/output definitions of the modules in `blueprint configuration` - to be out-of-sync with the corresponding definitions in the Terraform modules.  In other words, the *Terraform module developer* may change the inputs variable names, add a new output variable, or change the variable type, etc., while the *Blueprint developer* is not aware of these recent changes.
 
 With a large `blueprint configuration` (spanning 1000's of lines), it would be difficult to manually find the differences and update the module definitions.
 
 You can use the `blueprint sync` tool to find the differences and fix them.
 
-Use the current version of the `blueprint configuration file` as an input, to run the tool.  The output file will have the annotation to add, delete or update the input / output variables used in the module definitions.  In the `description` field of the input/output variable - you will see one of the following:
-* `_sync: add>`: To add this new input/output variable in the blueprint module.  (Reason: Found this new variable in the Terraform module source code)
-* `_sync: delete>`: To remove this input/output variable from the blueprint module.  (Reason: This variable was not found in the Terraform module source code)
-* `_sync: update>`: To update the definition of input/output variable in the blueprint module.  (Reason: This variable type, default value or description was changed in the Terraform module source code)
+Use the current version of the `blueprint configuration file` as an input, to run the tool.  The output file will have the annotation to add, delete or update the input / output variables used in the module definitions.  A `comment` is added to the input/output variable, with the following annotation:
+* `TODO: add param`: To add this new input/output variable in the blueprint module.  (Reason: Found this new variable in the Terraform module source code)
+* `TODO: delete param`: To remove this input/output variable from the blueprint module.  (Reason: This variable was not found in the Terraform module source code)
+* `TODO: update param`: To update the definition of input/output variable in the blueprint module.  (Reason: This variable type, default value or description was changed in the Terraform module source code)
 
 ---
 

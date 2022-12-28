@@ -19,7 +19,7 @@ from typing import List
 from blueprint.schema import param
 from blueprint.schema import source as src
 
-from blueprint.validate import blueprint_validator
+from blueprint.validate import module_validator
 from blueprint.lib import event
 
 from blueprint.lib.logger import logr
@@ -40,7 +40,8 @@ class Module(dict):
                     source: src.TemplateSource              = {}, 
                     inputs: List[param.Input]       = None, 
                     outputs: List[param.Output]     = None, 
-                    settings: List[param.Setting]   = None):
+                    settings: List[param.Setting]   = None,
+                    comment: str                    = None):
         """Module schema.
 
         :param name: Name of the module
@@ -48,7 +49,7 @@ class Module(dict):
         :param source: Source of module - Git source or Catalog source
         :param inputs: List of input parameters (type param.Input)
         :param outputs: List of output parameters (type param.Output)
-        :param settings: List of envitonment settings (type param.Setting)
+        :param settings: List of environment settings (type param.Setting)
         """
         self.name = name
         self.module_type = type
@@ -59,6 +60,7 @@ class Module(dict):
         self.set_inputs(inputs)
         self.set_outputs(outputs)
         self.set_settings(settings)
+        self.comment = comment
 
     def __enter__(self):
         return self
@@ -140,9 +142,12 @@ class Module(dict):
                 for p in self.settings:
                     p.remove_null_entries()
 
+        if hasattr(self, 'comment') and self.comment == None:
+            del self.comment
+    
     def to_yaml(self):
         # yaml.encoding = None
-        errors = self.validate(event.BPError)
+        errors = self.validate()
         # eprint(errors)
         return (yaml.dump(self, sort_keys=False), errors)
 
@@ -216,10 +221,9 @@ class Module(dict):
                 if alias_val != None:
                     p.value = alias_val
 
-
-    def validate(self, level=event.BPError):
-        mod_validator = blueprint_validator.ModuleValidator()
-        return mod_validator.validate_module(self, level)
+    def validate(self):
+        mod_validator = module_validator.ModuleModel(self)
+        return mod_validator.validate()
 
     def input_value_refs(self):
         value_refs = []
@@ -249,7 +253,7 @@ class Module(dict):
         self.set_inputs(m.inputs)
         self.set_outputs(m.outputs)
         self.set_settings(m.settings)
-        return self.validate(event.BPError)
+        return self.validate()
 
     def module_ref(self, key):
         (mod_vars, err) = self.input_ref(key)
@@ -346,7 +350,7 @@ class Module(dict):
         return var_names
 
     def set_source(self, source):
-        errors = source.validate(event.BPError)
+        errors = source.validate()
         self.source = source
         return errors
 
@@ -356,7 +360,7 @@ class Module(dict):
             self.inputs = []
             return errors
         for param in input_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
         if len(errors) == 0:
             for param in input_params:
                 self.inputs.append(param)
@@ -368,7 +372,7 @@ class Module(dict):
             self.outputs = []
             return errors
         for param in output_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
         if len(errors) == 0:
             for param in output_params:
                 self.outputs.append(param)
@@ -380,7 +384,7 @@ class Module(dict):
             self.settings = []
             return errors
         for param in setting_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
         if len(errors) == 0:
             for param in setting_params:
                 self.settings.append(param)
@@ -401,7 +405,7 @@ class Module(dict):
         for p in self.inputs:
             if p.name == param_name:
                 setattr(p, param_attr, param_value)
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -414,7 +418,7 @@ class Module(dict):
         for p in self.inputs:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -427,7 +431,7 @@ class Module(dict):
         for p in self.inputs:
             if p.name == param.name:
                 p.merge(param)
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -449,7 +453,7 @@ class Module(dict):
         for p in self.outputs:
             if p.name == param_name:
                 setattr(p, param_attr, param_value)
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -462,7 +466,7 @@ class Module(dict):
         for p in self.outputs:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -475,7 +479,7 @@ class Module(dict):
         for p in self.outputs:
             if p.name == param.name:
                 p.merge(param)
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -497,7 +501,7 @@ class Module(dict):
         for p in self.settings:
             if p.name == param_name:
                 setattr(p, param_attr, param_value)
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -510,7 +514,7 @@ class Module(dict):
         for p in self.settings:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -523,7 +527,7 @@ class Module(dict):
         for p in self.settings:
             if p.name == param.name:
                 p.merge(param)
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e

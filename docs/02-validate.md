@@ -57,7 +57,7 @@ As illustrated in the following code snippet:
     # Perform advanced semantic validation of Blueprint #
     ##=================================================##
     bpv = blueprint_validator.BlueprintModel(bp)
-    err = bpv.validate_model()
+    err = bpv.validate()
     if err != None:
         eprint(event.format_events(err, event.Format.Table))
 

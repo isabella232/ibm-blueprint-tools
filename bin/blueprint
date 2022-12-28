@@ -180,7 +180,7 @@ def main():
                 eprint("Error loading blueprint, for advanced validation")
             else:
                 bpv = blueprint_validator.BlueprintModel(bp)
-                errors = bpv.validate_model()
+                errors = bpv.validate()
                 if errors != None:
                     eprint(event.format_events(errors, event.Format.Table if log_json_format else event.Format.Json))
         else:

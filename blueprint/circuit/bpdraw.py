@@ -92,7 +92,7 @@ class BlueprintDraw:
             return [err]
 
         bpv = blueprint_validator.BlueprintModel(self.bp)
-        self.validation = bpv.validate_model()
+        self.validation = bpv.validate()
 
         self.circuit = bus.Circuit(self.bp)
         self.circuit.read()

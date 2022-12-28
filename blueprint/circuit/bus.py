@@ -186,7 +186,7 @@ class Wire:
                 if self.to_connector_type == Input:
                     errors.append(event.ValidationEvent(event.BPError, "Incorrect wiring of module.Module.output to blueprint.Blueprint.input", self))
                 elif self.to_connector_type == Output:
-                    self.to_node.set_input_value(self.to_param, self.from_param_ref)
+                    self.to_node.set_output_value(self.to_param, self.from_param_ref)
                 if self.to_connector_type == Setting:
                     errors.append(event.ValidationEvent(event.BPError, "Incorrect wiring of module.Module.output to blueprint.Blueprint.setting", self))
             if self.from_connector_type == Setting:

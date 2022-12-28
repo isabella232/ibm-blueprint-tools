@@ -56,7 +56,7 @@ def main(argv):
          sys.exit()
 
       bpv = blueprint_validator.BlueprintModel(bp)
-      errors = bpv.validate_model()
+      errors = bpv.validate()
       if errors != None:
          # eprint(str(errors))
          eprint(event.format_events(errors, event.Format.Table))

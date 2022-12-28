@@ -181,7 +181,7 @@ class Blueprint(dict):
 
     def to_yaml(self, stream = None):
         self.remove_null_entries()
-        errors = self.validate(event.BPWarning)
+        errors = self.validate()
         # eprint(errors)
 
         return (yaml.safe_load(self.to_yaml_str()), errors)
@@ -190,10 +190,12 @@ class Blueprint(dict):
         self.remove_null_entries()
         errors = []
         if do_validate:
-            errors = self.validate(event.BPWarning)
+            errors = self.validate()
             # if len(errors) > 0:
             #     eprint(errors)
-        return (yaml.dump(self, sort_keys=False), errors)
+        yaml_str = yaml.dump(self, sort_keys=False)
+        yaml_str = yaml_str.replace("comment: ", "# comment: ")
+        return (yaml_str, errors)
 
     def generate_input_file(self, stream = None):
         inputs_data = {}
@@ -273,30 +275,30 @@ class Blueprint(dict):
         return cls(name, description, 
                     inputs, outputs, settings, modules)
 
-    def validate(self, level=event.BPError):
+    def validate(self):
         bp_validator = blueprint_validator.BlueprintModel(self)
-        return bp_validator.validate_model()
+        return bp_validator.validate()
 
     def input_ref(self, key):
         if hasattr(self, "inputs") and self.inputs != None:
             for p in self.inputs:
                 if p.name == key:
                     return ("$blueprint.inputs." + key, None)
-        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint input parameter not found'), self)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint input parameter not found', self))
 
     def output_ref(self, key):
         if hasattr(self, "outputs") and self.outputs != None:
             for p in self.outputs:
                 if p.name == key:
                     return ("$blueprint.outputs." + key, None)
-        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint output parameter not found'), self)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint output parameter not found', self))
 
     def setting_ref(self, key):
         if hasattr(self, "settings") and self.settings != None:
             for p in self.settings:
                 if p.name == key:
                     return ("$blueprint.settings." + key, None)
-        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint settings parameter not found'), self)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint settings parameter not found', self))
 
     def module_ref(self, mod_name, key):
         if hasattr(self, "modules") and self.modules != None:
@@ -309,7 +311,7 @@ class Blueprint(dict):
                     return (None, err)
             else:
                 return (None, err)
-        return (None, event.ValidationEvent(event.BPWarning, 'Invalid modules in blueprint'), self)
+        return (None, event.ValidationEvent(event.BPWarning, 'Invalid modules in blueprint', self))
 
     def module_input_ref(self, mod_name, key):
         (m, err) = self.get_module(mod_name)
@@ -358,7 +360,7 @@ class Blueprint(dict):
             self.inputs = None
             return errors
         for param in input_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
         self.inputs = []
         if len(errors) == 0:
             for param in input_params:
@@ -368,7 +370,7 @@ class Blueprint(dict):
     def add_input(self, input_param):
         if self.inputs == None:
             self.inputs = []
-        errors = input_param.validate(event.BPError)
+        errors = input_param.validate()
         if len(errors) == 0:
             self.inputs.append(input_param)
         return errors
@@ -378,7 +380,7 @@ class Blueprint(dict):
             self.inputs = []
         errors = []
         for param in input_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
         if len(errors) == 0:
             for param in input_params:
                 self.inputs.append(param)
@@ -390,7 +392,7 @@ class Blueprint(dict):
         for p in self.inputs:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -398,7 +400,7 @@ class Blueprint(dict):
         return errors
 
     def get_output_var_names(self):
-        if hasattr(self, "inputs") and self.inputs != None:
+        if hasattr(self, "outputs") and self.outputs != None:
             param_names = []
             for p in self.outputs:
                 param_names.append(p.name)
@@ -411,7 +413,7 @@ class Blueprint(dict):
             self.outputs = None
             return errors
         for param in output_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
         self.outputs = []
         if len(errors) == 0:
             for param in output_params:
@@ -421,7 +423,7 @@ class Blueprint(dict):
     def add_output(self, output_param):
         if self.outputs == None:
             self.outputs = []
-        errors = output_param.validate(event.BPError)
+        errors = output_param.validate()
         if len(errors) == 0:
             self.outputs.append(output_param)
         return errors
@@ -431,7 +433,7 @@ class Blueprint(dict):
         if self.outputs == None:
             self.outputs = []
         for param in output_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
         if len(errors) == 0:
             for param in output_params:
                 self.outputs.append(param)
@@ -443,7 +445,7 @@ class Blueprint(dict):
         for p in self.outputs:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -464,7 +466,7 @@ class Blueprint(dict):
             self.settings = None
             return
         for param in setting_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
         self.settings = []
         if len(errors) == 0:
             for param in setting_params:
@@ -474,7 +476,7 @@ class Blueprint(dict):
     def add_setting(self, setting_param):
         if self.settings == None:
             self.settings = []
-        errors = setting_param.validate(event.BPError)
+        errors = setting_param.validate()
         if len(errors) == 0:
             self.settings.append(setting_param)
         return errors
@@ -484,7 +486,7 @@ class Blueprint(dict):
         if self.settings == None:
             self.settings = []
         for param in setting_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
         if len(errors) == 0:
             for param in setting_params:
                 self.settings.append(param)
@@ -496,7 +498,7 @@ class Blueprint(dict):
         for p in self.settings:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
@@ -519,7 +521,7 @@ class Blueprint(dict):
         self.modules = []
         errors = []
         for mod in mods:
-            e = mod.validate(event.BPError)
+            e = mod.validate()
             if len(e) == 0:
                 self.modules.append(mod)
             else:
@@ -527,7 +529,8 @@ class Blueprint(dict):
         return errors
 
     def add_module(self, mod):
-        errors = mod.validate(event.BPError)
+        errors = []
+        errors = mod.validate()
         if len(errors) == 0:
             if self.modules == None:
                 self.modules = []
@@ -542,7 +545,7 @@ class Blueprint(dict):
             self.modules = []
         errors = []
         for mod in mods:
-            e = mod.validate(event.BPError)
+            e = mod.validate()
             if len(e) == 0:
                 self.modules.append(mod)
             else:
@@ -557,7 +560,7 @@ class Blueprint(dict):
             try:
                 (m, err) = self.get_module(mod.name)
                 if err == None:
-                    errors += m.merge(mod)
+                    m.merge(mod)
                 else:
                     errors += err
                 return errors

@@ -33,7 +33,7 @@ def main(argv):
         menu_choice = int(input("\nEnter the choice: "))
         
         if menu_choice == 1:
-            errors = bp.validate(event.BPWarning)
+            errors = bp.validate()
             if len(errors) == 0:
                 print("No validation errors !\n")
             else:
@@ -68,7 +68,7 @@ def main(argv):
                         yaml_str = f.read()
                         bp = blueprint.Blueprint.from_yaml_str(yaml_str)
                     print("Success loading blueprint file " + filename + ". \nValidating ...")
-                    errors = bp.validate(event.BPWarning)
+                    errors = bp.validate()
                     if len(errors) == 0:
                         print("No validation errors !\n")
                     else:

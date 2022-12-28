@@ -16,7 +16,7 @@ import yaml
 import sys
 
 from blueprint.lib import event
-from blueprint.validate import blueprint_validator
+from blueprint.validate import parameter_validator
 
 from blueprint.lib.logger import logr
 # import logging
@@ -32,7 +32,8 @@ class Parameter(dict):
                 name: str           = "__init__", 
                 type: str           = None, 
                 description: str    = None, 
-                value: str          = None):
+                value: str          = None,
+                comment: str       = None):
         """Parameter schema (base).
 
         :param name: Name of the parameter
@@ -47,6 +48,9 @@ class Parameter(dict):
             self.description = description
         if(value != None):
             self.value = value
+        if(comment != None):
+            self.comment = comment
+        
 
     def __enter__(self):
         return self
@@ -56,12 +60,14 @@ class Parameter(dict):
 
     def merge(self, p):
         self.name = p.name
-        if p.type != None:
+        if hasattr(p, 'type') and p.type != None:
             self.type = p.type
-        if p.description != None:
+        if hasattr(p, 'description') and p.description != None:
             self.description = p.description
-        if p.value != None:
+        if hasattr(p, 'value') and p.value != None:
             self.value = p.value
+        if hasattr(p, 'comment') and p.comment != None:
+            self.comment = p.comment
 
     def remove_null_entries(self):
         if hasattr(self, 'name') and (self.name == None or len(self.name) == 0):
@@ -72,10 +78,12 @@ class Parameter(dict):
             del self.description
         if hasattr(self, 'value') and (self.value == None or (isinstance(self.value, str) and len(self.value) == 0)):
             del self.value
+        if hasattr(self, 'comment') and (self.comment == None or len(self.comment) == 0):
+            del self.comment
 
-    def validate(self, level=event.BPError):
-        param_validator = blueprint_validator.ParameterValidator()
-        return param_validator.validate_param(self, level)
+    def validate(self):
+        param_validator = parameter_validator.ParameterModel(self)
+        return param_validator.validate()
 
     def set_value(self, val):
             self.value = val
@@ -92,7 +100,8 @@ class Input (Parameter):
                 description: str    = None, 
                 value: str          = None,
                 default: str        = None,
-                optional: bool      = False
+                optional: bool      = False,
+                comment: str       = None
                 ):
         """Input parameter.
 
@@ -103,7 +112,7 @@ class Input (Parameter):
         """
         self.default = default
         self.optional = optional
-        super().__init__(name, type, description, value)
+        super().__init__(name, type, description, value, comment)
 
     def __enter__(self):
         return self
@@ -156,6 +165,13 @@ class Input (Parameter):
 
         return hash((self_name, self_type, self_value, self_description, self_default, self_optional))
 
+    def merge(self, p):
+        super().merge(p)
+        if hasattr(p, 'default') and p.default != None:
+            self.default = p.default
+        if hasattr(p, 'optional') and p.optional != None:
+            self.optional = p.optional
+    
     def remove_null_entries(self):
         super().remove_null_entries()
         if hasattr(self, 'default') and self.default == None:
@@ -165,7 +181,7 @@ class Input (Parameter):
 
     def to_yaml(self):
         # yaml.encoding = None
-        errors = self.validate(event.BPWarning)
+        errors = self.validate()
         # eprint(errors)
         return (yaml.dump(self, sort_keys=False), errors)
 
@@ -212,9 +228,9 @@ class Input (Parameter):
 
         return pars
 
-    def validate(self, level=event.BPError):
-        param_validator = blueprint_validator.ParameterValidator()
-        return param_validator.validate_input(self, level)
+    def validate(self):
+        param_validator = parameter_validator.ParameterModel(self, param_type = 'input')
+        return param_validator.validate()
 
     def set_value(self, val):
         super().set_value(val)
@@ -225,7 +241,8 @@ class Output (Parameter):
                 name: str           = "__init__", 
                 type: str           = None, 
                 description: str    = None, 
-                value: str          = None):
+                value: str          = None,
+                comment: str       = None):
         """Output parameter.
 
         :param name: Name of the output parameter
@@ -233,7 +250,7 @@ class Output (Parameter):
         :param description: Description of the output parameter
         :param value: Output parameter value
         """
-        super().__init__(name, type, description, value)
+        super().__init__(name, type, description, value, comment)
 
     def __enter__(self):
         return self
@@ -276,12 +293,15 @@ class Output (Parameter):
 
         return hash((self_name, self_type, self_value, self_description))
 
+    def merge(self, p):
+        super().merge(p)
+
     def remove_null_entries(self):
         super().remove_null_entries()
 
     def to_yaml(self):
         # yaml.encoding = None
-        errors = self.validate(event.BPWarning)
+        errors = self.validate()
         # eprint(errors)
         return (yaml.dump(self, sort_keys=False), errors)
 
@@ -317,9 +337,9 @@ class Output (Parameter):
 
         return pars
 
-    def validate(self, level=event.BPError):
-        param_validator = blueprint_validator.ParameterValidator()
-        return param_validator.validate_output(self, level)
+    def validate(self):
+        param_validator = parameter_validator.ParameterModel(self, param_type = 'output')
+        return param_validator.validate()
 
     def set_value(self, val):
         super().set_value(val)
@@ -332,7 +352,8 @@ class Setting (Parameter):
                 type: str           = None, 
                 description: str    = None, 
                 default: str        = None,
-                value: str          = None):
+                value: str          = None,
+                comment: str       = None):
         """Environment settings parameter.
 
         :param name: Name of the setting parameter
@@ -341,7 +362,7 @@ class Setting (Parameter):
         :param value: Environment setting parameter value
         """
         self.default = default
-        super().__init__(name, type, description, value)
+        super().__init__(name, type, description, value, comment)
 
     def __enter__(self):
         return self
@@ -389,6 +410,11 @@ class Setting (Parameter):
 
         return hash((self_name, self_type, self_value, self_default, self_description))
 
+    def merge(self, p):
+        super().merge(p)
+        if hasattr(p, 'default') and p.default != None:
+            self.default = p.default
+
     def remove_null_entries(self):
         super().remove_null_entries()
         if hasattr(self, 'default') and self.default == None:
@@ -396,7 +422,7 @@ class Setting (Parameter):
 
     def to_yaml(self):
         # yaml.encoding = None
-        errors = self.validate(event.BPWarning)
+        errors = self.validate()
         # eprint(errors)
         return (yaml.dump(self, sort_keys=False), errors)
 
@@ -440,10 +466,9 @@ class Setting (Parameter):
 
         return pars
 
-
-    def validate(self, level=event.BPError):
-        param_validator = blueprint_validator.ParameterValidator()
-        return param_validator.validate_setting(self, level)
+    def validate(self):
+        param_validator = parameter_validator.ParameterModel(self, param_type = 'setting')
+        return param_validator.validate()
 
     def set_value(self, val):
         super().set_value(val)
