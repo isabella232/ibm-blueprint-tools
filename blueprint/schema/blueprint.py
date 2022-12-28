@@ -15,6 +15,7 @@
 import yaml
 import sys
 from typing import List
+import re
 
 from blueprint.schema import module
 from blueprint.schema import param
@@ -186,6 +187,43 @@ class Blueprint(dict):
 
         return (yaml.safe_load(self.to_yaml_str()), errors)
 
+    def _process_comment(self, s):
+        out_str = ""
+        re_loc = re.finditer(pattern='comment:', string=s)
+        loc = [ind.start() for ind in re_loc]
+        start = 0
+        for i in loc:
+            out_str += s[start:i]
+            j = s.find("'", i)
+            out_str += s[i:j+1]
+            j += 1
+
+            while True:
+                k = s.find("'", j)
+                n = s.find("\n", j)
+                if k < n:
+                    out_str += s[j:k+1]
+                    start = k+1
+                    break
+                else:
+                    out_str += s[j:n+1]
+                    k = n+1
+                    lenn = 0
+                    while True:
+                        if s[k] != ' ':
+                            break
+                        k += 1
+                        lenn += 1
+                    k = 0
+                    while k < lenn-2:
+                        out_str += ' '
+                        k += 1
+                    out_str += '#'
+                    out_str += ' '
+                    j=n+1+lenn
+                    start = j
+        return out_str
+
     def to_yaml_str(self, do_validate = True, stream = None) -> str:
         self.remove_null_entries()
         errors = []
@@ -195,6 +233,7 @@ class Blueprint(dict):
             #     eprint(errors)
         yaml_str = yaml.dump(self, sort_keys=False)
         yaml_str = yaml_str.replace("comment: ", "# comment: ")
+        yaml_str = self._process_comment(yaml_str)
         return (yaml_str, errors)
 
     def generate_input_file(self, stream = None):
