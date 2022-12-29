@@ -37,11 +37,11 @@ def main(argv):
         elif opt in ("-o", "--ofile"):
             output_blueprint_file = arg
 
-    if blueprint_lite_file == None or blueprint_lite_file == '':
-        blueprint_lite_file = './examples/sync/data/bplite-2.yaml'
+    # if blueprint_lite_file == None or blueprint_lite_file == '':
+    #     blueprint_lite_file = './examples/sync/data/bplite-2.yaml'
 
-    if working_directory == None or working_directory == '':
-        working_directory = './examples/sync/temp'
+    # if working_directory == None or working_directory == '':
+    #     working_directory = './examples/sync/temp'
 
     if blueprint_lite_file == None or blueprint_lite_file == '' or working_directory == None or working_directory == '':
             print("Usage :")

@@ -230,7 +230,7 @@ class BlueprintMorphius:
                         if p.value == None and key not in bp.get_input_var_names():
                             bp_input = param.Input(key, type=type, description=description, value=val, comment='TODO: add param' if annotate else None)
                             bp.add_input(bp_input)
-                            bp_bus = bus.Bus(bp, mod)
+                            bp_bus = bus.WireBus(bp, mod)
                             bp_bus.add_wire(bp_input.name, p.name)
 
                     config_input_vars = list(config_json_data['variables'].keys())
@@ -276,7 +276,7 @@ class BlueprintMorphius:
                         if not is_p_linked and key not in bp.get_output_var_names():
                             bp_output = param.Output(key, description=description, comment='TODO: add param' if annotate else None)
                             bp.add_output(bp_output)
-                            bp_bus = bus.Bus(mod, bp)
+                            bp_bus = bus.WireBus(mod, bp)
                             bp_bus.add_wire(p.name, bp_output.name)
 
                     config_output_vars = list(config_json_data['outputs'].keys())

@@ -105,8 +105,8 @@ Add module to the blueprint
 Use a bus to connecting to blueprint to module, or module to a module
 
 ```python
-    bp_bus = bus.Bus(bp, cos_mod)
-    mod_bus = bus.Bus(rg_mod, cos_mod)
+    bp_bus = bus.WireBus(bp, cos_mod)
+    mod_bus = bus.WireBus(rg_mod, cos_mod)
 ```
 
 Add wires to the bus, in order to connect the input & output variables
@@ -163,7 +163,7 @@ Further, you can validate the blueprint configuration, for any known errors
 
 Now you have the Python Blueprint object, that can be extended to 
 * add new module.Module (modify existing module)
-* add new circuit.Bus (add/modify Wires in the Bus)
+* add new circuit.WireBus (add/modify Wires in the WireBus)
 
 ### 6.3 Run your cloud automation
 

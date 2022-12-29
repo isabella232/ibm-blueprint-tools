@@ -86,10 +86,13 @@ class Parameter(dict):
         return param_validator.validate()
 
     def set_value(self, val):
-            self.value = val
+        self.value = val
 
     def get_value(self):
+        if hasattr(self, 'value'):
             return self.value
+        else:
+            return None
 
 #========================================================================
 class Input (Parameter):

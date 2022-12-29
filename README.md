@@ -214,7 +214,7 @@ Refer to examples in the `examples/run` folder.
   * schema.param.Setting
 
   Further, the library can be used to wire the input & output parameters, using the following 
-  * circuit.Bus
+  * circuit.WireBus
   * circuit.Wire
 
   The library has built-in validation - and emits error or warning events (lib.event.ValidationEvent).

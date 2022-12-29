@@ -401,9 +401,7 @@ class Blueprint(dict):
         for param in input_params:
             errors += param.validate()
         self.inputs = []
-        if len(errors) == 0:
-            for param in input_params:
-                self.inputs.append(param)
+        self.inputs.extend(list(input_params))
         return errors
 
     def add_input(self, input_param):
@@ -454,9 +452,7 @@ class Blueprint(dict):
         for param in output_params:
             errors += param.validate()
         self.outputs = []
-        if len(errors) == 0:
-            for param in output_params:
-                self.outputs.append(param)
+        self.outputs.extend(output_params)
         return errors
 
     def add_output(self, output_param):
@@ -507,9 +503,7 @@ class Blueprint(dict):
         for param in setting_params:
             errors += param.validate()
         self.settings = []
-        if len(errors) == 0:
-            for param in setting_params:
-                self.settings.append(param)
+        self.settings.extend(setting_params)
         return errors
 
     def add_setting(self, setting_param):
