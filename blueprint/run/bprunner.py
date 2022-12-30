@@ -62,10 +62,18 @@ class BlueprintRunner:
         blueprint_file_name = blueprint_file[len(os.path.dirname(blueprint_file))+1:]
         input_data_file_name = input_data_file[len(os.path.dirname(input_data_file))+1:]
 
-        shutil.copyfile(blueprint_file, os.path.join(working_dir, blueprint_file_name))
+        bp_abs_file = os.path.join(working_dir, blueprint_file_name)
+        if not os.path.exists(bp_abs_file):
+            shutil.copyfile(blueprint_file, bp_abs_file)
+        else:
+            eprint(f"Blueprint file {bp_abs_file} - already exists, did not overwrite.")
         self.blueprint_file = os.path.join(working_dir, blueprint_file_name)
 
-        shutil.copyfile(input_data_file, os.path.join(working_dir, input_data_file_name))
+        ip_abs_file = os.path.join(working_dir, input_data_file_name)
+        if not os.path.exists(ip_abs_file):
+            shutil.copyfile(input_data_file, ip_abs_file)
+        else:
+            eprint(f"Input data file {ip_abs_file} - already exists, did not overwrite.")
         self.input_data_file = os.path.join(working_dir, input_data_file_name)
 
         # change current-working-directory to the working_dir

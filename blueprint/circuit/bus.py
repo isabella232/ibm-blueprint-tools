@@ -39,8 +39,6 @@ class Wire:
         :param to_node: end point for the WireBus (type: Module or Blueprint)
         :param to_param_name: name of parameter in the end Module or Blueprint
         """
-        self.from_param = from_param_name
-        self.to_param   = to_param_name
         self.from_node  = from_node
         self.to_node    = to_node
 
@@ -49,67 +47,114 @@ class Wire:
         self.from_param_ref = ""
         self.to_param_ref = ""
         self.errors = []
-        self._prepare()
 
-    def _prepare(self):
         """
         Prepare the from_param_ref, to_param_ref & connector_type in the Blueprint & Module definition
         """
         if isinstance(self.from_node, blueprint.Blueprint):
             self.from_node_type = "blueprint.Blueprint"
-            (self.from_param_ref, err) = self.from_node.input_ref(self.from_param)
+            (self.from_param_ref, err) = self.from_node.input_ref(from_param_name)
+            self.from_param = from_param_name
             self.from_connector_type = Input
             if err != None: 
-                (self.from_param_ref, err) = self.from_node.output_ref(self.from_param)
+                (self.from_param_ref, err) = self.from_node.output_ref(from_param_name)
+                self.from_param = from_param_name
                 self.from_connector_type = Output
                 if err != None: 
-                    (self.from_param_ref, err) = self.from_node.setting_ref(self.from_param)
+                    (self.from_param_ref, err) = self.from_node.setting_ref(from_param_name)
+                    self.from_param = from_param_name
                     self.from_connector_type = Setting
                     if err != None:
-                        self.errors.append(event.ValidationEvent(event.BPError, "Invalid $blueprint 'from' parameter name in the wire", self.from_param))
+                        self.from_param = f'Error({from_param_name})'
+                        self.errors.append(event.ValidationEvent(event.BPError, f"Invalid $blueprint.{from_param_name} 'from' parameter name in the wire"))
         elif isinstance(self.from_node, module.Module):
             self.from_node_type = "module.Module"
-            (self.from_param_ref, err)  = self.from_node.input_ref(self.from_param)
+            (self.from_param_ref, err)  = self.from_node.input_ref(from_param_name)
+            self.from_param = from_param_name
             self.from_connector_type = Input
             if err != None: 
-                (self.from_param_ref, err) = self.from_node.output_ref(self.from_param)
+                (self.from_param_ref, err) = self.from_node.output_ref(from_param_name)
+                self.from_param = from_param_name
                 self.from_connector_type = Output
                 if err != None: 
-                    (self.from_param_ref, err)  = self.from_node.setting_ref(self.from_param)
+                    (self.from_param_ref, err)  = self.from_node.setting_ref(from_param_name)
+                    self.from_param = from_param_name
                     self.from_connector_type = Setting
                     if err != None: 
-                        self.errors.append(event.ValidationEvent(event.BPError, "Invalid $module 'from' parameter name in the wire", self.from_param))
+                        self.from_param = f'Error({from_param_name})'
+                        self.errors.append(event.ValidationEvent(event.BPError, f"Invalid $module.{self.from_node.name}.{from_param_name} 'from' parameter name in the wire"))
         else:
             self.from_node_type = "Unknown"
-            self.errors.append(event.ValidationEvent(event.BPError, "Invalid 'from' parameter name in the wire", self.from_param))
+            self.from_param = f'Error({from_param_name})'
+            self.errors.append(event.ValidationEvent(event.BPError, f"Invalid {from_param_name} 'from' parameter name in the wire"))
 
         if isinstance(self.to_node, blueprint.Blueprint):
             self.to_node_type = "blueprint.Blueprint"
-            (self.to_param_ref, err) = self.to_node.input_ref(self.to_param)
+            (self.to_param_ref, err) = self.to_node.input_ref(to_param_name)
+            self.to_param   = to_param_name
             self.to_connector_type = Input
             if err != None: 
-                (self.to_param_ref, err) = self.to_node.output_ref(self.to_param)
+                (self.to_param_ref, err) = self.to_node.output_ref(to_param_name)
+                self.to_param   = to_param_name
                 self.to_connector_type = Output
                 if err != None: 
-                    (self.to_param_ref, err) = self.to_node.setting_ref(self.to_param)
+                    (self.to_param_ref, err) = self.to_node.setting_ref(to_param_name)
+                    self.to_param   = to_param_name
                     self.to_connector_type = Setting
                     if err != None: 
-                        self.errors.append(event.ValidationEvent(event.BPError, "Invalid $blueprint 'to' parameter name in the wire", self.to_param))
+                        self.to_param = f'Error({to_param_name})'
+                        self.errors.append(event.ValidationEvent(event.BPError, f"Invalid $blueprint.{to_param_name} 'to' parameter name in the wire"))
         elif isinstance(self.to_node, module.Module):
             self.to_node_type = "module.Module"
-            (self.to_param_ref, err) = self.to_node.input_ref(self.to_param)
+            (self.to_param_ref, err) = self.to_node.input_ref(to_param_name)
+            self.to_param   = to_param_name
             self.to_connector_type = Input
             if err != None: 
-                (self.to_param_ref, err) = self.to_node.output_ref(self.to_param)
+                (self.to_param_ref, err) = self.to_node.output_ref(to_param_name)
+                self.to_param   = to_param_name
                 self.to_connector_type = Output
                 if err != None: 
-                    (self.to_param_ref, err) = self.to_node.setting_ref(self.to_param)
+                    (self.to_param_ref, err) = self.to_node.setting_ref(to_param_name)
+                    self.to_param   = to_param_name
                     self.to_connector_type = Setting
                     if err != None: 
-                        self.errors.append(event.ValidationEvent(event.BPError, "Invalid $module 'to' parameter name in the wire", self.to_param))
+                        self.to_param = f'Error({to_param_name})'
+                        self.errors.append(event.ValidationEvent(event.BPError, f"Invalid $module.{self.to_node.name}.{to_param_name} 'to' parameter name in the wire"))
         else:
             self.to_node_type = "Unknown"
-            self.errors.append(event.ValidationEvent(event.BPError, "Invalid 'to' parameter name in the wire", self.to_param))
+            self.to_param = f'Error({to_param_name})'
+            self.errors.append(event.ValidationEvent(event.BPError, f"Invalid {to_param_name} 'to' parameter name in the wire"))
+
+        """
+        Dry-run to find wiring errors
+        """
+        if self.from_node_type == "blueprint.Blueprint" and self.to_node_type == "module.Module":
+            if self.from_connector_type == Input and self.to_connector_type == Input:
+                pass
+            elif self.from_connector_type == Input and self.to_connector_type == Setting:
+                pass
+            elif self.from_connector_type == Setting and self.to_connector_type == Setting:
+                pass
+            else:
+                self.errors.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f"from: {self.from_param_ref} to: {self.to_param_ref}"))
+
+        elif self.from_node_type == "module.Module" and self.to_node_type == "module.Module":
+            if self.from_connector_type == Output and self.to_connector_type == Input:
+                pass
+            elif self.from_connector_type == Output and self.to_connector_type == Setting:
+                pass
+            else:
+                self.errors.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f"from: {self.from_param_ref} to: {self.to_param_ref}"))
+
+        elif self.from_node_type == "module.Module" and self.to_node_type == "blueprint.Blueprint":
+            if self.from_connector_type == Output and self.to_connector_type == Output:
+                pass
+            else:
+                self.errors.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f"from: {self.from_param_ref} to: {self.to_param_ref}"))
+
+        else:
+            self.errors.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f"from: {self.from_param_ref} to: {self.to_param_ref}"))
+
 
     def __str__(self):
         txt = "wire("
@@ -133,26 +178,32 @@ class Wire:
         Save the connection in the Blueprint & Module, by modifying the parameter values with the linked-data-references
         """
         if self.from_node_type == "blueprint.Blueprint" and self.to_node_type == "module.Module":
-            if self.from_connector_type == Input:
-                if self.to_connector_type == Input:
-                    self.to_node.set_input_value(self.to_param, self.from_param_ref)
-                elif self.to_connector_type == Setting:
-                    self.to_node.set_setting_value(self.to_param, self.from_param_ref)
-            if self.from_connector_type == Setting:
-                if self.to_connector_type == Setting:
-                    self.to_node.set_setting_value(self.to_param, self.from_param_ref)
-        
+            if self.from_connector_type == Input and self.to_connector_type == Input:
+                self.to_node.set_input_value(self.to_param, self.from_param_ref)
+            elif self.from_connector_type == Input and self.to_connector_type == Setting:
+                self.to_node.set_setting_value(self.to_param, self.from_param_ref)
+            elif self.from_connector_type == Setting and self.to_connector_type == Setting:
+                self.to_node.set_setting_value(self.to_param, self.from_param_ref)
+            else:
+                self.errors.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f"from: {self.from_param_ref} to: {self.to_param_ref}"))
+
         elif self.from_node_type == "module.Module" and self.to_node_type == "module.Module":
-            if self.from_connector_type == Output:
-                if self.to_connector_type == Input:
-                    self.to_node.set_input_value(self.to_param, self.from_param_ref)
-                elif self.to_connector_type == Setting:
-                    self.to_node.set_setting_value(self.to_param, self.from_param_ref)
+            if self.from_connector_type == Output and self.to_connector_type == Input:
+                self.to_node.set_input_value(self.to_param, self.from_param_ref)
+            elif self.from_connector_type == Output and self.to_connector_type == Setting:
+                self.to_node.set_setting_value(self.to_param, self.from_param_ref)
+            else:
+                self.errors.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f"from: {self.from_param_ref} to: {self.to_param_ref}"))
 
         elif self.from_node_type == "module.Module" and self.to_node_type == "blueprint.Blueprint":
-            if self.from_connector_type == Output:
-                if self.to_connector_type == Output:
-                    self.to_node.set_output_value(self.to_param, self.from_param_ref)
+            if self.from_connector_type == Output and self.to_connector_type == Output:
+                self.to_node.set_output_value(self.to_param, self.from_param_ref)
+            else:
+                self.errors.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f"from: {self.from_param_ref} to: {self.to_param_ref}"))
+
+        else:
+            self.errors.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f"from: {self.from_param_ref} to: {self.to_param_ref}"))
+
 
 class WireBus:
 
