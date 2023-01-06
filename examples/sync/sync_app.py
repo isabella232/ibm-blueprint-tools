@@ -4,8 +4,9 @@ import getopt
 import logging
 
 from blueprint.sync import bpsync
-from blueprint.lib import event
+from blueprint.sync import bpconcile
 
+from blueprint.lib import event
 from blueprint.lib.logger import logr
 # import logging
 # logr = logging.getLogger(__name__)
@@ -51,7 +52,10 @@ def main(argv):
     bm = bpsync.BlueprintMorphius.from_yaml_file(blueprint_lite_file)
     bp = bm.sync_blueprint(working_dir = working_directory, annotate = True)
 
-    (out_yaml_str, errors) = bp.to_yaml_str()
+    # bpr = bpconcile.BlueprintReconciler(bp)
+    # bpr.reconcile()
+
+    (out_yaml_str, errors) = bpr.bp.to_yaml_str()
     if output_blueprint_file == None or output_blueprint_file == '':
         print(out_yaml_str)
     else:

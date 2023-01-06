@@ -142,7 +142,7 @@ The first step is - Import your blueprint configuration file
 
 ```python
 
-    filename = 'exising_blueprint.yaml'
+    filename = 'existing_blueprint.yaml'
 
     print("Loading blueprint file " + filename + " ...")
     with open(filename) as f:

@@ -24,10 +24,11 @@ from blueprint.schema import blueprint
 from blueprint.schema import module
 from blueprint.schema import param
 from blueprint.schema import source as src
+
 from blueprint.circuit import bus
 
 from blueprint.lib import git
-from blueprint.lib import event
+from blueprint.lib import type_helper
 from blueprint.lib import bfile
 
 from python_terraform import *
@@ -186,7 +187,7 @@ class BlueprintMorphius:
                     # Processing input variables
                     config_input_vars = list(config_json_data['variables'].keys())
                     logr.info('Processing inputs: ' + str(config_input_vars))
-                    existing_input_vars = mod.get_input_var_names()
+                    existing_input_vars = mod.list_input_param_names()
 
                     for key in config_input_vars:
 
@@ -203,13 +204,20 @@ class BlueprintMorphius:
                             val=config_value['default']
                         else:
                             val=None
+                        if type == None:
+                            if val != None:
+                                type = type_helper.val_type(val)
+                                if type == 'str' and (val.startswith('$blueprint') or val.startswith('$module')):
+                                    type = None
+                            if type == 'unknown':
+                                type = None
 
                         # If key already present in the 'mod', then update parameter
                         if key in existing_input_vars:
                             type2 = mod.get_input_attr(key, "type")
                             description2 = mod.get_input_attr(key, "description")
                             val2 = mod.get_input_attr(key, "value")
-                            comment2 = 'TODO: update param '
+                            comment2 = 'NOTES: update param '
                             is_updated = False
                             if type != type2:
                                 comment2 += f'type({type2} --> {type}) '
@@ -220,21 +228,29 @@ class BlueprintMorphius:
                             if val != val2 and not (val2.startswith('$blueprint.') or val2.startswith('$module.')):
                                 comment2 += f'value({val2} --> {val})'
                                 is_updated = True
+                            if is_updated == True and type == None:
+                                if val != None:
+                                    type = type_helper.val_type(val)
+                                    if type == 'str' and (val.startswith('$blueprint') or val.startswith('$module')):
+                                        type = None
+                                if type == 'unknown':
+                                    type = None
+
                             if is_updated:
                                 p = param.Input(key, type=type, description=description, value=val, comment=comment2 if annotate else None)
                                 mod.update_input(p)
                         else:
-                            p = param.Input(key, type=type, description=description, value=val, comment='TODO: add param' if annotate else None)
+                            p = param.Input(key, type=type, description=description, value=val, comment='NOTES: add param' if annotate else None)
                             mod.inputs.append(p)
 
-                        if p.value == None and key not in bp.get_input_var_names():
-                            bp_input = param.Input(key, type=type, description=description, value=val, comment='TODO: add param' if annotate else None)
-                            bp.add_input(bp_input)
-                            bp_bus = bus.WireBus(bp, mod)
-                            bp_bus.add_wire(bp_input.name, p.name)
+                        # if p.value == None and key not in bp.list_input_param_names():
+                        #     bp_input = param.Input(key, type=type, description=description, value=val, comment='NOTES: add param' if annotate else None)
+                        #     bp.add_input(bp_input)
+                        #     bp_bus = bus.WireBus(bp, mod)
+                        #     bp_bus.add_wire(bp_input.name, p.name)
 
                     config_input_vars = list(config_json_data['variables'].keys())
-                    # existing_input_vars = mod.get_input_var_names()
+                    # existing_input_vars = mod.list_input_param_names()
                     for key in existing_input_vars:
                         if key not in config_input_vars and annotate:
                             mod.set_input_attr(key, 'comment', 'TODO: delete param')
@@ -243,7 +259,7 @@ class BlueprintMorphius:
                     # Processing output variables
                     config_output_vars = list(config_json_data['outputs'].keys())
                     logr.info('Processing outputs: ' + str(config_output_vars))
-                    existing_output_vars = mod.get_output_var_names()
+                    existing_output_vars = mod.list_output_param_names()
                     for key in config_output_vars:
 
                         value = config_json_data['outputs'][key]
@@ -254,7 +270,7 @@ class BlueprintMorphius:
                         # If key already present in the 'mod', then skip
                         if key in existing_output_vars:
                             description2 = mod.get_output_attr(key, "description")
-                            comment2 = 'TODO: update param '
+                            comment2 = 'NOTES: update param '
                             is_updated = False
                             if description != description2:
                                 comment2 += f'description({description} --> {description2})  '
@@ -263,7 +279,7 @@ class BlueprintMorphius:
                                 p = param.Output(key, description=description, comment=comment2 if annotate else None)
                                 mod.update_input(p)
                         else:
-                            p = param.Output(key, description=description, comment='TODO: add param' if annotate else None)
+                            p = param.Output(key, description=description, comment='NOTES: add param' if annotate else None)
                             mod.outputs.append(p)
 
                         mod_ref = bp.module_output_ref(mod.name, p.name)
@@ -273,14 +289,14 @@ class BlueprintMorphius:
                                 is_p_linked = True
                                 break
 
-                        if not is_p_linked and key not in bp.get_output_var_names():
-                            bp_output = param.Output(key, description=description, comment='TODO: add param' if annotate else None)
+                        if not is_p_linked and key not in bp.list_output_param_names():
+                            bp_output = param.Output(key, description=description, comment='NOTES: add param' if annotate else None)
                             bp.add_output(bp_output)
                             bp_bus = bus.WireBus(mod, bp)
                             bp_bus.add_wire(p.name, bp_output.name)
 
                     config_output_vars = list(config_json_data['outputs'].keys())
-                    # existing_output_vars = mod.get_input_var_names()
+                    # existing_output_vars = mod.list_input_param_names()
                     for key in existing_output_vars:
                         if key not in config_output_vars and annotate:
                             mod.set_input_attr(key, 'comment', 'TODO: delete param')

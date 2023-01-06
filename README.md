@@ -225,7 +225,7 @@ Refer to examples in the `examples/run` folder.
 
   The library has built-in validation and emits error or warning events such as lib.event.ValidationEvent.
 
-  For more information about the example Python code, see the (code example)[./examples/generate/README.md].
+  For more information about the example Python code, see the (code example)[./examples/cdk/README.md].
 
 ---
 
@@ -239,7 +239,7 @@ The example folders hold some test data (for illustration only), and sample Pyth
   | 2 | Schema draw         | `./examples/draw/draw_app.py` | Illustrate the use of the `blueprint.circuit.draw.BlueprintDraw` class to draw a graph depicts the blueprint configuration file.|
   | 3 | Schema merge        | `./examples/validate/merge_app.py` | Illustrate the use of `blueprint.merge.manifest.BlueprintManifest` class to load manifest file to generate a blueprint configuration file </br> The `./examples/validate/data-1/manifest.yaml`, and `./examples/validate/data-2/manifest.yaml` are sample blueprint manifest file. |
   | 4 | Schema sync         | `./examples/sync/sync_app.py` | Illustrate the ability to sync the module definitions (inputs and outputs) in the blueprint configuration file, with the corresponding definition the Terraform repository. |
-  | 5 | Schema generate     | `./examples/generate/bp_basic.py` | Illustrate the use of `blueprint.schema`, and `blueprint.circuit` library classes to generate a blueprint configuration file, by using Python code |
+  | 5 | Schema generate     | `./examples/cdk/bp_basic.py` | Illustrate the use of `blueprint.schema`, and `blueprint.circuit` library classes to generate a blueprint configuration file, by using Python code |
   | 6 | Blueprint run       | `./examples/run/run_app.py` | Illustrate the ability to run and verify the blueprint behavior locally. |
 
 ---

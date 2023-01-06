@@ -127,9 +127,9 @@ class BlueprintDraw:
 
         bpd = diag.BlueprintPane(name = self.bp.name,
                                     description = self.bp.description  if hasattr(self.bp, 'description') else None,
-                                    inputs      = self.bp.get_input_var_names(),
-                                    outputs     = self.bp.get_output_var_names(),
-                                    settings    = self.bp.get_setting_var_names()
+                                    inputs      = self.bp.list_input_param_names(),
+                                    outputs     = self.bp.list_output_param_names(),
+                                    settings    = self.bp.list_setting_param_names()
                                     )
         diagrams.setcluster(bpd)
 
@@ -143,9 +143,9 @@ class BlueprintDraw:
                 mod_diag[mod.name] = diag.ModulePane(
                                             name        = mod.name,
                                             description = mod.description if hasattr(mod, 'description') else None,
-                                            inputs      = mod.get_input_var_names(),
-                                            outputs     = mod.get_output_var_names(),
-                                            settings    = mod.get_setting_var_names()
+                                            inputs      = mod.list_input_param_names(),
+                                            outputs     = mod.list_output_param_names(),
+                                            settings    = mod.list_setting_param_names()
                                         )
 
         for bus in self.circuit.fleet:

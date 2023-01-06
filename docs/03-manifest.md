@@ -1,6 +1,6 @@
 ## 2. How to generate `blueprint configuration file` from a `manifest file` ?
 
-When you try to codify the automation for a large cloud environment in a `blueprint configuration file`, comprising of multiple modules, inputs & outputd sections - it can soon become very large and complex to manage.  
+When you try to codify the automation for a large cloud environment in a `blueprint configuration file`, comprising of multiple modules, inputs & output sections - it can soon become very large and complex to manage.  
 
 The `blueprint manifest file` aims to simplify this experience, using a simple and easily consumable format, such as the following:
 
@@ -59,7 +59,7 @@ This can easily simplify the task of managing a large blueprint configuration fi
 ---
 ### Programmatic processing a manifest file
 
-In addition, you can progamatically process your `blueprint manifest file` using the following Python modules.
+In addition, you can programmatically process your `blueprint manifest file` using the following Python modules.
 * blueprint.merge.manifest.BlueprintManifest
 
 As illustrated in the following code snippet:

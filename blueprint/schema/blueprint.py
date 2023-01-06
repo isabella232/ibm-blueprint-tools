@@ -189,7 +189,10 @@ class Blueprint(dict):
 
     def _process_comment(self, s):
         out_str = ""
-        re_loc = re.finditer(pattern='comment:', string=s)
+        pattern = 'comment:'
+        if pattern not in s:
+            return s
+        re_loc = re.finditer(pattern=pattern, string=s)
         loc = [ind.start() for ind in re_loc]
         start = 0
         for i in loc:
@@ -318,28 +321,49 @@ class Blueprint(dict):
         bp_validator = blueprint_validator.BlueprintModel(self)
         return bp_validator.validate()
 
-    def input_ref(self, key):
+    def input_ref(self, key): # -> (str, event.ValidationEvent):
         if hasattr(self, "inputs") and self.inputs != None:
             for p in self.inputs:
                 if p.name == key:
                     return ("$blueprint.inputs." + key, None)
         return (None, event.ValidationEvent(event.BPWarning, 'Blueprint input parameter not found', self))
 
-    def output_ref(self, key):
+    def output_ref(self, key): # -> (str, event.ValidationEvent):
         if hasattr(self, "outputs") and self.outputs != None:
             for p in self.outputs:
                 if p.name == key:
                     return ("$blueprint.outputs." + key, None)
         return (None, event.ValidationEvent(event.BPWarning, 'Blueprint output parameter not found', self))
 
-    def setting_ref(self, key):
+    def setting_ref(self, key): # -> (str, event.ValidationEvent):
         if hasattr(self, "settings") and self.settings != None:
             for p in self.settings:
                 if p.name == key:
                     return ("$blueprint.settings." + key, None)
         return (None, event.ValidationEvent(event.BPWarning, 'Blueprint settings parameter not found', self))
 
-    def module_ref(self, mod_name, key):
+    def input_param(self, key): # -> (param.Input, event.ValidationEvent):
+        if hasattr(self, "inputs") and self.inputs != None:
+            for p in self.inputs:
+                if p.name == key:
+                    return (p, None)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint input parameter not found', self))
+
+    def output_param(self, key): # -> (param.Output, event.ValidationEvent):
+        if hasattr(self, "outputs") and self.outputs != None:
+            for p in self.outputs:
+                if p.name == key:
+                    return (p, None)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint output parameter not found', self))
+
+    def setting_param(self, key): # -> (param.Setting, event.ValidationEvent):
+        if hasattr(self, "settings") and self.settings != None:
+            for p in self.settings:
+                if p.name == key:
+                    return (p, None)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint settings parameter not found', self))
+
+    def module_ref(self, mod_name, key): # -> (str, event.ValidationEvent):
         if hasattr(self, "modules") and self.modules != None:
             (m, err) = self.get_module(mod_name)
             if err == None:
@@ -352,7 +376,7 @@ class Blueprint(dict):
                 return (None, err)
         return (None, event.ValidationEvent(event.BPWarning, 'Invalid modules in blueprint', self))
 
-    def module_input_ref(self, mod_name, key):
+    def module_input_ref(self, mod_name, key): # -> (str, event.ValidationEvent):
         (m, err) = self.get_module(mod_name)
         if err == None:
             (mod_ref, err) = m.input_ref(key)
@@ -363,7 +387,7 @@ class Blueprint(dict):
         else:
             return (None, event.ValidationEvent(event.BPWarning, 'Invalid module input, in the blueprint', self, None, chain = err))
 
-    def module_output_ref(self, mod_name, key):
+    def module_output_ref(self, mod_name, key): # -> (str, event.ValidationEvent):
         (m, err) = self.get_module(mod_name)
         if err == None:
             (mod_ref, err) = m.output_ref(key)
@@ -374,7 +398,7 @@ class Blueprint(dict):
         else:
             return (None, event.ValidationEvent(event.BPWarning, 'Invalid module output in blueprint', self, None, chain=err))
 
-    def module_setting_ref(self, mod_name, key):
+    def module_setting_ref(self, mod_name, key): # -> (str, event.ValidationEvent):
         (m, err) = self.get_module(mod_name)
         if err == None:
             (mod_ref, err) = m.setting_ref(key)
@@ -385,7 +409,7 @@ class Blueprint(dict):
         else:
             return (None, event.ValidationEvent(event.BPWarning, 'Invalid module setting in blueprint', self, None, chain=err))
 
-    def get_input_var_names(self):
+    def list_input_param_names(self) -> List[str]: 
         if hasattr(self, "inputs") and self.inputs != None:
             param_names = []
             for p in self.inputs:
@@ -393,42 +417,68 @@ class Blueprint(dict):
             return param_names
         return None
 
-    def set_inputs(self, input_params):
+    def set_inputs(self, 
+                    input_params: List[param.Input]) -> List[event.ValidationEvent]:
         errors = []
         if(input_params == None):
             self.inputs = None
             return errors
         for param in input_params:
             errors += param.validate()
+
+        # Set the input params, even if there are errors in them
         self.inputs = []
         self.inputs.extend(list(input_params))
         return errors
 
-    def add_input(self, input_param):
+    def add_input(self, 
+                    input_param: param.Input) -> List[event.ValidationEvent]:
         if self.inputs == None:
             self.inputs = []
         errors = input_param.validate()
-        if len(errors) == 0:
-            self.inputs.append(input_param)
+        
+        # Add input param, even if there are errors in them
+        self.inputs.append(input_param)
         return errors
 
-    def add_inputs(self, input_params):
+    def update_input(self,
+                    input_param: param.Input) -> List[event.ValidationEvent]:
+        if self.inputs == None:
+            self.inputs = []
+        errors = input_param.validate()
+        
+        # Find and update the input param, even if there are errors in the input_param
+        for param in self.inputs:
+            if param.name == input_param.name:
+                param.type          = input_param.type      if hasattr(input_param, 'type') else None
+                param.description   = input_param.description if hasattr(input_param, 'description') else None
+                param.value         = input_param.value     if hasattr(input_param, 'value') else None
+                param.default       = input_param.default   if hasattr(input_param, 'default') else None
+                param.optional      = input_param.optional  if hasattr(input_param, 'optional') else None
+
+        return errors
+
+    def add_inputs(self, 
+                    input_params: List[param.Input]) -> List[event.ValidationEvent]:
         if self.inputs == None:
             self.inputs = []
         errors = []
         for param in input_params:
             errors += param.validate()
-        if len(errors) == 0:
-            for param in input_params:
-                self.inputs.append(param)
+
+        self.inputs.extend(list(input_params))
         return errors
 
-    def set_input_value(self, param_name, param_value):
+    def set_input_value(self, 
+                    param_name: str, 
+                    param_value: str, 
+                    param_type:str = "string") -> List[event.ValidationEvent]:
         errors = []
         param_copy = []
         for p in self.inputs:
             if p.name == param_name:
                 p.value = param_value
+                p.type = param_type
             e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
@@ -436,7 +486,7 @@ class Blueprint(dict):
         self.inputs = param_copy
         return errors
 
-    def get_output_var_names(self):
+    def list_output_param_names(self) -> List[str]:
         if hasattr(self, "outputs") and self.outputs != None:
             param_names = []
             for p in self.outputs:
@@ -444,37 +494,52 @@ class Blueprint(dict):
             return param_names
         return None
 
-    def set_outputs(self, output_params):
+    def set_outputs(self, output_params) -> List[event.ValidationEvent]:
         errors = []
         if(output_params == None):
             self.outputs = None
             return errors
         for param in output_params:
             errors += param.validate()
+
         self.outputs = []
         self.outputs.extend(output_params)
         return errors
 
-    def add_output(self, output_param):
+    def add_output(self, output_param) -> List[event.ValidationEvent]:
         if self.outputs == None:
             self.outputs = []
         errors = output_param.validate()
-        if len(errors) == 0:
-            self.outputs.append(output_param)
+
+        self.outputs.append(output_param)
         return errors
 
-    def add_outputs(self, output_params):
+    def add_outputs(self, output_params) -> List[event.ValidationEvent]:
         errors = []
         if self.outputs == None:
             self.outputs = []
         for param in output_params:
             errors += param.validate()
-        if len(errors) == 0:
-            for param in output_params:
-                self.outputs.append(param)
+
+        self.outputs.extend(list(output_params))
         return errors
 
-    def set_output_value(self, param_name, param_value):
+    def update_output(self,
+                    output_param: param.Output) -> List[event.ValidationEvent]:
+        if self.outputs == None:
+            self.outputs = []
+        errors = output_param.validate()
+        
+        # Find and update the output param, even if there are errors in the output_param
+        for param in self.outputs:
+            if param.name == output_param.name:
+                param.type          = output_param.type     if hasattr(output_param, 'type') else None
+                param.description   = output_param.description if hasattr(output_param, 'description') else None
+                param.value         = output_param.value    if hasattr(output_param, 'value') else None
+
+        return errors
+
+    def set_output_value(self, param_name, param_value) -> List[event.ValidationEvent]:
         errors = []
         param_copy = []
         for p in self.outputs:
@@ -487,7 +552,7 @@ class Blueprint(dict):
         self.outputs = param_copy
         return errors
 
-    def get_setting_var_names(self):
+    def list_setting_param_names(self) -> List[str]:
         if hasattr(self, "inputs") and self.inputs != None:
             param_names = []
             for p in self.settings:
@@ -495,37 +560,53 @@ class Blueprint(dict):
             return param_names
         return None
 
-    def set_settings(self, setting_params):
+    def set_settings(self, setting_params) -> List[event.ValidationEvent]:
         errors = []
         if(setting_params == None):
             self.settings = None
             return
         for param in setting_params:
             errors += param.validate()
+
         self.settings = []
         self.settings.extend(setting_params)
         return errors
 
-    def add_setting(self, setting_param):
+    def add_setting(self, setting_param) -> List[event.ValidationEvent]:
         if self.settings == None:
             self.settings = []
         errors = setting_param.validate()
-        if len(errors) == 0:
-            self.settings.append(setting_param)
+
+        self.settings.append(setting_param)
         return errors
 
-    def add_settings(self, setting_params):
+    def add_settings(self, setting_params) -> List[event.ValidationEvent]:
         errors = []
         if self.settings == None:
             self.settings = []
         for param in setting_params:
             errors += param.validate()
-        if len(errors) == 0:
-            for param in setting_params:
-                self.settings.append(param)
+
+        self.settings.extend(list(setting_params))
         return errors
 
-    def set_setting_value(self, param_name, param_value):
+    def update_setting(self,
+                    setting_param: param.Setting) -> List[event.ValidationEvent]:
+        if self.settings == None:
+            self.settings = []
+        errors = setting_param.validate()
+        
+        # Find and update the output param, even if there are errors in the output_param
+        for param in self.settings:
+            if param.name == setting_param.name:
+                param.type          = setting_param.type        if hasattr(setting_param, 'type') else None
+                param.description   = setting_param.description if hasattr(setting_param, 'description') else None
+                param.value         = setting_param.value       if hasattr(setting_param, 'value') else None
+                param.default       = setting_param.default     if hasattr(setting_param, 'default') else None
+
+        return errors
+
+    def set_setting_value(self, param_name, param_value) -> List[event.ValidationEvent]:
         errors = []
         param_copy = []
         for p in self.settings:
@@ -538,16 +619,17 @@ class Blueprint(dict):
         self.settings = param_copy
         return errors
 
-    def get_modules(self):
+    def get_modules(self) -> List[module.Module]:
         return self.modules
 
-    def get_module(self, mod_name):
-        for m in self.modules:
-            if mod_name == m.name:
-                return (m, None)
+    def get_module(self, mod_name): # -> (module.Module, event.ValidationEvent):
+        if hasattr(self, 'modules') and self.modules != None:
+            for m in self.modules:
+                if mod_name == m.name:
+                    return (m, None)
         return (None, event.ValidationEvent(event.BPWarning, 'Invalid module name: ' + str(mod_name), self))
 
-    def set_modules(self, mods):
+    def set_modules(self, mods) -> List[event.ValidationEvent]:
         if(mods == None):
             self.modules = None
             return
@@ -561,16 +643,17 @@ class Blueprint(dict):
                 errors += e
         return errors
 
-    def add_module(self, mod):
+    def add_module(self, mod) -> List[event.ValidationEvent]:
         errors = []
         errors = mod.validate()
-        if len(errors) == 0:
-            if self.modules == None:
-                self.modules = []
-            self.modules.append(mod)
+
+        if self.modules == None:
+            self.modules = []
+        self.modules.append(mod)
+        
         return errors
 
-    def add_modules(self, mods):
+    def add_modules(self, mods) -> List[event.ValidationEvent]:
         if(mods == None):
             self.modules = None
             return
@@ -585,7 +668,7 @@ class Blueprint(dict):
                 errors += e
         return errors
 
-    def update_module(self, mod):
+    def update_module(self, mod) -> List[event.ValidationEvent]:
         errors = []
         if mod != None:
             if self.modules == None:
@@ -601,7 +684,7 @@ class Blueprint(dict):
                 self.modules.append(mod)
         return errors
 
-    def set_module_inputs(self, mod_name, inputs):
+    def set_module_inputs(self, mod_name, inputs) -> List[event.ValidationEvent]:
         (m, err) = self.get_module(mod_name)
         if err == None:
             err = m.set_inputs(inputs)
@@ -609,7 +692,7 @@ class Blueprint(dict):
 
 #========================================================================
 
-    def find_replace_in_module(self, param_ref, value):
+    def find_replace_in_module(self, param_ref, value) -> List[event.ValidationEvent]:
         errors = []
         if self.modules != None:
             for mod in self.modules:
@@ -641,7 +724,7 @@ class Blueprint(dict):
 
         return errors
 
-    def propagate_blueprint_input_data(self):
+    def propagate_blueprint_input_data(self) -> List[event.ValidationEvent]:
         errors = []
         for p in self.inputs:
             if p.value != None:
@@ -657,7 +740,7 @@ class Blueprint(dict):
 
         return errors
 
-    def propagate_module_data(self, module_data):
+    def propagate_module_data(self, module_data) -> List[event.ValidationEvent]:
         # module_data -> dict
         errors = []
         if self.modules != None:
@@ -680,7 +763,7 @@ class Blueprint(dict):
 
 #======================================================================
 
-    def build_dag(self):
+    def build_dag(self) -> dag.BlueprintGraph:
         g = dag.BlueprintGraph()
         if hasattr(self, "modules") and self.modules != None:        
             for m in self.modules:
@@ -706,10 +789,10 @@ class Blueprint(dict):
         
         return g
 
-    def is_dag_empty(self, bp_graph):
+    def is_dag_empty(self, bp_graph: dag.BlueprintGraph) -> bool:
         return bp_graph.isEmpty()
 
-    def dag_next_node(self, bp_graph):
+    def dag_next_node(self, bp_graph: dag.BlueprintGraph):
         if bp_graph.isEmpty():
             return None
         
@@ -721,7 +804,6 @@ class Blueprint(dict):
                 return node_name
         
         return None
-
 
 #======================================================================
 

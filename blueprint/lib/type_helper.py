@@ -16,7 +16,10 @@ def val_type(val) -> str:
     if val == None:
         return 'unknown'
     elif isinstance(val, str):
-        return 'string'
+        if val.startswith('$blueprint') or val.startswith('$module'):
+            return 'linked'
+        else:
+            return 'string'
     elif isinstance(val, int):
         return 'integer'
     elif isinstance(val, float):
@@ -33,11 +36,13 @@ def val_type(val) -> str:
 def is_val_type(val, type) -> bool:
     if val == None:
         if type == 'unknown':
-            return True    
+            return True
         else:
             return False
     if isinstance(val, str):
-        if type == 'string':
+        if type == 'linked' and (val.startswith('$blueprint') or val.startswith('$module')):
+            return True
+        elif type == 'string':
             return True    
         else:
             return False

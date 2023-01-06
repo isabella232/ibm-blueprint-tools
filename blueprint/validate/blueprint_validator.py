@@ -14,8 +14,9 @@
 
 from typing import List 
 from blueprint.lib import event
+from blueprint.schema import param
 from copy import deepcopy
-from blueprint.validate.type_helper import val_type, is_val_type
+from blueprint.lib.type_helper import val_type, is_val_type
 
 from blueprint.lib.logger import logr
 import logging
@@ -23,37 +24,45 @@ logr = logging.getLogger(__name__)
 
 class BlueprintModel:
     def __init__(self, bp):
-        self.bp = bp
-        self.name = bp.name
-        self.description = bp.description if hasattr(bp, 'description') else ""
+        self.bp             = bp
+        self.name           = bp.name
+        self.description    = bp.description if hasattr(bp, 'description') else ""
         self.schema_version = bp.schema_version
-        self.type = bp.type
-        self.bp_inputs = deepcopy(bp.inputs) if hasattr(bp, 'inputs') else None
-        self.bp_outputs = deepcopy(bp.outputs) if hasattr(bp, 'outputs') else None
-        self.bp_settings = deepcopy(bp.settings) if hasattr(bp, 'settings') else None
-        self.bp_modules = deepcopy(bp.modules) if hasattr(bp, 'modules') else None
+        self.type           = bp.type
+        self.bp_inputs      = bp.inputs if hasattr(bp, 'inputs') else None
+        self.bp_outputs     = bp.outputs if hasattr(bp, 'outputs') else None
+        self.bp_settings    = bp.settings if hasattr(bp, 'settings') else None
+        self.bp_modules     = bp.modules if hasattr(bp, 'modules') else None
 
-        self.bp_input_refs = []
-        self.bp_output_refs = []
-        self.bp_setting_refs = []
+        self.bp_input_refs      = [] # List of tuple (input_ref & type)
+        self.bp_output_refs     = [] # List of tuple (output_ref & type)
+        self.bp_setting_refs    = [] # List of tuple (setting_ref & type)
 
-        self.bp_input_value_refs = dict()
-        self.bp_input_value = dict()
-        self.bp_output_value_refs = dict()
-        self.bp_output_value = dict()
-        self.bp_setting_value_refs = dict()
-        self.bp_setting_value = dict()
+        self.bp_input_value_refs    = dict()
+        self.bp_input_value         = dict()
+        self.bp_output_value_refs   = dict()
+        self.bp_output_value        = dict()
+        self.bp_setting_value_refs  = dict()
+        self.bp_setting_value       = dict()
 
-        self.mod_input_refs = []
-        self.mod_output_refs = []
-        self.mod_setting_refs = []
+        self.unused_bp_input_refs       = [] # List of input_ref
+        self.unused_bp_setting_refs     = [] # List of setting_ref
+        # self.unused_bp_output_refs    = [] # List of output_ref
 
-        self.mod_input_value_refs = dict()
-        self.mod_input_value = dict()
-        self.mod_output_value_refs = dict()
-        self.mod_output_value = dict()
+        self.mod_input_refs     = [] # List of tuple (input_ref & type)
+        self.mod_output_refs    = [] # List of tuple (output_ref & type)
+        self.mod_setting_refs   = [] # List of tuple (setting_ref & type)
+
+        self.mod_input_value_refs   = dict()
+        self.mod_input_value        = dict()
+        self.mod_output_value_refs  = dict()
+        self.mod_output_value       = dict()
         self.mod_setting_value_refs = dict()
-        self.mod_setting_value = dict()
+        self.mod_setting_value      = dict()
+
+        # self.unused_mod_input_refs    = [] # List of input_ref
+        # self.unused_mod_setting_refs  = [] # List of setting_ref
+        self.unused_mod_output_refs     = [] # List of input_ref
 
         self._prepare_bp_params()
         self._prepare_bp_param_values()
@@ -284,7 +293,7 @@ class BlueprintModel:
         for pt in self.bp_input_refs:
             (p, t) = pt
             if p in self.bp_input_value.keys():
-                if not is_val_type(self.bp_input_value[p], t):
+                if self.bp_input_value[p] != None and not is_val_type(self.bp_input_value[p], t):
                     e = event.ValidationEvent(event.BPWarning, "Type mismatch for input parameter of the blueprint", t, p)
                     events.append(e)
 
@@ -349,6 +358,7 @@ class BlueprintModel:
         for pt in self.bp_input_refs:
             (p, t) = pt
             if p not in temp_param_value_refs.values():
+                self.unused_bp_input_refs.append(p)
                 e = event.ValidationEvent(event.BPWarning, "Unused input parameters declared in the blueprint", None, p)
                 events.append(e)
 
@@ -357,6 +367,7 @@ class BlueprintModel:
         for pt in self.bp_setting_refs:
             (p, t) = pt
             if p not in temp_param_value_refs.keys():
+                self.unused_bp_setting_refs.append(p)
                 e = event.ValidationEvent(event.BPWarning, "Unused setting parameters declared in the blueprint", None, p)
                 events.append(e)
 
@@ -523,7 +534,30 @@ class BlueprintModel:
         for v in temp_output_refs:
             if v != None and \
                 v not in temp_param_value_refs.values():
+                self.unused_mod_output_refs.append(v)
                 e = event.ValidationEvent(event.BPError, "Unused output parameters declared in the modules", None, v)
+                events.append(e)
+
+        #===============================================
+        temp_param_value_refs = dict()
+        temp_param_value_refs.update(self.bp_output_value_refs)
+        temp_param_value_refs.update(self.bp_setting_value_refs)
+        temp_param_value_refs.update(self.mod_input_value_refs)
+        temp_param_value_refs.update(self.mod_setting_value_refs)
+
+        temp_output_refs = []
+        temp_output_refs.extend(self.mod_input_refs)
+        temp_output_refs.extend(self.mod_setting_refs)
+
+        #===============================================
+        # Unused input parameters declared in the modules
+
+        for vt in temp_output_refs:
+            (v, t) = vt
+            if v != None \
+                and v not in temp_param_value_refs.values():
+                self.unused_mod_output_refs.append(v)
+                e = event.ValidationEvent(event.BPError, "Unused input parameters declared in the modules", None, v)
                 events.append(e)
 
         return events

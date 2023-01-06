@@ -15,7 +15,7 @@
 import yaml
 import sys
 
-from blueprint.lib import event
+from blueprint.lib import type_helper
 from blueprint.validate import parameter_validator
 
 from blueprint.lib.logger import logr
@@ -85,6 +85,48 @@ class Parameter(dict):
         param_validator = parameter_validator.ParameterModel(self)
         return param_validator.validate()
 
+    def to_yaml(self):
+        # yaml.encoding = None
+        errors = self.validate()
+        # eprint(errors)
+        return (yaml.dump(self, sort_keys=False), errors)
+
+    @classmethod
+    def from_yaml(cls, yaml_data):
+
+        if isinstance(yaml_data, Input):
+            return yaml_data
+
+        name = yaml_data['name']
+        try:
+            type = yaml_data['type']
+        except KeyError:
+            type = None
+        try:
+            description = yaml_data['description']
+        except KeyError:
+            description = None
+        try:
+            value = yaml_data['value']
+        except KeyError:
+            value = None
+        try:
+            comment = yaml_data['comment']
+        except KeyError:
+            comment = None
+
+        return cls(name = name, 
+                    type = type, 
+                    description = description, 
+                    value = value, 
+                    comment = comment)
+
+    @classmethod
+    def from_yaml_list(cls, yaml_data_list):
+        pars = []
+        for yaml_data in yaml_data_list:
+            pars.append(Parameter.from_yaml(yaml_data))
+
     def set_value(self, val):
         self.value = val
 
@@ -93,6 +135,22 @@ class Parameter(dict):
             return self.value
         else:
             return None
+
+    def get_type(self):
+        if hasattr(self, 'type') and self.type != None:
+            return self.type
+        else:
+            if hasattr(self, 'value'):
+                return type_helper.val_type(self.value)                    
+            else:
+                return 'unknown'
+
+    def set_type(self, type):
+        if type != 'unknown' and type != None:
+            self.type = type
+        else:
+            if hasattr(self, 'type'):
+                del self.type
 
 #========================================================================
 class Input (Parameter):
@@ -377,7 +435,7 @@ class Setting (Parameter):
         txt = "env("
         txt += "name:" + (self.name if hasattr(self, 'name') else 'None') + ", "
         txt += "type:" + str(self.type if hasattr(self, 'type') else 'None') + ", "
-        txt += "value:" + str(self.value if hasattr(self, 'value') else 'None')
+        txt += "value:" + str(self.value if hasattr(self, 'value') else 'None') + ", "
         txt += "default:"   + str(self.default  if hasattr(self, 'default')  else 'None') + ", "
         txt += "description:"  + str(self.description if hasattr(self, 'description') else  'None')
         txt += ")"

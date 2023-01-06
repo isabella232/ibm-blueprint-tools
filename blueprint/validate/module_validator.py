@@ -15,7 +15,7 @@
 from typing import List 
 from blueprint.lib import event
 from copy import deepcopy
-from blueprint.validate.type_helper import val_type, is_val_type
+from blueprint.lib.type_helper import val_type, is_val_type
 
 from blueprint.lib.logger import logr
 import logging

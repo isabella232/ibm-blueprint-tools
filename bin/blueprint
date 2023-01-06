@@ -30,6 +30,7 @@ from blueprint.validate import blueprint_validator
 from blueprint.validate import circuit_validator
 from blueprint.merge import manifest
 from blueprint.sync import bpsync
+from blueprint.sync import bpconcile
 from blueprint.run import bprunner
 from blueprint.lib import bfile
 from blueprint.lib import event
@@ -54,7 +55,7 @@ def main():
     validate = subparser.add_parser('validate')
     draw = subparser.add_parser('draw')
     merge = subparser.add_parser('merge')
-    # generate = subparser.add_parser('generate')
+    repair = subparser.add_parser('repair')
     sync = subparser.add_parser('sync')
     run = subparser.add_parser('run')
 
@@ -81,11 +82,12 @@ def main():
     merge.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
     merge.add_argument('-j', '--log-json', action='store_false', help='logs error messages in json format')
 
-    # generate.add_argument('-p', '--python-file', type=str, required=True, help='Python file used to describe the blueprint yaml', default=None)
-    # generate.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for python files', default='.')
-    # generate.add_argument('-o', '--out-file', type=str, required=False, help='Output blueprint configuration yaml file', default=None)
-    # generate.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
-    # generate.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
+    repair.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint configuration yaml file', default=None)
+    repair.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for python files', default='.')
+    repair.add_argument('-o', '--out-file', type=str, required=False, help='output blueprint configuration yaml file', default=None)
+    repair.add_argument('-l', '--log-file', type=str, required=False, help='log file', default=None)
+    repair.add_argument('-e', '--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], required=False, help='log level setting', default=None)
+    repair.add_argument('-j', '--log-json', action='store_false', help='logs error messages in json format')
 
     sync.add_argument('-b', '--bp-file', type=str, required=True, help='input blueprint lite configuration yaml file', default=None)
     sync.add_argument('-s', '--source-dir', type=str, required=False, help='source directory for input files', default=None)
@@ -306,21 +308,61 @@ def main():
                 with open(output_blueprint_file, 'w') as yaml_file:
                     yaml_file.write(out_yaml_str)
     
-    # elif args.command == 'generate':
-    #     if args.python_file:
-    #         bp_filename = args.python_file
-    #         source_dir = args.source_dir
-    #         output_blueprint_file = args.out_file
-    #         if source_dir:
-    #             python_file = os.path.join(source_dir, bp_filename)
-    #         print("Generate - " + python_file)
+    elif args.command == 'repair':
+        if args.bp_file:
+            bp_filename = args.bp_file
+            source_dir = args.source_dir
+            output_blueprint_file = args.out_file
 
-    #         # import subprocess
-    #         # subprocess.call(python_file, shell=True)
-    #         # exec(open(python_file).read())
-    #         manifest = importlib.import_module(bp_filename)
-    #         bp, errors = manifest.blueprint_manifest()
-    #         bp.to_yaml_str()
+            if source_dir:
+                if not os.path.exists(source_dir):
+                    print('Error in source_dir, or directory does not exists')
+                    logr.error('Error in source_dir, or directory does not exists')
+                    return -1
+                source_path = Path(source_dir)
+                if not source_path.is_dir():
+                    print('Error in source_dir, not a directory')
+                    logr.error('Error in source_dir, not a directory')
+                    return -1
+
+                source_dir = os.path.abspath(source_dir)
+                bp_filename = os.path.join(source_dir, bp_filename)
+                if not os.path.exists(bp_filename):
+                    print('Invalid source file location for blueprint : ' + bp_filename)
+                    logr.error('Invalid source file location for blueprint : ' + bp_filename)
+                    return -1
+
+            if output_blueprint_file != None:
+                out_file_path = os.path.dirname(output_blueprint_file)
+                if out_file_path == None or len(out_file_path) == 0:
+                    if working_dir != None and len(working_dir) > 0:
+                        print('Output file path has not defined or path not exists. Default to working_dir')
+                        logr.error('Output file path has not defined or path not exists. Default to working_dir')
+                        output_blueprint_file = os.path.join(working_dir, os.path.basename(output_blueprint_file))
+                    else:
+                        print('Output file path and Working directory has not defined or path not exists. Default to "./"')
+                        logr.error('Output file path and Working directory has not defined or path not exists. Default to "./"')
+                        output_blueprint_file = os.path.join("./", os.path.basename(output_blueprint_file))
+
+            print("Repair - " + bp_filename)
+            logr.info("Repair - " + bp_filename)
+            bp = bfile.FileHelper.load_blueprint(bp_filename)
+            if bp == None:
+                eprint("Error loading blueprint, for advanced validation")
+            else:
+                bpr = bpconcile.BlueprintReconciler(bp)
+                bpr.reconcile()
+
+                (out_yaml_str, errors) = bpr.bp.to_yaml_str()
+                logr.debug(out_yaml_str)
+                if len(errors) > 0:
+                    eprint(event.format_events(sorted(list(set(errors))), event.Format.Table if log_json_format else event.Format.Json))
+
+                if output_blueprint_file == None or output_blueprint_file == '':
+                    print(out_yaml_str)
+                else:
+                    with open(output_blueprint_file, 'w') as yaml_file:
+                        yaml_file.write(out_yaml_str)
 
     elif args.command == 'sync':
         if args.bp_file:
@@ -378,8 +420,10 @@ def main():
 
             bm = bpsync.BlueprintMorphius.from_yaml_file(bp_filename)
             bp = bm.sync_blueprint(working_dir, annotate = True)
+            bpr = bpconcile.BlueprintReconciler(bp)
+            bpr.reconcile()
 
-            (out_yaml_str, errors) = bp.to_yaml_str()
+            (out_yaml_str, errors) = bpr.bp.to_yaml_str()
             logr.debug(out_yaml_str)
             if len(errors) > 0:
                 eprint(event.format_events(sorted(list(set(errors))), event.Format.Table if log_json_format else event.Format.Json))

@@ -102,60 +102,79 @@ class WireModel:
         if self.wire.from_node_type == "blueprint.Blueprint" and self.wire.to_node_type == "module.Module":
             if self.wire.from_connector_type == bus.Input:
                 if self.wire.to_connector_type == bus.Output:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from blueprint.input to module.output", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
             elif self.wire.from_connector_type == bus.Output:
                 if self.wire.to_connector_type == bus.Input:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from blueprint.output to module.input", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 elif self.wire.to_connector_type == bus.Setting:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from blueprint.output to module.setting", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 elif self.wire.to_connector_type == bus.Output:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from blueprint.output to module.output", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
             if self.wire.from_connector_type == bus.Setting:
                 if self.wire.to_connector_type == bus.Input:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from blueprint.setting to module.input", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 elif self.wire.to_connector_type == bus.Output:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from blueprint.setting to module.output", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
         
         elif self.wire.from_node_type == "module.Module" and self.wire.to_node_type == "module.Module":
             if self.wire.from_connector_type == bus.Input:
                 if self.wire.to_connector_type == bus.Input:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.input to module.input", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 elif self.wire.to_connector_type == bus.Setting:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.input to module.setting", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 elif self.wire.to_connector_type == bus.Output:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.input to module.output", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
             elif self.wire.from_connector_type == bus.Output:
                 if self.wire.to_connector_type == bus.Output:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.output to module.output", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
             if self.wire.from_connector_type == bus.Setting:
                 if self.wire.to_connector_type == bus.Input:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.setting to module.input", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 elif self.wire.to_connector_type == bus.Setting:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.setting to module.setting", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 elif self.wire.to_connector_type == bus.Output:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.setting to module.output", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
 
         elif self.wire.from_node_type == "module.Module" and self.wire.to_node_type == "blueprint.Blueprint":
             if self.wire.from_connector_type == bus.Input:
                 if self.wire.to_connector_type == bus.Input:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.input to blueprint.input", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 elif self.wire.to_connector_type == bus.Output:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.input to blueprint.output", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 elif self.wire.to_connector_type == bus.Setting:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.input to blueprint.setting", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
             elif self.wire.from_connector_type == bus.Output:
                 if self.wire.to_connector_type == bus.Input:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring of module.output to blueprint.input", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 if self.wire.to_connector_type == bus.Setting:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring of module.output to blueprint.setting", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
             if self.wire.from_connector_type == bus.Setting:
                 if self.wire.to_connector_type == bus.Input:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.setting to blueprint.input", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 elif self.wire.to_connector_type == bus.Output:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.setting to blueprint.output", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
                 elif self.wire.to_connector_type == bus.Setting:
-                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring from module.setting to blueprint.setting", self.wire.from_param_ref, self.wire.to_param_ref))
+                    events.append(event.ValidationEvent(event.BPError, "Incorrect wiring", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
         else:
-            events.append(event.ValidationEvent(event.BPError, "Bad bus from blueprint.Blueprint to blueprint.Blueprint", self.wire.from_param_ref, self.wire.to_param_ref))
+            events.append(event.ValidationEvent(event.BPError, "Incorrect bus", None, f'from: {self.wire.from_param_ref} to: {self.wire.to_param_ref}'))
+
+        """
+        Validate the data-types in from-param and to-param
+        """
+        from_param = self.wire.from_param
+        if from_param != None:
+            from_param_type = from_param.get_type()
+        else:
+            from_param_type = 'unknown'
+        
+        to_param = self.wire.to_param
+        if to_param != None:
+            to_param_type = to_param.get_type()
+        else:
+            to_param_type = 'unknown'
+
+        if str(from_param_type).lower() != str(to_param_type).lower():
+            events.append(event.ValidationEvent(event.BPWarning, "Type mismatch on the wire", None, 
+                                        f'from: {from_param_type} T {self.wire.from_param_ref} to: {to_param_type} T {self.wire.to_param_ref}'))
 
         return events
