@@ -1,13 +1,13 @@
 ## CLI Illustrations
 
-Sample CLIs commands that you can use - to try and learn about the toolset:
+Sample CLIs commands that you can use to try to learn about the toolset.
 
 ### Blueprint validate tool
    * `blueprint validate -b ./examples/validate/data/detection-rule.yaml`
    * `blueprint validate -b detection-rule.yaml -s ./examples/validate/data`
-   * `blueprint validate -b detection-rule.yaml -s ./examples/validate/data -j`  (with json output)
+   * `blueprint validate -b detection-rule.yaml -s ./examples/validate/data -j` in the `json` output format.
   
-    Note: The `detection-rule.yaml` is a sample Blueprint configuration file.  Refer to other examples in the same folder.
+    Note: The `detection-rule.yaml` is a sample blueprint configuration file. Refer to other examples in the same folder.
 
 ---
 ### Blueprint merge tool
@@ -16,7 +16,7 @@ Sample CLIs commands that you can use - to try and learn about the toolset:
    * `blueprint merge -m manifest.yaml -s ./examples/merge/data-1 -o ./merged-bp.yaml`
    * `blueprint merge -m manifest.yaml -s ./examples/merge/data-1 -o ./merged-bp.yaml -j` 
     
-    Note: The `manifest.yaml` file is a sample Blueprint manifest file that combines multiple code snippets in the same folder.
+    Note: The `manifest.yaml` file is a sample blueprint manifest file that combines multiple code snippets in the same folder.
 
 ---
 ### Blueprint sync tool
@@ -29,24 +29,24 @@ Sample CLIs commands that you can use - to try and learn about the toolset:
 ---
 ### Blueprint run tool
     * `blueprint run -c apply -d -b ./examples/run/data/sample1.yaml -i ./examples/run/data/input_data1.yaml -w ./temp`
-      * pre-req: install terraform-config-inspect, and setup the environment $TERRAFORM_CONFIG_INSPECT_PATH
-      * pre-req: install Terraform CLI
-      * uses `./examples/run/data/sample1.yaml` as the blueprint configuration file
-      * uses `./examples/run/data/input_data1.yaml` as the input data file for the blueprint configuration
-      * `-d` will trigger a dry-run for the `blueprint apply` command
+      * pre-req: install terraform-config-inspect, and setup the environment $TERRAFORM_CONFIG_INSPECT_PATH.
+      * pre-req: install Terraform CLI.
+      * uses `./examples/run/data/sample1.yaml` as the blueprint configuration file.
+      * uses `./examples/run/data/input_data1.yaml` as the input data file for the blueprint configuration.
+      * `-d` will trigger a dry-run for the `blueprint apply` command.
       * uses `./temp` as the working directory to generate the temporary terraform files (due to a dry-run) and run the Terraform Apply command.
     * `blueprint run -c apply -b ./examples/run/data/sample1.yaml -i ./examples/run/data/input_data1.yaml -w ./temp`
-      * pre-req: install terraform-config-inspect, and setup the environment $TERRAFORM_CONFIG_INSPECT_PATH
-      * pre-req: install Terraform CLI
-      * uses `./examples/run/data/sample1.yaml` as the blueprint configuration file
-      * uses `./examples/run/data/input_data1.yaml` as the input data file for the blueprint configuration
-      * uses `./temp` as the working directory to download & run the Terraform Apply commands 
+      * pre-req: install terraform-config-inspect, and setup the environment $TERRAFORM_CONFIG_INSPECT_PATH.
+      * pre-req: install Terraform CLI.
+      * uses `./examples/run/data/sample1.yaml` as the blueprint configuration file.
+      * uses `./examples/run/data/input_data1.yaml` as the input data file for the blueprint configuration.
+      * uses `./temp` as the working directory to download and run the Terraform Apply commands.
 
 ---
 ### Blueprint draw tool
     * `blueprint draw -b ./examples/draw/data/sample1.yaml -t viz -w ./temp`
-      * Generate a `out_blueprint.png file` (default name) using the `./examples/draw/data/sample1.yaml` as the input blueprint configuration file.
-      * The output format is a GraphViz format
+      * Generate a `out_blueprint.png file` (default name) by using the `./examples/draw/data/sample1.yaml` as the input blueprint configuration file.
+      * The output format is a GraphViz format.
     * `blueprint draw -b ./examples/draw/data/sample1.yaml -t ic -w ./temp`
-      * The output format is an Integrated Circuit format
+      * The output format is an Integrated Circuit format.
   

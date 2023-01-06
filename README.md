@@ -184,7 +184,6 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
 
     > blueprint run -h
 
-
         usage: blueprint run [-h] -c {init,plan,apply,destroy,output} [-d] -b BP_FILE -i INPUT_FILE [-s SOURCE_DIR] [-w WORKING_DIR] [-o OUT_FILE]
                       [-l LOG_FILE] [-e {DEBUG,INFO,WARNING,ERROR}]
 
@@ -237,9 +236,9 @@ The example folders hold some test data (for illustration only), and sample Pyth
   |---|---------------------|------------|-----------------------|
   | 1 | Schema validator    | `./examples/validate/validate_app.py` | Illustrate the use of the `blueprint.schema.validate.validator.Validator` class to validate a blueprint configuration file.|
   | 2 | Schema draw         | `./examples/draw/draw_app.py` | Illustrate the use of the `blueprint.circuit.draw.BlueprintDraw` class to draw a graph depicts the blueprint configuration file.|
-  | 3 | Schema merge        | `./examples/validate/merge_app.py` | Illustrate the use of `blueprint.merge.manifest.BlueprintManifest` class to load manifest file to generate a blueprint configuration file </br> The `./examples/validate/data-1/manifest.yaml`, and `./examples/validate/data-2/manifest.yaml` are sample blueprint manifest file. |
+  | 3 | Schema merge        | `./examples/validate/merge_app.py` | Illustrate the use of `blueprint.merge.manifest.BlueprintManifest` class to load manifest file to generate a blueprint configuration file. </br> The `./examples/validate/data-1/manifest.yaml`, and `./examples/validate/data-2/manifest.yaml` are sample blueprint manifest file. |
   | 4 | Schema sync         | `./examples/sync/sync_app.py` | Illustrate the ability to sync the module definitions (inputs and outputs) in the blueprint configuration file, with the corresponding definition the Terraform repository. |
-  | 5 | Schema generate     | `./examples/cdk/bp_basic.py` | Illustrate the use of `blueprint.schema`, and `blueprint.circuit` library classes to generate a blueprint configuration file, by using Python code |
+  | 5 | Schema cdk          | `./examples/cdk/bp_basic_cdk.py` | Illustrate the use of `blueprint.schema`, and `blueprint.circuit` library classes to generate a blueprint configuration file, by using Python code |
   | 6 | Blueprint run       | `./examples/run/run_app.py` | Illustrate the ability to run and verify the blueprint behavior locally. |
 
 ---
