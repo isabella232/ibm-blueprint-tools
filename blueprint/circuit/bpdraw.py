@@ -95,7 +95,7 @@ class BlueprintDraw:
         self.validation = bpv.validate()
 
         self.circuit = bus.Circuit(self.bp)
-        self.circuit.read()
+        # self.circuit.read()
 
         return self.validation
 

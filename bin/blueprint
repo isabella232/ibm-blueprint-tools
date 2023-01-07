@@ -420,10 +420,12 @@ def main():
 
             bm = bpsync.BlueprintMorphius.from_yaml_file(bp_filename)
             bp = bm.sync_blueprint(working_dir, annotate = True)
-            bpr = bpconcile.BlueprintReconciler(bp)
-            bpr.reconcile()
+            (out_yaml_str, errors) = bp.to_yaml_str()
 
-            (out_yaml_str, errors) = bpr.bp.to_yaml_str()
+            # bpr = bpconcile.BlueprintReconciler(bp)
+            # bpr.reconcile()
+            # (out_yaml_str, errors) = bpr.bp.to_yaml_str()
+
             logr.debug(out_yaml_str)
             if len(errors) > 0:
                 eprint(event.format_events(sorted(list(set(errors))), event.Format.Table if log_json_format else event.Format.Json))
