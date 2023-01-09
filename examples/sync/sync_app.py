@@ -4,7 +4,9 @@ import getopt
 import logging
 
 from blueprint.sync import bpsync
+from blueprint.sync import bpconcile
 
+from blueprint.lib import event
 from blueprint.lib.logger import logr
 # import logging
 # logr = logging.getLogger(__name__)
@@ -37,7 +39,7 @@ def main(argv):
             output_blueprint_file = arg
 
     # if blueprint_lite_file == None or blueprint_lite_file == '':
-    #     blueprint_lite_file = './examples/sync/data/bplite.yaml'
+    #     blueprint_lite_file = './examples/sync/data/bplite-2.yaml'
 
     # if working_directory == None or working_directory == '':
     #     working_directory = './examples/sync/temp'
@@ -50,15 +52,18 @@ def main(argv):
     bm = bpsync.BlueprintMorphius.from_yaml_file(blueprint_lite_file)
     bp = bm.sync_blueprint(working_dir = working_directory, annotate = True)
 
-    (out_yaml_str, errors) = bp.to_yaml_str()
-    if len(errors) > 0:
-        eprint(errors)
+    # bpr = bpconcile.BlueprintReconciler(bp)
+    # bpr.reconcile()
 
+    (out_yaml_str, errors) = bpr.bp.to_yaml_str()
     if output_blueprint_file == None or output_blueprint_file == '':
         print(out_yaml_str)
     else:
         with open(output_blueprint_file, 'w') as yaml_file:
             yaml_file.write(out_yaml_str)
+
+    if len(errors) > 0:
+        eprint(event.format_events(errors, event.Format.Table))
 
 if __name__ == "__main__":
    main(sys.argv[1:])

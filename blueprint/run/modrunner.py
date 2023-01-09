@@ -29,13 +29,14 @@ def eprint(*args, **kwargs):
 
 class ModuleRunner:
 
-    def __init__(self, parent, module, dry_run=False):
+    def __init__(self, parent, module, dry_run=False, ignore_validation_errors = False):
         self.parent = parent
         self.errors = []
         if dry_run:
             self.setup_dry_module(module)
         else:
             self.setup_module(module) # set modules, download template, set working_dir
+        self.ignore_validation_errors = ignore_validation_errors
 
     def setup_module(self, module):
         # Create a folder with the module name (or switch to the existing folder)
@@ -90,7 +91,7 @@ class ModuleRunner:
         print("==================================================================")
         print("Preparing for terraform plan : " + str(self.module.name))
         tfvars_file, self.errors = self.prepare_tfvars()
-        if len(self.errors) == 0:
+        if self.ignore_validation_errors or len(self.errors) == 0:
             self.set_env()
             tr = terraform.TerraformRunner(self.working_dir, var_file="blueprint.tfvars")
             print("Running terraform init : " + str(self.module.name))
@@ -115,7 +116,7 @@ class ModuleRunner:
         print("==================================================================")
         print("Preparing for terraform apply : " + str(self.module.name))
         tfvars_file, self.errors = self.prepare_tfvars()
-        if len(self.errors) == 0:
+        if self.ignore_validation_errors or len(self.errors) == 0:
             if self.module.inputs != None:
                 input_data = {}
                 for input in self.module.inputs:
@@ -173,7 +174,7 @@ class ModuleRunner:
         print("==================================================================")
         print("Preparing for terraform destroy : " + str(self.module.name))
         tfvars_file, self.errors = self.prepare_tfvars()
-        if len(self.errors) == 0:
+        if self.ignore_validation_errors or len(self.errors) == 0:
             self.set_env()
             tr = terraform.TerraformRunner(self.working_dir, var_file="blueprint.tfvars")
             print("terraform destroy : " + str(self.module.name))
@@ -198,7 +199,8 @@ class ModuleRunner:
             # TODO: Try to dereference the input values ?
             if str(input.value).startswith("$"):
                 self.errors.append(event.ValidationEvent(event.BPWarning, "Parameter value is not dereferenced for " + input.name))
-            else:
+            
+            if self.ignore_validation_errors or not str(input.value).startswith("$"):
                 if input.type != None: 
                     if input.type.lower() != "string":
                         tfvars_str += (input.name + ' = ' + str(input.value))

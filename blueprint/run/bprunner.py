@@ -33,12 +33,13 @@ def eprint(*args, **kwargs):
 
 class BlueprintRunner:
 
-    def __init__(self, blueprint_file, input_data_file, dry_run = False, working_dir = '.'):
+    def __init__(self, blueprint_file, input_data_file, dry_run = False, ignore_validation_errors = False, working_dir = '.'):
         self.bp =  blueprint.Blueprint("Temp")
         self.blueprint_file = blueprint_file
         self.input_data_file = input_data_file
         self.working_dir = working_dir
         self.dry_run = dry_run
+        self.ignore_validation_errors = ignore_validation_errors
 
         self.module_runners = dict()
         self.input_data = dict()
@@ -61,10 +62,18 @@ class BlueprintRunner:
         blueprint_file_name = blueprint_file[len(os.path.dirname(blueprint_file))+1:]
         input_data_file_name = input_data_file[len(os.path.dirname(input_data_file))+1:]
 
-        shutil.copyfile(blueprint_file, os.path.join(working_dir, blueprint_file_name))
+        bp_abs_file = os.path.join(working_dir, blueprint_file_name)
+        if not os.path.exists(bp_abs_file):
+            shutil.copyfile(blueprint_file, bp_abs_file)
+        else:
+            eprint(f"Blueprint file {bp_abs_file} - already exists, did not overwrite.")
         self.blueprint_file = os.path.join(working_dir, blueprint_file_name)
 
-        shutil.copyfile(input_data_file, os.path.join(working_dir, input_data_file_name))
+        ip_abs_file = os.path.join(working_dir, input_data_file_name)
+        if not os.path.exists(ip_abs_file):
+            shutil.copyfile(input_data_file, ip_abs_file)
+        else:
+            eprint(f"Input data file {ip_abs_file} - already exists, did not overwrite.")
         self.input_data_file = os.path.join(working_dir, input_data_file_name)
 
         # change current-working-directory to the working_dir
@@ -81,7 +90,7 @@ class BlueprintRunner:
             logr.error("Errors found while loading input data for the blueprint: " + str(e))
         
         logr.debug("Loading ModuleRunners for the blueprint")
-        e = self.load_module_runners(dry_run)
+        e = self.load_module_runners(dry_run, ignore_validation_errors)
         if len(e) > 0:
             logr.error("Errors found while loading ModuleRunner: " + str(e))
 
@@ -93,7 +102,7 @@ class BlueprintRunner:
             yaml_str = f.read()
             self.bp = blueprint.Blueprint.from_yaml_str(yaml_str)
         logr.info("Success loading blueprint file " + self.blueprint_file + ". \nValidating ...")
-        errors = self.bp.validate(event.BPWarning)
+        errors = self.bp.validate()
         
         return errors
 
@@ -119,11 +128,11 @@ class BlueprintRunner:
         self.bp.propagate_blueprint_input_data()
         return errors
 
-    def load_module_runners(self, dry_run=False):
+    def load_module_runners(self, dry_run=False, ignore_validation_errors=False):
         errors = []
         for mod in self.bp.modules:
             logr.debug("Loading module-runner for module : " + mod.name)
-            self.module_runners[mod.name] = modrunner.ModuleRunner(self, mod, dry_run)
+            self.module_runners[mod.name] = modrunner.ModuleRunner(self, mod, dry_run, ignore_validation_errors)
             errors.append(self.module_runners[mod.name].get_errors())
         logr.debug("Successful load all module-runners")
         

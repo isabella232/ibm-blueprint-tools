@@ -114,14 +114,14 @@ def blueprint_manifest():
     
     #-------------Wiring starts-----------------
     err = []
-    bp_bus = bus.Bus(bp, cos_mod)
+    bp_bus = bus.WireBus(bp, cos_mod)
     err += bp_bus.add_wire('bp_storage_name', 'cos_instance_name')
     err += bp_bus.add_wire('bp_storage_plan', 'cos_storage_plan')
 
-    mod_bus = bus.Bus(rg_mod, cos_mod)
+    mod_bus = bus.WireBus(rg_mod, cos_mod)
     err += mod_bus.add_wire('resource_group_id', 'resource_group_id')
 
-    bp_out_bus = bus.Bus(cos_mod, bp)
+    bp_out_bus = bus.WireBus(cos_mod, bp)
     err += bp_out_bus.add_wire('cos_id', 'bp_storage_id')
     #-------------Wiring ends-----------------
 

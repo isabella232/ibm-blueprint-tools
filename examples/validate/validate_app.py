@@ -6,6 +6,8 @@ from blueprint.lib import bfile
 from blueprint.lib import event
 from blueprint.validate import schema_validator
 from blueprint.validate import blueprint_validator
+from blueprint.validate import circuit_validator
+from blueprint.circuit import bus
 
 from blueprint.lib.logger import logr
 # import logging
@@ -55,11 +57,14 @@ def main(argv):
          eprint("Error in loading the blueprint file")
          sys.exit()
 
-      bpv = blueprint_validator.BlueprintValidator()
-      errors = bpv.validate_blueprint(bp, level=event.BPWarning)
+      bpv = blueprint_validator.BlueprintModel(bp)
+      errors = bpv.validate()
+      cqt = bus.Circuit(bp)
+      cv = circuit_validator.CircuitModel(cqt)
+      errors.extend(list(cv.validate()))
       if errors != None:
          # eprint(str(errors))
-         eprint(event.format_events(errors, event.Format.Table))
+         eprint(event.format_events(sorted(errors), event.Format.Table))
    else:
       print("Blueprint filename = None")
 

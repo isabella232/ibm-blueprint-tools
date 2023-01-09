@@ -35,10 +35,9 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
 
 > Note: Use the following command to install `pygraphviz` in your Mac OS.
 
-```sh
-python3 -m pip install --global-option=build_ext --global-option="-I$(brew --prefix graphviz)/include/"  --global-option="-L$(brew --prefix graphviz)/lib/" pygraphviz
-```
-{: pre}
+    ```sh
+    python3 -m pip install --global-option=build_ext --global-option="-I$(brew --prefix graphviz)/include/"  --global-option="-L$(brew --prefix graphviz)/lib/" pygraphviz
+    ```
 
 ### Setup CLI
 
@@ -51,7 +50,6 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
         pip3 install build
         python3 -m build
       ```
-      {: pre}
       
       By default, the resulting wheel or tar files are placed in `dist/` folder under the current directory.
   3. Run the following commands to fetch a wheel or a source distribution, depending on your setup file.
@@ -59,7 +57,6 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
       ```sh
         pip3 install dist/blueprint-1.0.0-py3-none-any.whl
       ```
-      {: pre}
 ---
 
 ## Usage
@@ -78,7 +75,6 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
     ```sh
     blueprint -h
     ```
-    {: pre}
     
     **Output**
     
@@ -93,7 +89,6 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
         optional arguments:
           -h, --help            show this help message and exit
     ```
-    {: screen}
 
   For more information about the kickstart your journey, see [example CLI commands](./docs/cli-reference.md).
 
@@ -101,10 +96,11 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
 
   Use the `blueprint validate` command to verify the schema of the blueprint configuration file (blueprint.yaml)
 
+    > blueprint validate -h
+
     ```sh
     blueprint validate -h
     ```
-    {: pre}
 
     ```text
         usage: blueprint validate [-h] -b BP_FILE [-w WORKING_DIR]
@@ -118,7 +114,6 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
           -j, --log-json                                      logs error messages in json format
     ```
-    {: screen}
 
   Refer to the examples in the `examples/validate` folder.
 
@@ -129,8 +124,7 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
     ```sh
     > blueprint draw -h
     ```
-    {: pre}
-
+  
     ```text
         usage: blueprint draw [-h] -b BP_FILE [-s SOURCE_DIR] [-o OUT_FILE] [-f {png,jpg,svg,pdf,dot}] [-l LOG_FILE]
                               [-e {DEBUG,INFO,WARNING,ERROR}]
@@ -148,7 +142,6 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
           -j, --log-json                                      logs error messages in json format
       ```
-      {: screen}
 
   Refer to the examples from the `examples/draw` folder. 
   
@@ -159,7 +152,6 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
     ```sh
     blueprint merge -h
     ```
-    {: pre}
 
     ```text
         usage: blueprint merge [-h] -m MANIFEST_FILE [-w WORKING_DIR] [-o OUT_FILE]
@@ -172,9 +164,8 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
           -l LOG_FILE, --log-file LOG_FILE                    log file
           -e {DEBUG,INFO,WARNING,ERROR}, 
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
-          -j, --log-json                                      logs error messages in json format
+          -j, --log-json                                      logs error messages in json format 
       ```
-      {: screen}    
 
   Refer to the examples from the `examples/merge` folder.
 
@@ -189,7 +180,6 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
     ```sh
     blueprint sync -h
     ```
-    {: pre}
 
     ```text
         usage: blueprint sync [-h] -b BP_FILE [-s SOURCE_DIR] -o OUT_FILE -w WORKING_DIR [-l LOG_FILE] [-e {DEBUG,INFO,WARNING,ERROR}]
@@ -205,7 +195,6 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level setting
           -j, --log-json                                      logs error messages in json format
       ```
-      {: screen}
 
   Refer to the examples from the `examples/sync` data folder.
 
@@ -213,14 +202,16 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
 
   Use the `blueprint run` command to run the *blueprint configuration file* (blueprint.yaml), by using the input data in the local machine.  
   
-  The `blueprint run` downloads the templates from the Git repositories in the local file system (one folder per module, in the working directory). Further, it uses the local Terraform command-line installation to run the `blueprint run -c init`, `blueprint run -c plan`, `blueprint run -c apply` & `blueprint run -c destroy` commands for all its modules.
+  The `blueprint run` downloads the templates from the Git repositories in the local file system (one folder per module, in the working directory). 
+  Further, it uses the local Terraform command-line installation to run the `blueprint run -c init`, `blueprint run -c plan`, `blueprint run -c apply` 
+  & `blueprint run -c destroy` commands for all its modules.
 
-  The `--dry-run` option will _not_ download the template, instead it generates a dummy Terraform template for each module (with inputs and outputs that are specified in the *blueprint configuration yaml* file).  You can use these dummy terraform templates to verify the data flows in the log files.
+  The `--dry-run` option will _not_ download the template, instead it generates a dummy Terraform template for each module (with inputs and outputs 
+  that are specified in the *blueprint configuration yaml* file).  You can use these dummy terraform templates to verify the data flows in the log files.
 
     ```sh
     blueprint run -h
     ```
-    {: pre}
 
     ```text
         usage: blueprint run [-h] -c {init,plan,apply,destroy,output} [-d] -b BP_FILE -i INPUT_FILE [-s SOURCE_DIR] [-w WORKING_DIR] [-o OUT_FILE]
@@ -241,9 +232,8 @@ python3 -m pip install --global-option=build_ext --global-option="-I$(brew --pre
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
           -j, --log-json                                      logs error messages in json format
       ```
-      {: screen}
 
-Refer to examples in the `examples/run` folder.
+  Refer to examples in the `examples/run` folder.
 
 ### Blueprint Python library usage
 
@@ -265,7 +255,7 @@ Refer to examples in the `examples/run` folder.
 
   The library has built-in validation and emits error or warning events such as lib.event.ValidationEvent.
 
-  For more information about the example Python code, see the (code example)[./examples/generate/README.md].
+  For more information about the example Python code, see the (code example)[./examples/cdk/README.md].
 
 ---
 
@@ -277,9 +267,9 @@ The example folders hold some test data (for illustration only), and sample Pyth
   |---|---------------------|------------|-----------------------|
   | 1 | Schema validator    | `./examples/validate/validate_app.py` | Illustrate the use of the `blueprint.schema.validate.validator.Validator` class to validate a blueprint configuration file.|
   | 2 | Schema draw         | `./examples/draw/draw_app.py` | Illustrate the use of the `blueprint.circuit.draw.BlueprintDraw` class to draw a graph depicts the blueprint configuration file.|
-  | 3 | Schema merge        | `./examples/validate/merge_app.py` | Illustrate the use of `blueprint.merge.manifest.BlueprintManifest` class to load manifest file to generate a blueprint configuration file </br> The `./examples/validate/data-1/manifest.yaml`, and `./examples/validate/data-2/manifest.yaml` are sample blueprint manifest file. |
+  | 3 | Schema merge        | `./examples/validate/merge_app.py` | Illustrate the use of `blueprint.merge.manifest.BlueprintManifest` class to load manifest file to generate a blueprint configuration file. </br> The `./examples/validate/data-1/manifest.yaml`, and `./examples/validate/data-2/manifest.yaml` are sample blueprint manifest file. |
   | 4 | Schema sync         | `./examples/sync/sync_app.py` | Illustrate the ability to sync the module definitions (inputs and outputs) in the blueprint configuration file, with the corresponding definition the Terraform repository. |
-  | 5 | Schema generate     | `./examples/generate/bp_basic.py` | Illustrate the use of `blueprint.schema`, and `blueprint.circuit` library classes to generate a blueprint configuration file, by using Python code |
+  | 5 | Schema cdk          | `./examples/cdk/bp_basic_cdk.py` | Illustrate the use of `blueprint.schema`, and `blueprint.circuit` library classes to generate a blueprint configuration file, by using Python code |
   | 6 | Blueprint run       | `./examples/run/run_app.py` | Illustrate the ability to run and verify the blueprint behavior locally. |
 
 ---
@@ -296,7 +286,7 @@ The example folders hold some test data (for illustration only), and sample Pyth
 
 ## Contact
 
-  Following are the authors of the tool.
+  Following are the contributors to the toolset.
 
   - Albee Jhoney (albee.jhoney@in.ibm.com)
   - Nishu Bharti (nishu.bharti1@ibm.com)

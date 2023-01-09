@@ -15,6 +15,7 @@
 import yaml
 import sys
 from typing import List
+import re
 
 from blueprint.schema import module
 from blueprint.schema import param
@@ -106,39 +107,39 @@ class Blueprint(dict):
         if other == None:
             return False
 
-        self.name = "" if self.name == None else self.name
-        self.schema_version = "" if self.schema_version == None else self.schema_version
-        self.type = "" if not hasattr(self, 'type') or self.type == None else self.type
-        self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
-        self.inputs = "" if not hasattr(self, 'inputs') or self.inputs == None else str(self.inputs)
-        self.outputs = "" if not hasattr(self, 'outputs') or self.outputs == None else str(self.outputs)
-        self.settings = "" if not hasattr(self, 'settings') or self.settings == None else str(self.settings)
-        self.modules = "" if not hasattr(self, 'modules') or self.modules == None else str(self.modules)
+        self_name = "" if self.name == None else self.name
+        self_schema_version = "" if self.schema_version == None else self.schema_version
+        self_type = "" if not hasattr(self, 'type') or self.type == None else self.type
+        self_description = "" if not hasattr(self, 'description') or self.description == None else self.description
+        self_inputs = "" if not hasattr(self, 'inputs') or self.inputs == None else str(self.inputs)
+        self_outputs = "" if not hasattr(self, 'outputs') or self.outputs == None else str(self.outputs)
+        self_settings = "" if not hasattr(self, 'settings') or self.settings == None else str(self.settings)
+        self_modules = "" if not hasattr(self, 'modules') or self.modules == None else str(self.modules)
 
-        other.name = "" if other.name == None else other.name
-        other.schema_version = "" if other.schema_version == None else other.schema_version
-        other.type = "" if not hasattr(other, 'type') or other.type == None else other.type
-        other.description = "" if not hasattr(other, 'description') or other.description == None else other.description
-        other.inputs = "" if not hasattr(other, 'inputs') or other.inputs == None else str(other.inputs)
-        other.outputs = "" if not hasattr(other, 'outputs') or other.outputs == None else str(other.outputs)
-        other.settings = "" if not hasattr(other, 'settings') or other.settings == None else str(other.settings)
-        other.modules = "" if not hasattr(other, 'modules') or other.modules == None else str(other.modules)
+        other_name = "" if other.name == None else other.name
+        other_schema_version = "" if other.schema_version == None else other.schema_version
+        other_type = "" if not hasattr(other, 'type') or other.type == None else other.type
+        other_description = "" if not hasattr(other, 'description') or other.description == None else other.description
+        other_inputs = "" if not hasattr(other, 'inputs') or other.inputs == None else str(other.inputs)
+        other_outputs = "" if not hasattr(other, 'outputs') or other.outputs == None else str(other.outputs)
+        other_settings = "" if not hasattr(other, 'settings') or other.settings == None else str(other.settings)
+        other_modules = "" if not hasattr(other, 'modules') or other.modules == None else str(other.modules)
 
-        return (self.name == other.name) and (self.type == other.type) and (self.schema_version == other.schema_version) \
-            and (self.description == other.description) and (self.modules == other.modules) \
-            and (self.inputs == other.inputs) and (self.outputs == other.outputs) and (self.settings == other.settings)
+        return (self_name == other_name) and (self_type == other_type) and (self_schema_version == other_schema_version) \
+            and (self_description == other_description) and (self_modules == other_modules) \
+            and (self_inputs == other_inputs) and (self_outputs == other_outputs) and (self_settings == other_settings)
 
     def __hash__(self):
-        self.name = "" if self.name == None else self.name
-        self.schema_version = "" if self.schema_version == None else self.schema_version
-        self.type = "" if not hasattr(self, 'type') or self.type == None else self.type
-        self.description = "" if not hasattr(self, 'description') or self.description == None else self.description
-        self.inputs = "" if not hasattr(self, 'inputs') or self.inputs == None else str(self.inputs)
-        self.outputs = "" if not hasattr(self, 'outputs') or self.outputs == None else str(self.outputs)
-        self.settings = "" if not hasattr(self, 'settings') or self.settings == None else str(self.settings)
-        self.modules = "" if not hasattr(self, 'modules') or self.modules == None else str(self.modules)
+        self_name = "" if self.name == None else self.name
+        self_schema_version = "" if self.schema_version == None else self.schema_version
+        self_type = "" if not hasattr(self, 'type') or self.type == None else self.type
+        self_description = "" if not hasattr(self, 'description') or self.description == None else self.description
+        self_inputs = "" if not hasattr(self, 'inputs') or self.inputs == None else str(self.inputs)
+        self_outputs = "" if not hasattr(self, 'outputs') or self.outputs == None else str(self.outputs)
+        self_settings = "" if not hasattr(self, 'settings') or self.settings == None else str(self.settings)
+        self_modules = "" if not hasattr(self, 'modules') or self.modules == None else str(self.modules)
 
-        return hash((self.name, self.schema_version, self.type, self.description, self.inputs, self.outputs, self.settings, self.modules))
+        return hash((self_name, self_schema_version, self_type, self_description, self_inputs, self_outputs, self_settings, self_modules))
 
 
     def remove_null_entries(self):
@@ -181,18 +182,62 @@ class Blueprint(dict):
 
     def to_yaml(self, stream = None):
         self.remove_null_entries()
-        errors = self.validate(event.BPWarning)
+        errors = self.validate()
         # eprint(errors)
 
         return (yaml.safe_load(self.to_yaml_str()), errors)
 
-    def to_yaml_str(self, stream = None) -> str:
-        self.remove_null_entries()
-        errors = self.validate(event.BPWarning)
-        # if len(errors) > 0:
-        #     eprint(errors)
-        return (yaml.dump(self, sort_keys=False), errors)
+    def _process_comment(self, s):
+        out_str = ""
+        pattern = 'comment:'
+        if pattern not in s:
+            return s
+        re_loc = re.finditer(pattern=pattern, string=s)
+        loc = [ind.start() for ind in re_loc]
+        start = 0
+        for i in loc:
+            out_str += s[start:i]
+            j = s.find("'", i)
+            out_str += s[i:j+1]
+            j += 1
 
+            while True:
+                k = s.find("'", j)
+                n = s.find("\n", j)
+                if k < n:
+                    out_str += s[j:k+1]
+                    start = k+1
+                    break
+                else:
+                    out_str += s[j:n+1]
+                    k = n+1
+                    lenn = 0
+                    while True:
+                        if s[k] != ' ':
+                            break
+                        k += 1
+                        lenn += 1
+                    k = 0
+                    while k < lenn-2:
+                        out_str += ' '
+                        k += 1
+                    out_str += '#'
+                    out_str += ' '
+                    j=n+1+lenn
+                    start = j
+        return out_str
+
+    def to_yaml_str(self, do_validate = True, stream = None) -> str:
+        self.remove_null_entries()
+        errors = []
+        if do_validate:
+            errors = self.validate()
+            # if len(errors) > 0:
+            #     eprint(errors)
+        yaml_str = yaml.dump(self, sort_keys=False)
+        yaml_str = yaml_str.replace("comment: ", "# comment: ")
+        yaml_str = self._process_comment(yaml_str)
+        return (yaml_str, errors)
 
     def generate_input_file(self, stream = None):
         inputs_data = {}
@@ -223,6 +268,7 @@ class Blueprint(dict):
 
     @classmethod
     def from_yaml_data(cls, yaml_data):
+        value_ref = dict()
         name = yaml_data['name']
         try:
             description = yaml_data['description']
@@ -232,60 +278,92 @@ class Blueprint(dict):
         try:
             inputs=[]
             for p in yaml_data['inputs']:
-                inputs.append(param.Input.from_yaml(p))
+                in_param = param.Input.from_yaml(p)
+                value_ref.update({"$blueprint." + in_param.name : "$blueprint.inputs." + in_param.name})
+                inputs.append(in_param)
         except (KeyError, UnboundLocalError, TypeError):
             inputs = None
 
         try:
             outputs=[]
             for p in yaml_data['outputs']:
-                outputs.append(param.Output.from_yaml(p))
+                out_param = param.Output.from_yaml(p)
+                value_ref.update({"$blueprint." + out_param.name : "$blueprint.outputs." + out_param.name})
+                outputs.append(out_param)
+
         except (KeyError, UnboundLocalError, TypeError):
             outputs = None
 
         try:
             settings=[]
             for p in yaml_data['settings']:
-                settings.append(param.Setting.from_yaml(p))
+                env_param = param.Setting.from_yaml(p)
+                value_ref.update({"$blueprint." + env_param.name : "$blueprint.settings." + env_param.name})
+                settings.append(env_param)
+
         except (KeyError, UnboundLocalError, TypeError):
             settings = None
 
         try:
             modules=[]
             for d in yaml_data['modules']:
-                modules.append(module.Module.from_yaml(d))
+                mod = module.Module.from_yaml(d)
+                mod.repair_module(value_ref)
+                modules.append(mod)
+                
         except (KeyError, UnboundLocalError, TypeError):
             modules = None
 
         return cls(name, description, 
                     inputs, outputs, settings, modules)
 
-    def validate(self, level=event.BPError):
-        bp_validator = blueprint_validator.BlueprintValidator()
-        return bp_validator.validate_blueprint(self, level)
+    def validate(self):
+        bp_validator = blueprint_validator.BlueprintModel(self)
+        return bp_validator.validate()
 
-    def input_ref(self, key):
+    def input_ref(self, key): # -> (str, event.ValidationEvent):
         if hasattr(self, "inputs") and self.inputs != None:
             for p in self.inputs:
                 if p.name == key:
                     return ("$blueprint.inputs." + key, None)
-        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint input parameter not found'), self)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint input parameter not found', self))
 
-    def output_ref(self, key):
+    def output_ref(self, key): # -> (str, event.ValidationEvent):
         if hasattr(self, "outputs") and self.outputs != None:
             for p in self.outputs:
                 if p.name == key:
                     return ("$blueprint.outputs." + key, None)
-        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint output parameter not found'), self)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint output parameter not found', self))
 
-    def setting_ref(self, key):
+    def setting_ref(self, key): # -> (str, event.ValidationEvent):
         if hasattr(self, "settings") and self.settings != None:
             for p in self.settings:
                 if p.name == key:
                     return ("$blueprint.settings." + key, None)
-        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint settings parameter not found'), self)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint settings parameter not found', self))
 
-    def module_ref(self, mod_name, key):
+    def input_param(self, key): # -> (param.Input, event.ValidationEvent):
+        if hasattr(self, "inputs") and self.inputs != None:
+            for p in self.inputs:
+                if p.name == key:
+                    return (p, None)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint input parameter not found', self))
+
+    def output_param(self, key): # -> (param.Output, event.ValidationEvent):
+        if hasattr(self, "outputs") and self.outputs != None:
+            for p in self.outputs:
+                if p.name == key:
+                    return (p, None)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint output parameter not found', self))
+
+    def setting_param(self, key): # -> (param.Setting, event.ValidationEvent):
+        if hasattr(self, "settings") and self.settings != None:
+            for p in self.settings:
+                if p.name == key:
+                    return (p, None)
+        return (None, event.ValidationEvent(event.BPWarning, 'Blueprint settings parameter not found', self))
+
+    def module_ref(self, mod_name, key): # -> (str, event.ValidationEvent):
         if hasattr(self, "modules") and self.modules != None:
             (m, err) = self.get_module(mod_name)
             if err == None:
@@ -296,9 +374,9 @@ class Blueprint(dict):
                     return (None, err)
             else:
                 return (None, err)
-        return (None, event.ValidationEvent(event.BPWarning, 'Invalid modules in blueprint'), self)
+        return (None, event.ValidationEvent(event.BPWarning, 'Invalid modules in blueprint', self))
 
-    def module_input_ref(self, mod_name, key):
+    def module_input_ref(self, mod_name, key): # -> (str, event.ValidationEvent):
         (m, err) = self.get_module(mod_name)
         if err == None:
             (mod_ref, err) = m.input_ref(key)
@@ -309,7 +387,7 @@ class Blueprint(dict):
         else:
             return (None, event.ValidationEvent(event.BPWarning, 'Invalid module input, in the blueprint', self, None, chain = err))
 
-    def module_output_ref(self, mod_name, key):
+    def module_output_ref(self, mod_name, key): # -> (str, event.ValidationEvent):
         (m, err) = self.get_module(mod_name)
         if err == None:
             (mod_ref, err) = m.output_ref(key)
@@ -320,7 +398,7 @@ class Blueprint(dict):
         else:
             return (None, event.ValidationEvent(event.BPWarning, 'Invalid module output in blueprint', self, None, chain=err))
 
-    def module_setting_ref(self, mod_name, key):
+    def module_setting_ref(self, mod_name, key): # -> (str, event.ValidationEvent):
         (m, err) = self.get_module(mod_name)
         if err == None:
             (mod_ref, err) = m.setting_ref(key)
@@ -331,7 +409,7 @@ class Blueprint(dict):
         else:
             return (None, event.ValidationEvent(event.BPWarning, 'Invalid module setting in blueprint', self, None, chain=err))
 
-    def get_input_var_names(self):
+    def list_input_param_names(self) -> List[str]: 
         if hasattr(self, "inputs") and self.inputs != None:
             param_names = []
             for p in self.inputs:
@@ -339,105 +417,142 @@ class Blueprint(dict):
             return param_names
         return None
 
-    def set_inputs(self, input_params):
+    def set_inputs(self, 
+                    input_params: List[param.Input]) -> List[event.ValidationEvent]:
         errors = []
         if(input_params == None):
             self.inputs = None
             return errors
         for param in input_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
+
+        # Set the input params, even if there are errors in them
         self.inputs = []
-        if len(errors) == 0:
-            for param in input_params:
-                self.inputs.append(param)
+        self.inputs.extend(list(input_params))
         return errors
 
-    def add_input(self, input_param):
+    def add_input(self, 
+                    input_param: param.Input) -> List[event.ValidationEvent]:
         if self.inputs == None:
             self.inputs = []
-        errors = input_param.validate(event.BPError)
-        if len(errors) == 0:
-            self.inputs.append(input_param)
+        errors = input_param.validate()
+        
+        # Add input param, even if there are errors in them
+        self.inputs.append(input_param)
         return errors
 
-    def add_inputs(self, input_params):
+    def update_input(self,
+                    input_param: param.Input) -> List[event.ValidationEvent]:
+        if self.inputs == None:
+            self.inputs = []
+        errors = input_param.validate()
+        
+        # Find and update the input param, even if there are errors in the input_param
+        for param in self.inputs:
+            if param.name == input_param.name:
+                param.type          = input_param.type      if hasattr(input_param, 'type') else None
+                param.description   = input_param.description if hasattr(input_param, 'description') else None
+                param.value         = input_param.value     if hasattr(input_param, 'value') else None
+                param.default       = input_param.default   if hasattr(input_param, 'default') else None
+                param.optional      = input_param.optional  if hasattr(input_param, 'optional') else None
+
+        return errors
+
+    def add_inputs(self, 
+                    input_params: List[param.Input]) -> List[event.ValidationEvent]:
         if self.inputs == None:
             self.inputs = []
         errors = []
         for param in input_params:
-            errors += param.validate(event.BPError)
-        if len(errors) == 0:
-            for param in input_params:
-                self.inputs.append(param)
+            errors += param.validate()
+
+        self.inputs.extend(list(input_params))
         return errors
 
-    def set_input_value(self, param_name, param_value):
+    def set_input_value(self, 
+                    param_name: str, 
+                    param_value: str, 
+                    param_type:str = "string") -> List[event.ValidationEvent]:
         errors = []
         param_copy = []
         for p in self.inputs:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(event.BPError)
+                p.type = param_type
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
         self.inputs = param_copy
         return errors
 
-    def get_output_var_names(self):
-        if hasattr(self, "inputs") and self.inputs != None:
+    def list_output_param_names(self) -> List[str]:
+        if hasattr(self, "outputs") and self.outputs != None:
             param_names = []
             for p in self.outputs:
                 param_names.append(p.name)
             return param_names
         return None
 
-    def set_outputs(self, output_params):
+    def set_outputs(self, output_params) -> List[event.ValidationEvent]:
         errors = []
         if(output_params == None):
             self.outputs = None
             return errors
         for param in output_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
+
         self.outputs = []
-        if len(errors) == 0:
-            for param in output_params:
-                self.outputs.append(param)
+        self.outputs.extend(output_params)
         return errors
 
-    def add_output(self, output_param):
+    def add_output(self, output_param) -> List[event.ValidationEvent]:
         if self.outputs == None:
             self.outputs = []
-        errors = output_param.validate(event.BPError)
-        if len(errors) == 0:
-            self.outputs.append(output_param)
+        errors = output_param.validate()
+
+        self.outputs.append(output_param)
         return errors
 
-    def add_outputs(self, output_params):
+    def add_outputs(self, output_params) -> List[event.ValidationEvent]:
         errors = []
         if self.outputs == None:
             self.outputs = []
         for param in output_params:
-            errors += param.validate(event.BPError)
-        if len(errors) == 0:
-            for param in output_params:
-                self.outputs.append(param)
+            errors += param.validate()
+
+        self.outputs.extend(list(output_params))
         return errors
 
-    def set_output_value(self, param_name, param_value):
+    def update_output(self,
+                    output_param: param.Output) -> List[event.ValidationEvent]:
+        if self.outputs == None:
+            self.outputs = []
+        errors = output_param.validate()
+        
+        # Find and update the output param, even if there are errors in the output_param
+        for param in self.outputs:
+            if param.name == output_param.name:
+                param.type          = output_param.type     if hasattr(output_param, 'type') else None
+                param.description   = output_param.description if hasattr(output_param, 'description') else None
+                param.value         = output_param.value    if hasattr(output_param, 'value') else None
+
+        return errors
+
+    def set_output_value(self, param_name, param_value) -> List[event.ValidationEvent]:
         errors = []
         param_copy = []
         for p in self.outputs:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
         self.outputs = param_copy
         return errors
 
-    def get_setting_var_names(self):
+    def list_setting_param_names(self) -> List[str]:
         if hasattr(self, "inputs") and self.inputs != None:
             param_names = []
             for p in self.settings:
@@ -445,83 +560,100 @@ class Blueprint(dict):
             return param_names
         return None
 
-    def set_settings(self, setting_params):
+    def set_settings(self, setting_params) -> List[event.ValidationEvent]:
         errors = []
         if(setting_params == None):
             self.settings = None
             return
         for param in setting_params:
-            errors += param.validate(event.BPError)
+            errors += param.validate()
+
         self.settings = []
-        if len(errors) == 0:
-            for param in setting_params:
-                self.settings.append(param)
+        self.settings.extend(setting_params)
         return errors
 
-    def add_setting(self, setting_param):
+    def add_setting(self, setting_param) -> List[event.ValidationEvent]:
         if self.settings == None:
             self.settings = []
-        errors = setting_param.validate(event.BPError)
-        if len(errors) == 0:
-            self.settings.append(setting_param)
+        errors = setting_param.validate()
+
+        self.settings.append(setting_param)
         return errors
 
-    def add_settings(self, setting_params):
+    def add_settings(self, setting_params) -> List[event.ValidationEvent]:
         errors = []
         if self.settings == None:
             self.settings = []
         for param in setting_params:
-            errors += param.validate(event.BPError)
-        if len(errors) == 0:
-            for param in setting_params:
-                self.settings.append(param)
+            errors += param.validate()
+
+        self.settings.extend(list(setting_params))
         return errors
 
-    def set_setting_value(self, param_name, param_value):
+    def update_setting(self,
+                    setting_param: param.Setting) -> List[event.ValidationEvent]:
+        if self.settings == None:
+            self.settings = []
+        errors = setting_param.validate()
+        
+        # Find and update the output param, even if there are errors in the output_param
+        for param in self.settings:
+            if param.name == setting_param.name:
+                param.type          = setting_param.type        if hasattr(setting_param, 'type') else None
+                param.description   = setting_param.description if hasattr(setting_param, 'description') else None
+                param.value         = setting_param.value       if hasattr(setting_param, 'value') else None
+                param.default       = setting_param.default     if hasattr(setting_param, 'default') else None
+
+        return errors
+
+    def set_setting_value(self, param_name, param_value) -> List[event.ValidationEvent]:
         errors = []
         param_copy = []
         for p in self.settings:
             if p.name == param_name:
                 p.value = param_value
-            e = p.validate(event.BPError)
+            e = p.validate()
             if len(e) == 0:
                 param_copy.append(p)
             errors += e
         self.settings = param_copy
         return errors
 
-    def get_modules(self):
+    def get_modules(self) -> List[module.Module]:
         return self.modules
 
-    def get_module(self, mod_name):
-        for m in self.modules:
-            if mod_name == m.name:
-                return (m, None)
+    def get_module(self, mod_name): # -> (module.Module, event.ValidationEvent):
+        if hasattr(self, 'modules') and self.modules != None:
+            for m in self.modules:
+                if mod_name == m.name:
+                    return (m, None)
         return (None, event.ValidationEvent(event.BPWarning, 'Invalid module name: ' + str(mod_name), self))
 
-    def set_modules(self, mods):
+    def set_modules(self, mods) -> List[event.ValidationEvent]:
         if(mods == None):
             self.modules = None
             return
         self.modules = []
         errors = []
         for mod in mods:
-            e = mod.validate(event.BPError)
+            e = mod.validate()
             if len(e) == 0:
                 self.modules.append(mod)
             else:
                 errors += e
         return errors
 
-    def add_module(self, mod):
-        errors = mod.validate(event.BPError)
-        if len(errors) == 0:
-            if self.modules == None:
-                self.modules = []
-            self.modules.append(mod)
+    def add_module(self, mod) -> List[event.ValidationEvent]:
+        errors = []
+        errors = mod.validate()
+
+        if self.modules == None:
+            self.modules = []
+        self.modules.append(mod)
+        
         return errors
 
-    def add_modules(self, mods):
+    def add_modules(self, mods) -> List[event.ValidationEvent]:
         if(mods == None):
             self.modules = None
             return
@@ -529,14 +661,14 @@ class Blueprint(dict):
             self.modules = []
         errors = []
         for mod in mods:
-            e = mod.validate(event.BPError)
+            e = mod.validate()
             if len(e) == 0:
                 self.modules.append(mod)
             else:
                 errors += e
         return errors
 
-    def update_module(self, mod):
+    def update_module(self, mod) -> List[event.ValidationEvent]:
         errors = []
         if mod != None:
             if self.modules == None:
@@ -544,7 +676,7 @@ class Blueprint(dict):
             try:
                 (m, err) = self.get_module(mod.name)
                 if err == None:
-                    errors += m.merge(mod)
+                    m.merge(mod)
                 else:
                     errors += err
                 return errors
@@ -552,7 +684,7 @@ class Blueprint(dict):
                 self.modules.append(mod)
         return errors
 
-    def set_module_inputs(self, mod_name, inputs):
+    def set_module_inputs(self, mod_name, inputs) -> List[event.ValidationEvent]:
         (m, err) = self.get_module(mod_name)
         if err == None:
             err = m.set_inputs(inputs)
@@ -560,7 +692,7 @@ class Blueprint(dict):
 
 #========================================================================
 
-    def find_replace_in_module(self, param_ref, value):
+    def find_replace_in_module(self, param_ref, value) -> List[event.ValidationEvent]:
         errors = []
         if self.modules != None:
             for mod in self.modules:
@@ -592,7 +724,7 @@ class Blueprint(dict):
 
         return errors
 
-    def propagate_blueprint_input_data(self):
+    def propagate_blueprint_input_data(self) -> List[event.ValidationEvent]:
         errors = []
         for p in self.inputs:
             if p.value != None:
@@ -608,7 +740,7 @@ class Blueprint(dict):
 
         return errors
 
-    def propagate_module_data(self, module_data):
+    def propagate_module_data(self, module_data) -> List[event.ValidationEvent]:
         # module_data -> dict
         errors = []
         if self.modules != None:
@@ -631,7 +763,7 @@ class Blueprint(dict):
 
 #======================================================================
 
-    def build_dag(self):
+    def build_dag(self) -> dag.BlueprintGraph:
         g = dag.BlueprintGraph()
         if hasattr(self, "modules") and self.modules != None:        
             for m in self.modules:
@@ -657,10 +789,10 @@ class Blueprint(dict):
         
         return g
 
-    def is_dag_empty(self, bp_graph):
+    def is_dag_empty(self, bp_graph: dag.BlueprintGraph) -> bool:
         return bp_graph.isEmpty()
 
-    def dag_next_node(self, bp_graph):
+    def dag_next_node(self, bp_graph: dag.BlueprintGraph):
         if bp_graph.isEmpty():
             return None
         
@@ -672,7 +804,6 @@ class Blueprint(dict):
                 return node_name
         
         return None
-
 
 #======================================================================
 
