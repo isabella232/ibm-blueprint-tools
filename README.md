@@ -35,7 +35,9 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
 
 > Note: Use the following command to install `pygraphviz` in your Mac OS.
 
-> python3 -m pip install --global-option=build_ext --global-option="-I$(brew --prefix graphviz)/include/"  --global-option="-L$(brew --prefix graphviz)/lib/" pygraphviz
+    ```sh
+    python3 -m pip install --global-option=build_ext --global-option="-I$(brew --prefix graphviz)/include/"  --global-option="-L$(brew --prefix graphviz)/lib/" pygraphviz
+    ```
 
 ### Setup CLI
 
@@ -43,15 +45,18 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
   1. Download the released `tgz` file, or fork the [blueprint dev-tools](https://github.com/IBM-Cloud/ibm-blueprint-tools) repository.
   2. Run the following commands to create the wheel, and tar file
 
-        > pip3 install wheel
-        > pip3 install build
-        > python3 -m build
+      ```sh
+        pip3 install wheel
+        pip3 install build
+        python3 -m build
+      ```
       
       By default, the resulting wheel or tar files are placed in `dist/` folder under the current directory.
   3. Run the following commands to fetch a wheel or a source distribution, depending on your setup file.
 
-       > pip3 install dist/blueprint-1.0.0-py3-none-any.whl
-   
+      ```sh
+        pip3 install dist/blueprint-1.0.0-py3-none-any.whl
+      ```
 ---
 
 ## Usage
@@ -67,9 +72,13 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
 
   Use the `blueprint dev-tools` CLI to validate, and work with the blueprint configuration file.
 
-    > blueprint -h
+    ```sh
+    blueprint -h
+    ```
     
+    **Output**
     
+    ```text
         usage: blueprint [-h] {validate,draw,merge,sync,run} ...
 
         Blueprint helper tools for IBM Cloud Schematics
@@ -79,7 +88,8 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
 
         optional arguments:
           -h, --help            show this help message and exit
-    
+    ```
+
   For more information about the kickstart your journey, see [example CLI commands](./docs/cli-reference.md).
 
 #### _Blueprint schema validator usage_
@@ -87,8 +97,12 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
   Use the `blueprint validate` command to verify the schema of the blueprint configuration file (blueprint.yaml)
 
     > blueprint validate -h
-          
-          
+
+    ```sh
+    blueprint validate -h
+    ```
+
+    ```text
         usage: blueprint validate [-h] -b BP_FILE [-w WORKING_DIR]
 
         optional arguments:
@@ -99,7 +113,7 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
           -e {DEBUG,INFO,WARNING,ERROR}, 
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
           -j, --log-json                                      logs error messages in json format
-
+    ```
 
   Refer to the examples in the `examples/validate` folder.
 
@@ -107,9 +121,11 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
 
   Use the `blueprint draw` command to verify the draw a graph illustrating dependencies between modules in a blueprint configuration file (blueprint.yaml)
 
+    ```sh
     > blueprint draw -h
-
-
+    ```
+  
+    ```text
         usage: blueprint draw [-h] -b BP_FILE [-s SOURCE_DIR] [-o OUT_FILE] [-f {png,jpg,svg,pdf,dot}] [-l LOG_FILE]
                               [-e {DEBUG,INFO,WARNING,ERROR}]
 
@@ -125,6 +141,7 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
           -e {DEBUG,INFO,WARNING,ERROR}, 
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
           -j, --log-json                                      logs error messages in json format
+      ```
 
   Refer to the examples from the `examples/draw` folder. 
   
@@ -132,9 +149,11 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
 
   Use the `blueprint merge` command to assemble the parts of the blueprint configuration file (blueprint.yaml) from a blueprint manifest (manifest.yaml file).
 
-    > blueprint merge -h
+    ```sh
+    blueprint merge -h
+    ```
 
-
+    ```text
         usage: blueprint merge [-h] -m MANIFEST_FILE [-w WORKING_DIR] [-o OUT_FILE]
 
         optional arguments:
@@ -146,6 +165,7 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
           -e {DEBUG,INFO,WARNING,ERROR}, 
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
           -j, --log-json                                      logs error messages in json format 
+      ```
 
   Refer to the examples from the `examples/merge` folder.
 
@@ -157,8 +177,11 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
   * Install (terraform-config-inspect)[https://github.com/ibm-cloud/terraform-config-inspect] in your machine
   * Set TERRAFORM_CONFIG_INSPECT_PATH for the installation location of the terraform-config-inspect tool.
 
-    > blueprint sync -h
+    ```sh
+    blueprint sync -h
+    ```
 
+    ```text
         usage: blueprint sync [-h] -b BP_FILE [-s SOURCE_DIR] -o OUT_FILE -w WORKING_DIR [-l LOG_FILE] [-e {DEBUG,INFO,WARNING,ERROR}]
 
         optional arguments:
@@ -171,6 +194,7 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
           -e {DEBUG,INFO,WARNING,ERROR}, 
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level setting
           -j, --log-json                                      logs error messages in json format
+      ```
 
   Refer to the examples from the `examples/sync` data folder.
 
@@ -178,12 +202,18 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
 
   Use the `blueprint run` command to run the *blueprint configuration file* (blueprint.yaml), by using the input data in the local machine.  
   
-  The `blueprint run` downloads the templates from the Git repositories in the local file system (one folder per module, in the working directory). Further, it uses the local Terraform command-line installation to run the `blueprint run -c init`, `blueprint run -c plan`, `blueprint run -c apply` & `blueprint run -c destroy` commands for all its modules.
+  The `blueprint run` downloads the templates from the Git repositories in the local file system (one folder per module, in the working directory). 
+  Further, it uses the local Terraform command-line installation to run the `blueprint run -c init`, `blueprint run -c plan`, `blueprint run -c apply` 
+  & `blueprint run -c destroy` commands for all its modules.
 
-  The `--dry-run` option will _not_ download the template, instead it generates a dummy Terraform template for each module (with inputs and outputs that are specified in the *blueprint configuration yaml* file).  You can use these dummy terraform templates to verify the data flows in the log files.
+  The `--dry-run` option will _not_ download the template, instead it generates a dummy Terraform template for each module (with inputs and outputs 
+  that are specified in the *blueprint configuration yaml* file).  You can use these dummy terraform templates to verify the data flows in the log files.
 
-    > blueprint run -h
+    ```sh
+    blueprint run -h
+    ```
 
+    ```text
         usage: blueprint run [-h] -c {init,plan,apply,destroy,output} [-d] -b BP_FILE -i INPUT_FILE [-s SOURCE_DIR] [-w WORKING_DIR] [-o OUT_FILE]
                       [-l LOG_FILE] [-e {DEBUG,INFO,WARNING,ERROR}]
 
@@ -201,8 +231,9 @@ For more information, see IBM Cloud Schematics [Blueprints](https://cloud.ibm.co
           -e {DEBUG,INFO,WARNING,ERROR}, 
               --log-level {DEBUG,INFO,WARNING,ERROR}          log level
           -j, --log-json                                      logs error messages in json format
+      ```
 
-Refer to examples in the `examples/run` folder.
+  Refer to examples in the `examples/run` folder.
 
 ### Blueprint Python library usage
 
@@ -255,7 +286,7 @@ The example folders hold some test data (for illustration only), and sample Pyth
 
 ## Contact
 
-  Following members are the authors of the tool.
+  Following are the contributors to the toolset.
 
   - Albee Jhoney (albee.jhoney@in.ibm.com)
   - Nishu Bharti (nishu.bharti1@ibm.com)
